@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
 import 'core/theme/theme.dart';
-import 'features/dream/presentation/screens/dream_input_screen.dart';
+import 'features/home/presentation/screens/main_pager_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ class OneiroApp extends StatelessWidget {
       title: 'Oneiro / Rüya Tabiri',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const DreamInputScreen(),
+      home: const MainPagerScreen(),
     );
   }
 }
