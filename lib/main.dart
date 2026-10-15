@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
 import 'core/theme/theme.dart';
-import 'features/home/presentation/screens/main_pager_screen.dart';
+import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,8 @@ class OneiroApp extends StatelessWidget {
       title: 'Oneiro / Rüya Tabiri',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const MainPagerScreen(),
+      // İlk açılışta şık Google & Apple giriş ekranı karşılar, ardından ana sayfaya geçer
+      home: const OnboardingAuthScreen(),
     );
   }
 }
