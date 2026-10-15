@@ -24,6 +24,13 @@ class ChatRepository implements IChatRepository {
     required String systemPromptContext,
     required List<ChatMessage> history,
   }) async {
+    // 1. Sunucu es geçme (Mock / Test) modu kontrolü
+    if (ApiConstants.useMockBackend) {
+      debugPrint('[ChatRepository] Mock modu devrede: Sunucu es geçiliyor, akıllı bilge yanıtı üretiliyor.');
+      await Future.delayed(const Duration(milliseconds: 600));
+      return _generateMysticalFallbackReply(message);
+    }
+
     try {
       final response = await _dioClient.dio.post(
         ApiConstants.chatEndpoint,
@@ -47,21 +54,21 @@ class ChatRepository implements IChatRepository {
       }
     } catch (e) {
       debugPrint('[ChatRepository] Çevrimdışı/Hata durumu: $e. Akıllı simülatör yanıtı üretiliyor.');
-      await Future.delayed(const Duration(milliseconds: 1400));
+      await Future.delayed(const Duration(milliseconds: 600));
       return _generateMysticalFallbackReply(message);
     }
   }
 
   String _generateMysticalFallbackReply(String query) {
     final lower = query.toLowerCase();
-    if (lower.contains('ne anlama') || lower.contains('neden')) {
-      return 'Bilinçaltın bu sembolü bir ayna gibi kullanıyor. Sorun, dış dünyadaki bir tıkanıklığın iç aleminde yankılanmasıdır. '
-          'Rüyandaki o kritik ânı hatırladığında hissettiğin ilk duygu neydi? Asıl cevap orada gizlidir.';
-    } else if (lower.contains('korku') || lower.contains('korktum')) {
+    if (lower.contains('ne anlama') || lower.contains('neden') || lower.contains('nasıl')) {
+      return 'Bilinçaltın bu sembolü bir ayna gibi kullanıyor. Bu arayış, uyanık hayatında görmezden geldiğin ancak ruhunun çözmek istediği bir dügüme işaret eder. '
+          'Rüyandaki o kritik ânı hatırladığında kalbinde hissettiğin ilk his neydi? Asıl anahtar orada saklı.';
+    } else if (lower.contains('korku') || lower.contains('korktum') || lower.contains('endişe')) {
       return 'Korku, bilinçaltının henüz aydınlatamadığı odaların bekçisidir. '
-          'Kadim gelenekte korkulan sembol, aslında sahibine güç bahşedecek olan gizli hazinedir.';
+          'Kadim bilgelikte korku uyandıran semboller, aslında kişinin aşması gereken sınır eşiklerini temsil eder.';
     } else {
-      return 'Sorun kadim levhalarda yankılandı. Bu rüya senin sadece dün geceni değil, yakın gelecekteki sezgisel kavşaklarını da aydınlatıyor. '
+      return 'Sorun kadim levhalarda yankılandı. Bu rüya senin sadece dün geceni değil, içindeki sezgisel kavşakları da aydınlatıyor. '
           'Zihnini serbest bırak ve rüyandaki en canlı ayrıntıya odaklan.';
     }
   }

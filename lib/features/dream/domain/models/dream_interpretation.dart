@@ -55,26 +55,41 @@ class DreamInterpretation {
     };
   }
 
-  /// Örnek / Mock Rüya Çıktısı (API kapalıyken veya testlerde kullanılır)
+  /// Dinamik ve Zengin Mock / Lorem Üreticisi
+  /// Kullanıcının yazdığı rüya metninden kelimeler ayıklayarak canlı bir analiz sunar
   factory DreamInterpretation.mockFromRequest({required String dreamText, required String emotion}) {
+    // Rüya metninden anahtar kelimeler türetelim
+    final words = dreamText
+        .split(RegExp(r'[\s,.;!?]+'))
+        .where((w) => w.length > 3)
+        .take(3)
+        .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+        .toList();
+
+    final List<String> extractedSymbols = words.isNotEmpty
+        ? [...words, 'Mistik Işık', 'Ayna']
+        : ['Karanlık Su', 'Uçurum', 'Altın Işık', 'Kuzgun'];
+
     return DreamInterpretation(
       id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
       dreamText: dreamText,
       emotion: emotion,
-      symbols: ['Karanlık Su', 'Uçurum', 'Altın Işık', 'Kuzgun'],
+      symbols: extractedSymbols.take(4).toList(),
       ancientInterpretation:
-          'Kadim Doğu ve Mısır kaynaklarına göre suyun derinlikleri, gizlenmiş ilahi sırları ve beklenmedik bir arınmayı simgeler. '
-          'Karanlıktan yükselen altın ışık, yakın zamanda sabrınızın sınanacağını ancak ardından ruhani bir aydınlanma ve ferahlığın kapınızı çalacağını fısıldar.',
+          'Kadim Mezopotamya ve Mısır papirüslerine göre, bu rüyada görülen "${extractedSymbols.first}" sembolü, '
+          'ruhsal bir eşiği ve gizli kalmış bir haberin uyanışını müjdeler. Suyun ve gölgelerin fısıltısı, '
+          'hayatınızda kapanmak üzere olan bir devrin ardından gelecek arınma ve aydınlanmayı işaret etmektedir.',
       subconsciousAnalysis:
-          'Carl Jung arketipsel analizine göre bu rüya, "Gölge" (Shadow) ile yüzleşme evrenizi temsil ediyor. '
-          'Uçurum kenarında hissettiğiniz kontrol kaybı, uyanık hayatınızdaki bir karar eşiğinde bilinçaltınızın verdiği alarmdır. '
-          'Bilinçdışınız, kontrolü bırakıp sezgilerinize güvenmeniz gerektiğini işaret ediyor.',
+          'Carl Jung arketipsel psikolojisine göre bu rüya, "Gölge" (Shadow) ve sezgisel benliğinizin çatışmasını yansıtıyor. '
+          'Rüyanızdaki $emotion hissi, uyanık hayatınızda bastırılmış bir kararın veya ertelenmiş bir yüzleşmenin dışavurumudur. '
+          'Bilinçdışınız, kontrolü mantığa bırakmak yerine iç sesinize güvenmeniz gerektiğini fısıldıyor.',
       warningOfDay:
-          'Bugün aceleyle verilmiş taahhütlerden ve zihninizi bulandıran kalabalıklardan uzak durun. Bilinçaltınızın fısıltılarına kulak verin.',
+          'Bugün aceleyle verilmiş kararlardan ve zihninizi bulandıran kalabalıklardan uzak durun. İlk sezginiz en doğru rehberinizdir.',
       createdAt: DateTime.now(),
     );
   }
 }
+
 class UniqueKey {
   @override
   String toString() => DateTime.now().microsecondsSinceEpoch.toString();

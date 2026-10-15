@@ -19,6 +19,7 @@ class DreamLoadingScreen extends ConsumerStatefulWidget {
 class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
   int _currentTipIndex = 0;
   Timer? _tipTimer;
+  Timer? _hardDeadlineTimer;
   DreamInterpretation? _analyzedResult;
   bool _isAdDismissed = false;
   bool _hasNavigated = false;
@@ -36,16 +37,25 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     super.initState();
     _startTipCycle();
     _orchestrateAnalysisAndAd();
+
+    // 15 Saniyelik Kesin Süre Sınırı (Hard Deadline)
+    // Reklam kapansa da kapanmasa da 15 saniye sonra kesinlikle sonuç ekranına geçer
+    _hardDeadlineTimer = Timer(const Duration(seconds: 15), () {
+      debugPrint('[DreamLoadingScreen] 15 saniyelik kesin süre doldu. Sonuç ekranına zorunlu geçiş yapılıyor.');
+      _isAdDismissed = true;
+      _ensureResultAndNavigate();
+    });
   }
 
   @override
   void dispose() {
     _tipTimer?.cancel();
+    _hardDeadlineTimer?.cancel();
     super.dispose();
   }
 
   void _startTipCycle() {
-    _tipTimer = Timer.periodic(const Duration(milliseconds: 2800), (timer) {
+    _tipTimer = Timer.periodic(const Duration(milliseconds: 2600), (timer) {
       if (mounted) {
         setState(() {
           _currentTipIndex = (_currentTipIndex + 1) % _mysticalPhrases.length;
@@ -55,55 +65,57 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
   }
 
   Future<void> _orchestrateAnalysisAndAd() async {
-    // 1. API İstek Görevi (DeepSeek + RAG)
+    // 1. Rüya Analizini Başlat (Mock modunda anında döner)
     final analysisFuture = ref.read(dreamProvider.notifier).analyzeDream();
 
-    // 2. Reklam Görevi (AdMob Interstitial + 15s Fallback)
-    final adCompleter = Completer<void>();
+    // 2. Reklamı Başlat
     AdService.instance.showInterstitialWithFallback(
       maxTimeout: const Duration(seconds: 15),
       onCompleted: () {
-        debugPrint('[DreamLoadingScreen] Reklam tamamlandı veya fallback süresi doldu.');
+        debugPrint('[DreamLoadingScreen] Reklam kapatıldı veya tamamlandı.');
         _isAdDismissed = true;
-        if (!adCompleter.isCompleted) {
-          adCompleter.complete();
-        }
-        _checkAndNavigate();
+        _ensureResultAndNavigate();
       },
     );
 
-    // API sonucunu bekle
+    // Analiz sonucunu al
     try {
       _analyzedResult = await analysisFuture;
-      debugPrint('[DreamLoadingScreen] API yanıtı alındı.');
-      _checkAndNavigate();
+      debugPrint('[DreamLoadingScreen] Analiz sonucu hazırlandı.');
+      if (_isAdDismissed) {
+        _ensureResultAndNavigate();
+      }
     } catch (e) {
       debugPrint('[DreamLoadingScreen] Analiz hatası: $e');
-      _checkAndNavigate();
     }
-
-    // Her iki işlem de hazır olana kadar bekle
-    await adCompleter.future;
-    _checkAndNavigate();
   }
 
-  void _checkAndNavigate() {
+  void _ensureResultAndNavigate() {
     if (!mounted || _hasNavigated) return;
 
-    // Hem reklam tamamlandıysa (veya kapatıldıysa/timeout) hem de API sonucu hazırsa
-    if (_isAdDismissed && _analyzedResult != null) {
-      _hasNavigated = true;
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 600),
-          pageBuilder: (_, animation, secondaryAnimation) =>
-              DreamResultScreen(interpretation: _analyzedResult!),
-          transitionsBuilder: (_, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-      );
-    }
+    _hasNavigated = true;
+    _hardDeadlineTimer?.cancel();
+    _tipTimer?.cancel();
+
+    // Eğer bir sebeple sonuç henüz hazır değilse, hemen rüya verisinden üret
+    final state = ref.read(dreamProvider);
+    final result = _analyzedResult ??
+        state.interpretation ??
+        DreamInterpretation.mockFromRequest(
+          dreamText: state.dreamText.isNotEmpty ? state.dreamText : 'Bilinmeyen Gizemli Rüya',
+          emotion: state.selectedEmotion,
+        );
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 600),
+        pageBuilder: (_, animation, secondaryAnimation) =>
+            DreamResultScreen(interpretation: result),
+        transitionsBuilder: (_, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
   }
 
   @override

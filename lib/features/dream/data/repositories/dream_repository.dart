@@ -17,6 +17,16 @@ class DreamRepository implements IDreamRepository {
 
   @override
   Future<DreamInterpretation> interpretDream(DreamRequest request) async {
+    // 1. Sunucu es geçme (Mock / Test) modu kontrolü
+    if (ApiConstants.useMockBackend) {
+      debugPrint('[DreamRepository] Mock modu devrede: Sunucu es geçiliyor, zengin mistik lorem tabir üretiliyor.');
+      await Future.delayed(const Duration(milliseconds: 400));
+      return DreamInterpretation.mockFromRequest(
+        dreamText: request.dreamText,
+        emotion: request.emotion,
+      );
+    }
+
     try {
       debugPrint('[DreamRepository] RAG + DeepSeek backend servisine istek gönderiliyor...');
       final response = await _dioClient.dio.post(
@@ -44,8 +54,7 @@ class DreamRepository implements IDreamRepository {
     } catch (e) {
       debugPrint('[DreamRepository] API çağrısı başarısız veya sunucu çevrimdışı: $e');
       debugPrint('[DreamRepository] Kesintisiz deneyim için akıllı simülasyon (Fallback) devreye alınıyor.');
-      // Kullanıcının deneyimini kesintiye uğratmamak için zengin mock model döndürülür
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future.delayed(const Duration(milliseconds: 500));
       return DreamInterpretation.mockFromRequest(
         dreamText: request.dreamText,
         emotion: request.emotion,
