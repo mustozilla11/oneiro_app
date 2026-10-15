@@ -1,0 +1,36 @@
+# Flutter & Dart Derleme ve Önbellek Dosyaları
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.lock
+pubspec.lock
+
+# Android & Gradle Geçici Dosyaları
+.gradle/
+android/.gradle/
+android/app/build/
+android/local.properties
+android/gradle/wrapper/gradle-wrapper.jar
+*.apk
+*.aab
+*.dex
+*.class
+*.jar
+
+# Git & IDE Ayarları
+.git/
+.idea/
+.vscode/
+*.iml
+
+# Sistem, Log ve Çöp Dosyaları
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+node_modules/
+.venv/
+dist/
