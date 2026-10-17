@@ -255,7 +255,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Oneiro RAG Backend",
     description="Kaynak Bilinçli (Metadata-Aware), Ultra Hafif Mistik Rüya Tabiri Servisi",
-    version="1.0.1",
+    version="1.0.2",
     lifespan=lifespan
 )
 
@@ -346,8 +346,8 @@ async def interpret_dream(request: DreamInterpretRequest):
     """
     1. Rüya metnini Gemini embedding ile vektöre dönüştürür.
     2. NumPy kosinüs benzerliği ile kitaplardan en alakalı 3 pasajı çeker.
-    3. DeepSeek LLM'e kaynak ayrımı odaklı sistem talimatıyla gönderir.
-    4. Bütüncül ve mistik yanıtı döner.
+    3. DeepSeek LLM'e 5 başlıklı şık ve mistik sistem talimatıyla gönderir.
+    4. Bütüncül ve yapılandırılmış yanıtı döner.
     """
     global deepseek_client
 
@@ -384,39 +384,39 @@ async def interpret_dream(request: DreamInterpretRequest):
 
     context_str = "\n\n".join(context_blocks) if context_blocks else "Doğrudan eşleşen spesifik bir kadim kitap pasajı bulunamadı; kadim arketipleri hafızandan aktar."
 
-    # 2. GENERATION (Kaynak Ayrımı Odaklı DeepSeek Promptu)
-    system_prompt = (
-        "Sen 'Oneiro' kadim rüya mabedinin baş bilgesi ve derin bilinçaltı rehberisin.\n"
-        "Görevin: Kullanıcının paylaştığı rüyayı, sana sunulan kadim referans kaynakları temel alarak bilgece yorumlamaktır.\n\n"
-        "ÖNEMLİ KURALLAR:\n"
-        "1. Kullanıcının rüyasını yorumlarken gelen kaynakları (İslam/Doğu geleneği, Antik Yunan kaynakları, Psikanaliz vb. kaynak dosya adlarına göre) AÇIKÇA BİRBİRİNDEN AYIR.\n"
-        "2. Hangi geleneğin bu sembole ne anlam yüklediğini sırasıyla belirt (Örn: 'İslam ve Doğu kaynakları bu sembolü... olarak bildirirken, Antik Akdeniz bilgeliğinde bu... olarak yankılanır. Carl Jung ve analitik psikoloji ise bunu... olarak çözümler').\n"
-        "3. Yüzeysel falcı veya ucuz kehanet tonundan kesinlikle uzak dur. Bütüncül, derin, şefkatli ve edebi bir üslup kullan.\n"
-        "4. En sonda rüya sahibinin bugünkü uyanık hayatına ışık tutacak tek cümlelik bilge bir 'Günün Uyarısı ve Hikmeti' bırak."
+    # 2. GENERATION (5 Başlıklı Şık DeepSeek Sistem Mesajı)
+    sistem_mesaji = (
+        "Sen 'Oneiro', kadim sembollerin ve insan bilinçdışının bilge tercümanısın. "
+        "Kullanıcının rüyasını, aşağıda sana verilen tarihi metin parçalarından beslenerek şu 5 başlık altında yorumla:\n\n"
+        "1. 🌌 Bilinçaltı Aynası: Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetle.\n"
+        "2. 📜 Doğu ve İslam Geleneği: Kaynaklardaki İbn Sirin / Nablusi geleneğine göre manevi işaretleri aktar.\n"
+        "3. 🏛️ Antik Akdeniz Bilgeliği: Artemidorus / Oneirocritica geleneğindeki dünyevi yansımaları açıkla.\n"
+        "4. 🧠 Derinlik Psikolojisi: Carl Jung ve Freud arketipleri ışığında bastırılmış duyguları ve içsel çatışmaları çözümle.\n"
+        "5. 🧭 Günün Pusulası: Rüya sahibinin gün içinde üzerine düşünebileceği tek ve vurucu bir bilgelik notu bırak.\n\n"
+        f"KULLANACAĞIN KAYNAK METİNLER:\n{context_str}"
     )
 
     user_content = (
         f"KULLANICININ GÖRDÜĞÜ RÜYA:\n\"{dream_text}\"\n\n"
-        f"KİTAPLARDAN BULUNAN İLGİLİ KAYNAK PASAJLAR:\n{context_str}\n\n"
-        f"Lütfen yukarıdaki kaynak ayrımına sadık kalarak, her geleneğin bakışını belirten bütüncül tabirini aktar."
+        f"Lütfen yukarıdaki 5 başlık altında bilgece, derinlikli ve edebi bir üslupla yorumunu aktar."
     )
 
     # DeepSeek API Çağrısı
     if not deepseek_client:
         interpretation = (
-            "Kadim kaynaklar rüyanızdaki sembolleri çözümlüyor:\n\n"
-            "📜 Doğu ve İslam Geleneğinde: Bu sembol içsel bir arınmaya ve yakında sabırla aşılacak manevi bir eşiğe işaret eder.\n\n"
-            "🏛️ Antik Akdeniz Bilgeliğinde: Kaderin (Moira) rüya sahibine sezgilerini dinlemesi yönünde fısıldadığı bir çağrıdır.\n\n"
-            "🧠 Carl Jung ve Psikanalizde: Bastırılmış Gölge (Shadow) arketipinizin bilinç düzeyine çıkma gayretidir.\n\n"
-            "⚡ Günün Uyarısı: İlk sezginize güvenin; mantığınızın duraksadığı yerde ruhunuz doğru yolu bilir."
+            "1. 🌌 Bilinçaltı Aynası: Bu rüya, derin bir eşik ve içsel dönüşüm atmosferi taşımaktadır.\n\n"
+            "2. 📜 Doğu ve İslam Geleneği: İbn Sirin ve Nablusi kaynaklarına göre bu semboller, manevi bir ferahlığın ve sabırla beklenen bir müjdenin habercisidir.\n\n"
+            "3. 🏛️ Antik Akdeniz Bilgeliği: Artemidorus geleneğinde kaderin rüya sahibini yeni bir yolculuğa ve basirete davet ettiğini gösterir.\n\n"
+            "4. 🧠 Derinlik Psikolojisi: Carl Jung ışığında Gölge arketipinizle yüzleşme ve sezgisel benliğinizin kontrolü devralma arzusudur.\n\n"
+            "5. 🧭 Günün Pusulası: İlk hissinize ve iç sesinize güvenin; zihniniz duraksadığında kalbiniz doğru rotayı fısıldayacaktır."
         )
     else:
         try:
-            logger.info("DeepSeek API'ye kaynak bilinçli prompt gönderiliyor...")
+            logger.info("DeepSeek API'ye 5 başlıklı şık sistem promptu gönderiliyor...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
-                    {"role": "system", "content": system_prompt},
+                    {"role": "system", "content": sistem_mesaji},
                     {"role": "user", "content": user_content}
                 ],
                 temperature=0.7,
