@@ -1,5 +1,6 @@
 import os
 import glob
+import asyncio
 import logging
 from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
@@ -24,7 +25,14 @@ logger = logging.getLogger("oneiro_rag")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
 BOOKS_DIR = os.getenv("BOOKS_DIR", os.path.join(os.path.dirname(__file__), "books"))
-GEMINI_EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004"
+
+# Google Gemini Embedding Endpoint'leri
+# 1. Resmi v1 Endpoint (Birincil)
+PRIMARY_EMBED_URL = "https://generativelanguage.googleapis.com/v1/models/text-embedding-004:embedContent"
+# 2. Resmi v1beta Endpoint (Yedek/Fallback)
+FALLBACK_EMBED_URL = "https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent"
+# Aktif URL (404 durumunda otomatik fallback'e geçer)
+ACTIVE_EMBED_URL = PRIMARY_EMBED_URL
 
 # -----------------------------------------------------------------------------
 # 2. BELLEK İÇİ (IN-MEMORY) HAFİF VEKTÖR VERİTABANI
@@ -45,64 +53,67 @@ else:
 
 
 # -----------------------------------------------------------------------------
-# 3. HAFİF GEMINI EMBEDDING İŞLEVLERİ (0 MB RAM TÜKETİMİ)
+# 3. HAFİF GEMINI EMBEDDING İŞLEVLERİ (0 MB RAM TÜKETİMİ & OTOMATİK FALLBACK)
 # -----------------------------------------------------------------------------
 async def get_single_embedding(text: str, client: httpx.AsyncClient) -> Optional[List[float]]:
-    """Gemini text-embedding-004 API'sini kullanarak tek bir metin parçasını vektöre çevirir."""
+    """
+    Metin parçasını Gemini API ile vektöre çevirir.
+    Öncelikle v1 text-embedding-004 dener; 404 dönerse v1beta embedding-001'e otomatik fallback yapar.
+    """
+    global ACTIVE_EMBED_URL
     if not GEMINI_API_KEY:
         logger.error("GEMINI_API_KEY tanımlı değil, embedding alınamıyor.")
         return None
 
-    url = f"{GEMINI_EMBED_URL}:embedContent?key={GEMINI_API_KEY}"
+    # Standart Gemini API payload yapısı
     payload = {
-        "model": "models/text-embedding-004",
-        "content": {"parts": [{"text": text[:2000]}]}  # Güvenli karakter limiti
+        "content": {
+            "parts": [{"text": text[:2000]}]  # Güvenli karakter limiti
+        }
     }
+
+    url = f"{ACTIVE_EMBED_URL}?key={GEMINI_API_KEY}"
 
     try:
         response = await client.post(url, json=payload, timeout=20.0)
         if response.status_code == 200:
             data = response.json()
             return data.get("embedding", {}).get("values")
+        elif response.status_code == 404 and ACTIVE_EMBED_URL != FALLBACK_EMBED_URL:
+            logger.warning(
+                "text-embedding-004 (v1) 404 döndü. Otomatik olarak yedek modele (embedding-001 v1beta) geçiliyor..."
+            )
+            ACTIVE_EMBED_URL = FALLBACK_EMBED_URL
+            fallback_url = f"{ACTIVE_EMBED_URL}?key={GEMINI_API_KEY}"
+            fb_response = await client.post(fallback_url, json=payload, timeout=20.0)
+            if fb_response.status_code == 200:
+                data = fb_response.json()
+                return data.get("embedding", {}).get("values")
+            else:
+                logger.error(f"Yedek model de başarısız oldu ({fb_response.status_code}): {fb_response.text}")
+                return None
         else:
             logger.error(f"Gemini API Hatası ({response.status_code}): {response.text}")
             return None
     except Exception as e:
-        logger.error(f"Gemini embedding isteğinde istisna oluştu: {e}")
+        logger.error(f"Gemini embedding isteğinde istisna: {e}")
+        if ACTIVE_EMBED_URL != FALLBACK_EMBED_URL:
+            try:
+                ACTIVE_EMBED_URL = FALLBACK_EMBED_URL
+                fallback_url = f"{ACTIVE_EMBED_URL}?key={GEMINI_API_KEY}"
+                fb_response = await client.post(fallback_url, json=payload, timeout=20.0)
+                if fb_response.status_code == 200:
+                    data = fb_response.json()
+                    return data.get("embedding", {}).get("values")
+            except Exception as fb_e:
+                logger.error(f"Yedek model de istisna fırlattı: {fb_e}")
         return None
 
 
 async def get_batch_embeddings(texts: List[str], client: httpx.AsyncClient) -> List[Optional[List[float]]]:
-    """Gemini batchEmbedContents API'sini kullanarak birden fazla metni topluca vektörleştirir."""
-    if not GEMINI_API_KEY:
-        return [None] * len(texts)
-
-    url = f"{GEMINI_EMBED_URL}:batchEmbedContents?key={GEMINI_API_KEY}"
-    requests_payload = [
-        {
-            "model": "models/text-embedding-004",
-            "content": {"parts": [{"text": t[:2000]}]}
-        }
-        for t in texts
-    ]
-
-    try:
-        response = await client.post(url, json={"requests": requests_payload}, timeout=45.0)
-        if response.status_code == 200:
-            data = response.json()
-            embeddings_list = data.get("embeddings", [])
-            return [emb.get("values") for emb in embeddings_list]
-        else:
-            logger.warning(f"Batch embedding başarısız ({response.status_code}), tekil moda dönülüyor: {response.text}")
-    except Exception as e:
-        logger.warning(f"Batch embedding hatası: {e}. Tekil çağrılara geçiliyor.")
-
-    # Fallback: Batch başarısız olursa tekil olarak dene
-    results = []
-    for text in texts:
-        emb = await get_single_embedding(text, client)
-        results.append(emb)
-    return results
+    """Her metin için fallback garantili embedding çağrısını eşzamanlı olarak topluca yönetir."""
+    tasks = [get_single_embedding(t, client) for t in texts]
+    return await asyncio.gather(*tasks)
 
 
 # -----------------------------------------------------------------------------
@@ -199,10 +210,10 @@ async def index_books():
         logger.warning("GEMINI_API_KEY eksik! Vektörleştirme atlandı, sunucu mock/arama olmadan başlayacak.")
         return
 
-    # Paragrafları Gemini API ile toplu (batch) olarak vektörleştir
+    # Paragrafları Gemini API ile toplu olarak vektörleştir
     vector_list: List[List[float]] = []
     valid_chunks: List[Dict[str, Any]] = []
-    batch_size = 30
+    batch_size = 20
 
     async with httpx.AsyncClient() as client:
         for i in range(0, len(CHUNKS_DB), batch_size):
@@ -244,7 +255,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Oneiro RAG Backend",
     description="Kaynak Bilinçli (Metadata-Aware), Ultra Hafif Mistik Rüya Tabiri Servisi",
-    version="1.0.0",
+    version="1.0.1",
     lifespan=lifespan
 )
 
@@ -316,7 +327,7 @@ def retrieve_top_k(query_vector: List[float], top_k: int = 3) -> List[Dict[str, 
 @app.get("/health", summary="Sunucu Durum ve İndeks Kontrolü")
 async def health_check():
     """Render.com uyanıklık kontrolü ve indekslenen kitapların raporu."""
-    global CHUNKS_DB, VECTORS
+    global CHUNKS_DB, VECTORS, ACTIVE_EMBED_URL
     sources = list(set(c["source"] for c in CHUNKS_DB)) if CHUNKS_DB else []
     return {
         "status": "healthy",
@@ -324,6 +335,7 @@ async def health_check():
         "total_chunks": len(CHUNKS_DB),
         "total_vectors": len(VECTORS) if VECTORS is not None else 0,
         "books_loaded": sources,
+        "active_embedding_endpoint": ACTIVE_EMBED_URL,
         "gemini_api_configured": bool(GEMINI_API_KEY),
         "deepseek_api_configured": bool(DEEPSEEK_API_KEY)
     }
@@ -332,7 +344,7 @@ async def health_check():
 @app.post("/interpret", response_model=DreamInterpretResponse, summary="Rüyayı Kaynak Bilinçli RAG ile Yorumla")
 async def interpret_dream(request: DreamInterpretRequest):
     """
-    1. Rüya metnini Gemini text-embedding-004 ile vektöre dönüştürür.
+    1. Rüya metnini Gemini embedding ile vektöre dönüştürür.
     2. NumPy kosinüs benzerliği ile kitaplardan en alakalı 3 pasajı çeker.
     3. DeepSeek LLM'e kaynak ayrımı odaklı sistem talimatıyla gönderir.
     4. Bütüncül ve mistik yanıtı döner.
@@ -391,7 +403,6 @@ async def interpret_dream(request: DreamInterpretRequest):
 
     # DeepSeek API Çağrısı
     if not deepseek_client:
-        # API Key girilmediyse bilgilendirici ve zengin bir simülasyon yanıtı dön
         interpretation = (
             "Kadim kaynaklar rüyanızdaki sembolleri çözümlüyor:\n\n"
             "📜 Doğu ve İslam Geleneğinde: Bu sembol içsel bir arınmaya ve yakında sabırla aşılacak manevi bir eşiğe işaret eder.\n\n"
