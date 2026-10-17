@@ -26,9 +26,10 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
   final List<String> _mysticalPhrases = const [
     'Kadim semboller ve bilinçaltı taranıyor...',
+    'Kadim kütüphaneler uykusundan uyanıyor...',
     'Mısır ve Mezopotamya papirüsleri çözümleniyor...',
     'Carl Jung arketipsel bilinçdışı taranıyor...',
-    'Rüya frekansları astral boyuttan aktarılıyor...',
+    'DeepSeek 5 kadim gelenek ışığında rüyanızı çözümlüyor...',
     'Günün kadim uyarısı mühürleniyor...',
   ];
 
@@ -38,10 +39,11 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     _startTipCycle();
     _orchestrateAnalysisAndAd();
 
-    // 15 Saniyelik Kesin Süre Sınırı (Hard Deadline)
-    // Reklam kapansa da kapanmasa da 15 saniye sonra kesinlikle sonuç ekranına geçer
-    _hardDeadlineTimer = Timer(const Duration(seconds: 15), () {
-      debugPrint('[DreamLoadingScreen] 15 saniyelik kesin süre doldu. Sonuç ekranına zorunlu geçiş yapılıyor.');
+    // 60 Saniyelik Kesin Süre Sınırı (Render Cold Start Toleransı)
+    // Render ücretsiz sunucusu uykudayken 40-50 saniyede uyanabilir.
+    // 60 saniye boyunca gerçek sunucu yanıtını bekler, süre aşılırsa güvenli fallback açar.
+    _hardDeadlineTimer = Timer(const Duration(seconds: 60), () {
+      debugPrint('[DreamLoadingScreen] 60 saniyelik tolerans süresi doldu. Sonuç ekranına geçiliyor.');
       _isAdDismissed = true;
       _ensureResultAndNavigate();
     });
@@ -65,7 +67,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
   }
 
   Future<void> _orchestrateAnalysisAndAd() async {
-    // 1. Rüya Analizini Başlat (Mock modunda anında döner)
+    // 1. Rüya Analizini Başlat (Render FastAPI RAG + DeepSeek)
     final analysisFuture = ref.read(dreamProvider.notifier).analyzeDream();
 
     // 2. Reklamı Başlat
@@ -74,14 +76,18 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
       onCompleted: () {
         debugPrint('[DreamLoadingScreen] Reklam kapatıldı veya tamamlandı.');
         _isAdDismissed = true;
-        _ensureResultAndNavigate();
+        // Eğer API yanıtı zaten geldiyse hemen geç
+        if (_analyzedResult != null) {
+          _ensureResultAndNavigate();
+        }
       },
     );
 
-    // Analiz sonucunu al
+    // Analiz sonucunu bekle
     try {
       _analyzedResult = await analysisFuture;
       debugPrint('[DreamLoadingScreen] Analiz sonucu hazırlandı.');
+      // Eğer kullanıcı reklamı zaten kapattıysa hemen sonuç ekranına geç
       if (_isAdDismissed) {
         _ensureResultAndNavigate();
       }
@@ -97,7 +103,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     _hardDeadlineTimer?.cancel();
     _tipTimer?.cancel();
 
-    // Eğer bir sebeple sonuç henüz hazır değilse, hemen rüya verisinden üret
+    // Eğer bir sebeple sonuç henüz hazır değilse, rüya verisinden güvenli analiz üret
     final state = ref.read(dreamProvider);
     final result = _analyzedResult ??
         state.interpretation ??
