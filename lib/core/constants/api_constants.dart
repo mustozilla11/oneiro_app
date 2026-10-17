@@ -1,19 +1,14 @@
 class ApiConstants {
-  ApiConstants._();
+  static const String baseUrl = "https://oneiro-app.onrender.com";
+  static const String interpretEndpoint = "$baseUrl/interpret";
+  static const String healthEndpoint = "$baseUrl/health";
 
-  /// Geliştirme ve Test Aşaması İçin Sunucu Es Geçme (Mock) Modu
-  /// True olduğunda harici FastAPI sunucusu aranmaz, anında zengin mistik tabir üretilir.
-  static const bool useMockBackend = true;
+  /// Canlı Render.com backend'ine bağlanmak için mock modu kapatıldı (false)
+  /// İstenirse internet yokken test etmek için true yapılabilir.
+  static const bool useMockBackend = false;
 
-  // FastAPI + DeepSeek RAG Backend Base URL (Sunucu açıldığında bağlanacak adres)
-  static const String baseUrl = 'https://api.oneiro-rag.internal'; 
-  static const String interpretEndpoint = '/api/v1/dreams/interpret';
-  static const String chatEndpoint = '/api/v1/dreams/chat';
-
-  // LLM derin düşünme & RAG tarama için timeout süreleri
-  static const Duration connectTimeout = Duration(seconds: 10);
-  static const Duration receiveTimeout = Duration(seconds: 30);
-
-  // DeepSeek Model Kimliği
-  static const String defaultModel = 'deepseek-r1-rag';
+  static const String chatEndpoint = "$baseUrl/chat";
+  static const Duration connectTimeout = Duration(seconds: 15);
+  static const Duration receiveTimeout = Duration(seconds: 60);
+  static const String defaultModel = "deepseek-chat";
 }

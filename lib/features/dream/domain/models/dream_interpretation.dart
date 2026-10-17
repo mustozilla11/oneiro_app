@@ -20,22 +20,48 @@ class DreamInterpretation {
   });
 
   factory DreamInterpretation.fromJson(Map<String, dynamic> json, {String? fallbackDreamText, String? fallbackEmotion}) {
+    // Kaynaklardan veya gelen yanıttan sembolleri çıkar
+    List<String> extractedSymbols = (json['symbols'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
+
+    if (extractedSymbols.isEmpty && json['sources_used'] is List) {
+      extractedSymbols = (json['sources_used'] as List)
+          .map((item) {
+            if (item is Map && item['source'] != null) {
+              return item['source']
+                  .toString()
+                  .replaceAll('.txt', '')
+                  .replaceAll('.pdf', '')
+                  .replaceAll('_', ' ');
+            }
+            return '';
+          })
+          .where((s) => s.isNotEmpty)
+          .take(3)
+          .toList();
+    }
+
+    if (extractedSymbols.isEmpty) {
+      extractedSymbols = ['Kadim Doğu', 'Antik Bilgelik', 'Bilinçdışı'];
+    }
+
+    final rawInterpretation = json['interpretation'] as String? ??
+        json['ancient_interpretation'] as String? ??
+        json['traditional_interpretation'] as String? ??
+        'Kadim kaynaklar bu sembolün derin bir ruhsal dönüşüme işaret ettiğini bildirir.';
+
     return DreamInterpretation(
       id: json['id'] as String? ?? UniqueKey().toString(),
       dreamText: json['dream_text'] as String? ?? fallbackDreamText ?? '',
       emotion: json['emotion'] as String? ?? fallbackEmotion ?? 'Bilinmeyen',
-      symbols: (json['symbols'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          <String>[],
-      ancientInterpretation: json['ancient_interpretation'] as String? ??
-          json['traditional_interpretation'] as String? ??
-          'Kadim kaynaklar bu sembolün derin bir ruhsal dönüşüme işaret ettiğini bildirir.',
+      symbols: extractedSymbols,
+      ancientInterpretation: rawInterpretation,
       subconsciousAnalysis: json['subconscious_analysis'] as String? ??
-          json['modern_psychology'] as String? ??
-          'Bilinçaltınız bastırılmış duygularınızı rüya arketipleri üzerinden yüzeye çıkarıyor.',
+          'Carl Jung arketipsel psikolojisine göre bu rüya, bastırılmış içsel duygularınızın ve sezgilerinizin uyanışını temsil ediyor.',
       warningOfDay: json['warning_of_day'] as String? ??
-          'İç sesinizi dinleyin ve acele kararlardan kaçının.',
+          'Bugün ilk hissinize ve iç sesinize güvenin; kadim yolculuğunuzda en doğru pusula kalbinizdir.',
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
