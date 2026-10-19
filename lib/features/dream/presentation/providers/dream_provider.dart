@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../services/firestore_service.dart';
 import '../../data/repositories/dream_repository.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../../domain/models/dream_request.dart';
@@ -69,9 +71,11 @@ class DreamNotifier extends StateNotifier<DreamState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
+      final currentUid = AuthService.instance.currentUser?.uid;
       final request = DreamRequest(
         dreamText: state.dreamText.trim(),
         emotion: state.selectedEmotion,
+        userId: currentUid,
       );
 
       final result = await _repository.interpretDream(request);
@@ -79,6 +83,21 @@ class DreamNotifier extends StateNotifier<DreamState> {
         isLoading: false,
         interpretation: result,
       );
+
+      // Bulut veritabanına rüyayı mühürle (Oturum açılmışsa)
+      if (currentUid != null) {
+        await FirestoreService.instance.saveDream(
+          currentUid,
+          dreamText: result.dreamText,
+          interpretation: result.interpretation,
+          subconsciousAnalysis: result.subconsciousAnalysis,
+          warningOfDay: result.warningOfDay,
+          primaryTradition: result.primaryTradition.title,
+          lockedTraditions: result.lockedTraditions.map((t) => t.title).toList(),
+          symbols: result.symbols,
+        );
+      }
+
       return result;
     } catch (e) {
       state = state.copyWith(
@@ -96,9 +115,11 @@ class DreamNotifier extends StateNotifier<DreamState> {
     state = state.copyWith(isUnlocking: true);
 
     try {
+      final currentUid = AuthService.instance.currentUser?.uid;
       final unlockedItem = await _repository.unlockTradition(
         state.dreamText.isNotEmpty ? state.dreamText : state.interpretation!.dreamText,
         traditionId,
+        userId: currentUid,
       );
 
       final updatedLocked = state.interpretation!.lockedTraditions.map((trad) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../services/auth_service.dart';
 import '../../../home/presentation/screens/main_pager_screen.dart';
 
 class OnboardingAuthScreen extends StatefulWidget {
@@ -12,9 +13,11 @@ class OnboardingAuthScreen extends StatefulWidget {
 }
 
 class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
+  bool _isLoading = false;
+
   void _navigateToHome() {
     HapticFeedback.mediumImpact();
-    // İlk açılış tamamlandı, ana ekrana geçiş yap
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),
@@ -26,34 +29,86 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
     );
   }
 
-  void _handleGoogleSignIn() {
+  Future<void> _handleGoogleSignIn() async {
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Google ile başarıyla bağlanıldı. Astral portal açılıyor...',
-          style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await AuthService.instance.signInWithGoogle();
+      if (!mounted) return;
+
+      final name = user?.displayName ?? 'Kadim Gezgin';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Hoş geldiniz $name. Astral portal açılıyor...',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.ancientGold),
+          ),
         ),
-        backgroundColor: AppColors.surfaceCardElevated,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    _navigateToHome();
+      );
+      _navigateToHome();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Giriş tamamlanamadı veya iptal edildi. Misafir olarak devam edebilirsiniz.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
-  void _handleAppleSignIn() {
+  Future<void> _handleAppleSignIn() async {
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Apple ile başarıyla bağlanıldı. Astral portal açılıyor...',
-          style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await AuthService.instance.signInWithApple();
+      if (!mounted) return;
+
+      final name = user?.displayName ?? 'Kadim Gezgin';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Hoş geldiniz $name. Astral portal açılıyor...',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.ancientGold),
+          ),
         ),
-        backgroundColor: AppColors.surfaceCardElevated,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    _navigateToHome();
+      );
+      _navigateToHome();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Apple girişi tamamlanamadı veya iptal edildi.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -227,12 +282,12 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: _isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: backgroundColor,
+            color: _isLoading ? backgroundColor.withOpacity(0.6) : backgroundColor,
             borderRadius: BorderRadius.circular(16),
             border: border,
             boxShadow: [
@@ -243,21 +298,32 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              iconWidget,
-              const SizedBox(width: 12),
-              Text(
-                text,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
+          child: _isLoading
+              ? Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: textColor,
+                    ),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    iconWidget,
+                    const SizedBox(width: 12),
+                    Text(
+                      text,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

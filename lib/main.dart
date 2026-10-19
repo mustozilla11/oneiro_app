@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/theme.dart';
 import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
+import 'features/home/presentation/screens/main_pager_screen.dart';
+import 'services/auth_service.dart';
+import 'services/subscription_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +24,28 @@ void main() async {
     ),
   );
 
-  // Reklam servisini arka planda başlat
-  await AdService.instance.initialize();
+  // 1. Firebase Başlatma (Defansif: google-services.json yoksa çökmez, simülasyon modu devrede kalır)
+  try {
+    await Firebase.initializeApp();
+    debugPrint('[Firebase] Başarıyla başlatıldı.');
+  } catch (e) {
+    debugPrint('[Firebase] Yapılandırma dosyası bekleniyor (Geliştirme/Çevrimdışı Mod): $e');
+  }
+
+  // 2. RevenueCat Satın Alma ve Abonelik Servisini Başlat
+  try {
+    final currentUid = AuthService.instance.currentUser?.uid;
+    await SubscriptionService.instance.initialize(uid: currentUid);
+  } catch (e) {
+    debugPrint('[RevenueCat] Başlatma uyarısı: $e');
+  }
+
+  // 3. AdMob Reklam Servisini Başlat
+  try {
+    await AdService.instance.initialize();
+  } catch (e) {
+    debugPrint('[AdService] Başlatma uyarısı: $e');
+  }
 
   runApp(
     const ProviderScope(
@@ -37,8 +63,41 @@ class OneiroApp extends StatelessWidget {
       title: 'Oneiro / Rüya Tabiri',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      // İlk açılışta şık Google & Apple giriş ekranı karşılar, ardından ana sayfaya geçer
-      home: const OnboardingAuthScreen(),
+      // Oturum durumunu dinleyen AuthGate
+      home: const AuthGate(),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: AuthService.instance.authStateChanges,
+      builder: (context, snapshot) {
+        // İlk yükleme aşaması
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            backgroundColor: AppColors.oledBlack,
+            body: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.ancientGold,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        // Giriş yapmış kullanıcı -> Doğrudan Ana Sayfaya
+        if (snapshot.hasData && snapshot.data != null) {
+          return const MainPagerScreen();
+        }
+
+        // Giriş yapmamış kullanıcı -> Onboarding & Giriş Ekranı
+        return const OnboardingAuthScreen();
+      },
     );
   }
 }

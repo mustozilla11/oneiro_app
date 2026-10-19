@@ -6,8 +6,6 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData get darkTheme {
-    final baseTextTheme = ThemeData.dark().textTheme;
-
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,

@@ -7,7 +7,7 @@ import '../../domain/models/dream_request.dart';
 
 abstract class IDreamRepository {
   Future<DreamInterpretation> interpretDream(DreamRequest request);
-  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId);
+  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId, {String? userId});
 }
 
 class DreamRepository implements IDreamRepository {
@@ -63,20 +63,24 @@ class DreamRepository implements IDreamRepository {
   }
 
   @override
-  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId) async {
+  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId, {String? userId}) async {
     if (ApiConstants.useMockBackend) {
       await Future.delayed(const Duration(milliseconds: 400));
       return _mockUnlockedTradition(traditionId);
     }
 
     try {
-      debugPrint('[DreamRepository] "$traditionId" geleneğinin kilidi açılıyor...');
+      debugPrint('[DreamRepository] "$traditionId" geleneğinin kilidi açılıyor... (User ID: $userId)');
+      final payload = <String, dynamic>{
+        'dream_text': dreamText,
+        'tradition_id': traditionId,
+      };
+      if (userId != null && userId.isNotEmpty) {
+        payload['user_id'] = userId;
+      }
       final response = await _dioClient.dio.post(
         ApiConstants.unlockTraditionEndpoint,
-        data: {
-          'dream_text': dreamText,
-          'tradition_id': traditionId,
-        },
+        data: payload,
       );
 
       if (response.statusCode == 200 && response.data != null) {

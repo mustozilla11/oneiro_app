@@ -107,6 +107,7 @@ class DreamInterpretation {
   String get ancientInterpretation => primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.';
   String get subconsciousAnalysis => freeAnalysis.bilincaltiAynasi;
   String get warningOfDay => freeAnalysis.gununPusulasi;
+  String get interpretation => ancientInterpretation;
 
   DreamInterpretation copyWith({
     String? id,
@@ -151,9 +152,9 @@ class DreamInterpretation {
       freeAnalysis = FreeAnalysis.fromJson(json['free_analysis'] as Map<String, dynamic>);
     } else {
       freeAnalysis = FreeAnalysis(
-        bilincalti_aynasi: json['subconscious_analysis'] as String? ??
+        bilincaltiAynasi: json['subconscious_analysis'] as String? ??
             'Carl Jung arketipsel psikolojisine göre bu rüya, bastırılmış içsel duygularınızın ve sezgilerinizin uyanışını temsil ediyor.',
-        gunun_pusulasi: json['warning_of_day'] as String? ??
+        gununPusulasi: json['warning_of_day'] as String? ??
             'Bugün ilk hissinize ve iç sesinize güvenin; en doğru pusula kalbinizdir.',
       );
     }
@@ -254,7 +255,7 @@ class DreamInterpretation {
         bilincaltiAynasi:
             'Carl Jung arketipsel psikolojisine göre bu rüya, Gölge ve sezgisel benliğinizin yüzleşmesini yansıtıyor. '
             'Bilinçdışınız, kontrolü yalnızca mantığa bırakmak yerine kadim sezgilerinize kulak vermeniz gerektiğini fısıldıyor.',
-        gunun_pusulasi:
+        gununPusulasi:
             'Bugün zihninizi bulandıran aceleci kararlardan uzak durun; kalbinizin ilk sessiz hissi en doğru rotadır.',
       ),
       primaryTradition: TraditionAnalysisItem(

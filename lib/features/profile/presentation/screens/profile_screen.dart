@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../services/auth_service.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
 
@@ -14,37 +16,90 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isSignedIn = false;
-  String _userName = 'Misafir Seyyah';
-  String _userEmail = 'Giriş yapılmadı';
+  bool _isLoading = false;
 
-  void _toggleGoogleSignIn() {
+  Future<void> _handleGoogleSignIn() async {
     HapticFeedback.mediumImpact();
-    setState(() {
-      _isSignedIn = !_isSignedIn;
-      if (_isSignedIn) {
-        _userName = 'Mustafa';
-        _userEmail = 'mustafa@example.com';
-      } else {
-        _userName = 'Misafir Seyyah';
-        _userEmail = 'Giriş yapılmadı';
+    setState(() => _isLoading = true);
+    try {
+      final user = await AuthService.instance.signInWithGoogle();
+      if (!mounted) return;
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Google ile bağlanıldı (${user.displayName ?? user.email}). Rüyalarınız bulutta senkronize ediliyor.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
-    });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Google bağlantısı tamamlanamadı.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
+  Future<void> _handleAppleSignIn() async {
+    HapticFeedback.mediumImpact();
+    setState(() => _isLoading = true);
+    try {
+      final user = await AuthService.instance.signInWithApple();
+      if (!mounted) return;
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Apple ile bağlanıldı (${user.displayName ?? user.email}).',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Apple bağlantısı tamamlanamadı.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+          ),
+          backgroundColor: AppColors.surfaceCardElevated,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleSignOut() async {
+    HapticFeedback.mediumImpact();
+    await AuthService.instance.signOut();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          _isSignedIn
-              ? 'Google ile bağlanıldı. Rüyalarınız bulutta senkronize ediliyor.'
-              : 'Oturum kapatıldı. Rüyalarınız yalnızca cihazınızda saklanacak.',
+          'Oturum kapatıldı. Misafir moduna geçildi.',
           style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
         ),
         backgroundColor: AppColors.surfaceCardElevated,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.neonPurple, width: 1),
-        ),
       ),
     );
   }
@@ -99,107 +154,166 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 28),
 
-              // Profil Kartı & Google Girişi
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceCard,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: _isSignedIn ? AppColors.ancientGold.withOpacity(0.4) : AppColors.borderSubtle,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundColor: AppColors.surfaceCardElevated,
-                      child: Text(
-                        _isSignedIn ? 'M' : '𓂀',
-                        style: TextStyle(
-                          fontSize: _isSignedIn ? 28 : 32,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.ancientGold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _userName,
-                      style: GoogleFonts.cinzel(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPureWhite,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _userEmail,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color: AppColors.textDim,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+              // Profil Kartı & Kimlik Doğrulama
+              StreamBuilder<User?>(
+                stream: AuthService.instance.authStateChanges,
+                builder: (context, authSnap) {
+                  final user = authSnap.data ?? AuthService.instance.currentUser;
+                  final isSignedIn = user != null;
+                  final userName = user?.displayName ?? (isSignedIn ? 'Kadim Gezgin' : 'Misafir Seyyah');
+                  final userEmail = user?.email ?? (isSignedIn ? 'Bulut Senkronize' : 'Giriş yapılmadı');
+                  final avatarInitial = (userName.isNotEmpty ? userName[0].toUpperCase() : '𓂀');
 
-                    // Google ile Giriş Yap Butonu
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: _toggleGoogleSignIn,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: _isSignedIn
-                                ? AppColors.surfaceDark
-                                : AppColors.textPureWhite,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: _isSignedIn ? AppColors.borderSubtle : Colors.transparent,
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceCard,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSignedIn ? AppColors.ancientGold.withOpacity(0.4) : AppColors.borderSubtle,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 36,
+                          backgroundColor: AppColors.surfaceCardElevated,
+                          child: Text(
+                            isSignedIn ? avatarInitial : '𓂀',
+                            style: TextStyle(
+                              fontSize: isSignedIn ? 28 : 32,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.ancientGold,
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (!_isSignedIn) ...[
-                                // Google G Simgesi
-                                const Text(
-                                  'G',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF4285F4),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Google ile Bağlan',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ] else ...[
-                                const Icon(Icons.logout_rounded, size: 16, color: AppColors.textMuted),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Oturumu Kapat',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    color: AppColors.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          userName,
+                          style: GoogleFonts.cinzel(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPureWhite,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          userEmail,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            color: AppColors.textDim,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        if (!isSignedIn) ...[
+                          // 1. Google ile Giriş Yap Butonu
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: _isLoading ? null : _handleGoogleSignIn,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.textPureWhite,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'G',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF4285F4),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Google ile Bağlan',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // 2. Apple ile Giriş Yap Butonu
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: _isLoading ? null : _handleAppleSignIn,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF161324),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: AppColors.borderSubtle),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.apple, size: 20, color: AppColors.textPureWhite),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Apple ile Bağlan',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPureWhite,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ] else ...[
+                          // Oturumu Kapat Butonu
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: _isLoading ? null : _handleSignOut,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceDark,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: AppColors.borderSubtle),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.logout_rounded, size: 16, color: AppColors.textMuted),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Oturumu Kapat',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 20),

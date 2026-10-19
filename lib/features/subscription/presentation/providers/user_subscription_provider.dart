@@ -1,17 +1,53 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../services/firestore_service.dart';
+import '../../../../services/subscription_service.dart';
 import '../../domain/models/user_subscription_state.dart';
 
 class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
+  StreamSubscription? _firestoreSub;
+
   UserSubscriptionNotifier() : super(const UserSubscriptionState()) {
     _loadFromPrefs();
+    _initRevenueCatHooks();
+    _listenAuthAndFirestore();
   }
 
   static const _keyIsPremium = 'oneiro_is_premium';
   static const _keyCredits = 'oneiro_dream_credits';
   static const _keyDailyUsed = 'oneiro_daily_used';
   static const _keyLastDate = 'oneiro_last_date';
+
+  void _initRevenueCatHooks() {
+    SubscriptionService.instance.onPremiumStatusChanged = (isPrem) {
+      setPremium(isPrem);
+    };
+    SubscriptionService.instance.onCreditsPurchased = (count) {
+      addCredits(count);
+    };
+  }
+
+  void _listenAuthAndFirestore() {
+    AuthService.instance.authStateChanges.listen((user) {
+      _firestoreSub?.cancel();
+      if (user != null) {
+        _firestoreSub = FirestoreService.instance.streamUserData(user.uid).listen((data) {
+          if (data != null) {
+            syncWithFirestore(data);
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _firestoreSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> _loadFromPrefs() async {
     try {
@@ -32,11 +68,28 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
     }
   }
 
+  void syncWithFirestore(Map<String, dynamic> data) {
+    final isPrem = data['isPremium'] as bool? ?? state.isPremium;
+    final credits = data['dreamCredits'] as int? ?? state.dreamCredits;
+    final lastDate = data['dailyFreeDreamDate'] as String? ?? state.lastFreeDreamDate;
+
+    state = state.copyWith(
+      isPremium: isPrem,
+      dreamCredits: credits,
+      lastFreeDreamDate: lastDate,
+    );
+  }
+
   Future<void> setPremium(bool isPrem) async {
     state = state.copyWith(isPremium: isPrem);
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyIsPremium, isPrem);
+
+      final user = AuthService.instance.currentUser;
+      if (user != null) {
+        await FirestoreService.instance.updatePremiumStatus(user.uid, isPrem);
+      }
     } catch (_) {}
   }
 
@@ -46,6 +99,11 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_keyCredits, updated);
+
+      final user = AuthService.instance.currentUser;
+      if (user != null) {
+        await FirestoreService.instance.incrementCredits(user.uid, count);
+      }
     } catch (_) {}
   }
 
@@ -54,6 +112,11 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
     if (state.isPremium) return true;
 
     final today = _getTodayString();
+    final user = AuthService.instance.currentUser;
+
+    if (user != null) {
+      await FirestoreService.instance.deductCreditOrUseDaily(user.uid);
+    }
 
     // Eğer bugün henüz ücretsiz hakkını kullanmadıysa, ücretsiz hakkı tüket
     if (state.lastFreeDreamDate != today || state.dailyFreeDreamsUsed < 1) {
@@ -92,6 +155,11 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setInt(_keyCredits, updated);
+
+        final user = AuthService.instance.currentUser;
+        if (user != null) {
+          await FirestoreService.instance.incrementCredits(user.uid, -1);
+        }
       } catch (_) {}
       return true;
     }

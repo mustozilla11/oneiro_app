@@ -261,6 +261,7 @@ class TraditionAnalysisItem(BaseModel):
 class DreamInterpretRequest(BaseModel):
     dream_text: str = Field(..., min_length=3, description="Kullanıcının rüya metni")
     preferred_tradition: Optional[str] = Field("islam_dogu", description="İlk analizde ücretsiz açılacak gelenek")
+    user_id: Optional[str] = Field(None, description="Kullanıcı Firebase UID (opsiyonel)")
 
 
 class DreamInterpretResponse(BaseModel):
@@ -280,6 +281,7 @@ class DreamInterpretResponse(BaseModel):
 class UnlockTraditionRequest(BaseModel):
     dream_text: str = Field(..., min_length=3, description="Rüya metni")
     tradition_id: str = Field(..., description="Açılmak istenen gelenek ID'si (antik_akdeniz, psikoloji vb.)")
+    user_id: Optional[str] = Field(None, description="Kullanıcı Firebase UID (opsiyonel)")
 
 
 class UnlockTraditionResponse(BaseModel):
@@ -360,6 +362,8 @@ async def interpret_dream(request: DreamInterpretRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Lütfen geçerli bir rüya metni giriniz."
         )
+
+    logger.info(f"Rüya analizi talebi alındı. Kullanıcı ID: {request.user_id or 'Misafir/Anonim'}")
 
     preferred_trad = request.preferred_tradition or "islam_dogu"
     if preferred_trad not in TRADITIONS:
@@ -515,6 +519,8 @@ async def unlock_tradition(request: UnlockTraditionRequest):
     yalnızca o spesifik geleneğin tam tabirini ~200 token ile hızlıca üretir.
     """
     global deepseek_client
+
+    logger.info(f"Kilit açma talebi alındı: {request.tradition_id}. Kullanıcı ID: {request.user_id or 'Misafir/Anonim'}")
 
     tradition_id = request.tradition_id
     if tradition_id not in TRADITIONS:

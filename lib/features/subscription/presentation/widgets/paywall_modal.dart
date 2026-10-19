@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../services/subscription_service.dart';
 import '../providers/user_subscription_provider.dart';
 
 class PaywallModal extends ConsumerWidget {
@@ -118,7 +119,10 @@ class PaywallModal extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               onTap: () async {
                 HapticFeedback.heavyImpact();
-                await ref.read(userSubscriptionProvider.notifier).setPremium(true);
+                final success = await SubscriptionService.instance.purchaseMonthlySubscription();
+                if (success) {
+                  await ref.read(userSubscriptionProvider.notifier).setPremium(true);
+                }
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -128,7 +132,9 @@ class PaywallModal extends ConsumerWidget {
                           const Icon(Icons.verified, color: AppColors.ancientGold),
                           const SizedBox(width: 12),
                           Text(
-                            'Kadim Gezgin Plus mühürlendi! Hoş geldiniz.',
+                            success
+                                ? 'Kadim Gezgin Plus mühürlendi! Hoş geldiniz.'
+                                : 'İşlem tamamlanamadı veya iptal edildi.',
                             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
                           ),
                         ],
@@ -229,7 +235,10 @@ class PaywallModal extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () async {
                 HapticFeedback.mediumImpact();
-                await ref.read(userSubscriptionProvider.notifier).addCredits(10);
+                final success = await SubscriptionService.instance.purchaseCreditPack();
+                if (success) {
+                  await ref.read(userSubscriptionProvider.notifier).addCredits(10);
+                }
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +248,9 @@ class PaywallModal extends ConsumerWidget {
                           const Icon(Icons.token, color: AppColors.neonPurple),
                           const SizedBox(width: 12),
                           Text(
-                            '10 Kadim Jeton cüzdanınıza eklendi!',
+                            success
+                                ? '10 Kadim Jeton cüzdanınıza eklendi!'
+                                : 'İşlem tamamlanamadı veya iptal edildi.',
                             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
                           ),
                         ],

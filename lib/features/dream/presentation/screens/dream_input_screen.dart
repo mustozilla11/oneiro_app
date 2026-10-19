@@ -82,6 +82,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
   @override
   Widget build(BuildContext context) {
     final hasFocus = _focusNode.hasFocus;
+    final subState = ref.watch(userSubscriptionProvider);
 
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
@@ -124,6 +125,56 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                                 color: AppColors.ancientGold,
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Dinamik Kredi / Abonelik Durum Çipi (Tıklanabilir Paywall Erişimi)
+                    GestureDetector(
+                      onTap: () => PaywallModal.show(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: subState.isPremium
+                              ? LinearGradient(
+                                  colors: [
+                                    AppColors.ancientGold.withOpacity(0.25),
+                                    AppColors.neonPurple.withOpacity(0.2),
+                                  ],
+                                )
+                              : null,
+                          color: subState.isPremium ? null : AppColors.surfaceCardElevated,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: subState.isPremium
+                                ? AppColors.ancientGold
+                                : AppColors.neonPurple.withOpacity(0.4),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              subState.isPremium ? Icons.workspace_premium_rounded : Icons.stars_rounded,
+                              color: subState.isPremium ? AppColors.ancientGold : AppColors.electricLavender,
+                              size: 15,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              subState.isPremium
+                                  ? '👑 Kadim Üye • Sınırsız'
+                                  : '✨ Kalan Kredi: ${subState.dreamCredits}  |  Günlük Hak: ${subState.hasFreeDreamToday ? 1 : 0}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: subState.isPremium ? AppColors.ancientGold : AppColors.textPureWhite,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.ancientGold, size: 10),
                           ],
                         ),
                       ),
