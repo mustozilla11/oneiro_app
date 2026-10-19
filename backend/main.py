@@ -73,11 +73,23 @@ TRADITIONS: Dict[str, Dict[str, str]] = {
 CHUNKS_DB: List[Dict[str, Any]] = []
 
 TURKISH_STOPWORDS = {
+    # Genel edat, bağlaç, zamirler
     "ve", "ile", "bu", "şu", "o", "bir", "de", "da", "ki", "için", "gibi", "kadar",
     "daha", "çok", "en", "ama", "fakat", "ancak", "çünkü", "mi", "mı", "mu", "mü",
-    "rüyada", "rüyamda", "gördüm", "dün", "gece", "sonra", "ben", "sen", "biz", "siz",
-    "olan", "olmak", "eden", "etmek", "vardı", "yoktu", "diye", "bunu", "buna", "bunun",
-    "kendimi", "kendini", "böyle", "şöyle", "her", "şey", "şeyler"
+    "ben", "sen", "biz", "siz", "onlar", "bana", "beni", "sana", "seni", "ona", "onu",
+    "bize", "bizi", "size", "sizi", "onlara", "onları", "onlari", "bizim", "sizin", "onların", "onlarin",
+    "kendimi", "kendini", "kendisi", "kendimize", "kendinizi", "kendilerini",
+    "böyle", "boyle", "şöyle", "soyle", "öyle", "oyle", "her", "şey", "sey", "şeyler", "seyler",
+    "tüm", "tum", "bütün", "butun", "bazı", "bazi", "biri", "birisi",
+    "diye", "bunu", "buna", "bunun", "şunu", "sunu", "şuna", "suna", "şunun", "sunun",
+    "olan", "olmak", "eden", "etmek", "vardı", "vardi", "yoktu", "oldu", "olmuş", "olmus", "olacak",
+    "ayrıca", "ayrica", "birden", "aniden", "artık", "artik", "şimdi", "simdi",
+    # Rüya anlatımında çok sık geçen dolgu fiil ve zaman zarfları
+    "rüyada", "ruyada", "rüyamda", "ruyamda", "rüya", "ruya", "rüyam", "ruyam",
+    "gördüm", "gordum", "görüyorum", "goruyorum", "görmek", "gormek",
+    "dün", "dun", "gece", "sabah", "sonra", "önce", "once",
+    "baktım", "baktim", "gittim", "geldim", "vardım", "vardim", "çıktım", "ciktim",
+    "yerde", "yere", "zaman", "bazen"
 }
 
 
@@ -98,10 +110,12 @@ def normalize_turkish(text: str) -> str:
 
 
 def extract_keywords(text: str) -> List[str]:
-    """Metindeki anlamlı anahtar kelimeleri ve kökleri ayıklar."""
+    """Metindeki anlamlı anahtar kelimeleri ve sembol köklerini ayıklar."""
     norm = normalize_turkish(text)
     words = re.findall(r"\b[a-z0-9]{3,}\b", norm)
-    return [w for w in words if w not in TURKISH_STOPWORDS]
+    meaningful = [w for w in words if w not in TURKISH_STOPWORDS]
+    # Eğer tüm kelimeler stopword'e takıldıysa, en az 3 harfli orijinal kelimeleri koru
+    return meaningful if meaningful else words
 
 
 def detect_tradition_id(filename: str) -> str:
@@ -148,7 +162,7 @@ def read_pdf_file(filepath: str) -> str:
 
 
 def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
-    """Metni anlamlı paragraflara böler ve gelenek etiketi ekler."""
+    """Metni anlamlı paragraflara böler, kelime kümesini indeksler ve gelenek etiketi ekler."""
     tradition_id = detect_tradition_id(source_name)
     raw_paragraphs = text.split("\n\n")
     chunks = []
@@ -156,12 +170,16 @@ def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
     for p in raw_paragraphs:
         cleaned = " ".join(p.split()).strip()
         if len(cleaned) >= 35:
+            norm = normalize_turkish(cleaned)
+            words_list = re.findall(r"\b[a-z0-9]{3,}\b", norm)
             chunks.append({
                 "text": cleaned,
                 "source": source_name,
                 "tradition": tradition_id,
                 "tradition_title": TRADITIONS[tradition_id]["title"],
-                "norm": normalize_turkish(cleaned)
+                "norm": norm,
+                "words": set(words_list),
+                "is_substantive": len(cleaned) >= 90
             })
 
     return chunks
@@ -293,37 +311,179 @@ class UnlockTraditionResponse(BaseModel):
 
 
 # -----------------------------------------------------------------------------
-# 6. GELENEK BAZLI RETRIEVAL
+# 6. GELİŞMİŞ TÜRKÇE RAG RETRIEVAL & BOŞ EŞLEŞME GÜVENLİK KATMANI
 # -----------------------------------------------------------------------------
+def score_passage_relevance(dream_keywords: List[str], chunk: Dict[str, Any]) -> float:
+    """
+    Rüyadan gelen anahtar kelimeler ile kitap paragrafı arasındaki anlamsal alakayı hesaplar.
+    
+    1. Tam Kelime Eşleşmesi (Exact word match) -> 4.0 puan
+    2. İki Yönlü Kök/Ek Toleransı (Substring / In-Word Match):
+       - Kitap kökünün rüya kelimesi içinde geçmesi (örn: rüya: "kuyudaydim", kitap: "kuyu") -> 2.5 - 3.8 puan
+       - Rüya kökünün kitap türevi içinde geçmesi (örn: rüya: "deniz", kitap: "denizlerde") -> 2.2 - 3.4 puan
+    3. Ortak Ön Ek (Common Prefix >= 3 harf):
+       - Ortak harf >= 4 (örn: "merdiven" / "merdivenlerden") -> 1.8 - 2.8 puan
+       - Ortak harf == 3 (kısa kökler) -> 1.0 puan
+    4. Cümle / Paragraf İçi Geçiş (norm substring) -> 2.0 puan
+    """
+    if not dream_keywords:
+        return 0.0
+
+    chunk_norm = chunk.get("norm", "")
+    chunk_words = chunk.get("words", set())
+    if not chunk_words and chunk_norm:
+        chunk_words = set(re.findall(r"\b[a-z0-9]{3,}\b", chunk_norm))
+
+    total_score = 0.0
+    matched_keywords_count = 0
+
+    for kw in dream_keywords:
+        kw_len = len(kw)
+        if kw_len < 3:
+            continue
+
+        best_kw_score = 0.0
+
+        # A) Tam Kelime Eşleşmesi
+        if kw in chunk_words:
+            best_kw_score = 4.0
+        else:
+            # B) İki yönlü substring ve kök/ek toleransı
+            for bw in chunk_words:
+                bw_len = len(bw)
+                if bw_len < 3:
+                    continue
+
+                if bw == kw:
+                    best_kw_score = 4.0
+                    break
+
+                # 1. Kitap kök kelimesi rüya kelimesinin içinde geçiyor mu?
+                # Örn: kw = "yilanlardan", bw = "yilan" -> "yilan" in "yilanlardan"
+                # Örn: kw = "kuyudaydim", bw = "kuyu" -> "kuyu" in "kuyudaydim"
+                if bw in kw:
+                    ratio = bw_len / kw_len
+                    candidate = 2.4 + (ratio * 1.4)
+                    if candidate > best_kw_score:
+                        best_kw_score = candidate
+
+                # 2. Rüya kelimesi kitap kelimesinin içinde geçiyor mu?
+                # Örn: kw = "deniz", bw = "denizlerde" -> "deniz" in "denizlerde"
+                elif kw in bw:
+                    ratio = kw_len / bw_len
+                    candidate = 2.2 + (ratio * 1.2)
+                    if candidate > best_kw_score:
+                        best_kw_score = candidate
+
+                # 3. Ortak Ön Ek (Common Prefix toleransı)
+                else:
+                    common_len = 0
+                    min_len = min(kw_len, bw_len)
+                    while common_len < min_len and kw[common_len] == bw[common_len]:
+                        common_len += 1
+
+                    if common_len >= 4:
+                        prefix_score = 1.6 + (common_len * 0.15)
+                        if prefix_score > best_kw_score:
+                            best_kw_score = prefix_score
+                    elif common_len == 3 and min_len <= 5:
+                        if 1.0 > best_kw_score:
+                            best_kw_score = 1.0
+
+            # C) Paragraf metni içinde doğrudan alt dize olarak geçme kontrolü
+            if best_kw_score < 2.0 and kw in chunk_norm:
+                best_kw_score = 2.0
+
+        if best_kw_score > 0:
+            total_score += best_kw_score
+            matched_keywords_count += 1
+
+    if matched_keywords_count == 0:
+        return 0.0
+
+    normalized_score = min(0.99, max(0.25, (total_score / (len(dream_keywords) * 3.0))))
+    if matched_keywords_count >= 2:
+        normalized_score = min(0.99, normalized_score + 0.10)
+
+    return round(normalized_score, 4)
+
+
 def retrieve_by_tradition(dream_text: str, tradition_id: str, top_k: int = 1) -> List[Dict[str, Any]]:
-    """Belirli bir geleneğe ait en alakalı kitap pasajını getirir."""
+    """
+    Belirli bir geleneğe ait en alakalı kitap pasajını / pasajlarını getirir.
+    Gelişmiş Türkçe kök, ek ve alt dize toleransı ile çalışır.
+    
+    BOŞ EŞLEŞME GÜVENLİK KATMANI:
+    Eğer rüyadaki kelimeler kitapta doğrudan geçmiyorsa veya nadir bir kelimeyse,
+    o geleneğin en zengin ve temsili 2 genel pasajını DeepSeek'e bağlam olarak iletir.
+    """
     tradition_chunks = [c for c in CHUNKS_DB if c.get("tradition") == tradition_id]
     if not tradition_chunks:
+        logger.warning(f"'{tradition_id}' geleneğine ait indekslenmiş pasaj bulunamadı.")
         return []
 
     keywords = extract_keywords(dream_text)
-    scored = []
+    scored: List[Dict[str, Any]] = []
 
     if keywords:
         for c in tradition_chunks:
-            score = 0.0
-            for kw in keywords:
-                stem = kw[:4] if len(kw) >= 4 else kw
-                if kw in c["norm"]:
-                    score += 2.0
-                elif stem in c["norm"]:
-                    score += 1.0
-            if score > 0:
-                norm_score = min(0.98, max(0.20, score / (len(keywords) * 1.5)))
-                scored.append({"chunk": c, "score": norm_score})
+            rel_score = score_passage_relevance(keywords, c)
+            if rel_score > 0:
+                scored.append({"chunk": c, "score": rel_score, "is_fallback": False})
+
+        scored.sort(key=lambda x: x["score"], reverse=True)
+
+    # 1. Eşleşme bulunduysa en iyileri dön
+    if scored:
+        return scored[:top_k]
+
+    # 2. BOŞ EŞLEŞME GÜVENLİK KATMANI:
+    # Rüyada geçen kelimeler doğrudan eşleşmediğinde arama motoru boş kalmaz.
+    # O geleneğin en zengin, içerikli ve temsili 2 pasajını seçer.
+    logger.info(f"'{tradition_id}' geleneğinde doğrudan kelime eşleşmesi bulunamadı. Temsili 2 pasaj devreye alınıyor.")
+    substantive_chunks = [c for c in tradition_chunks if c.get("is_substantive", len(c.get("text", "")) >= 90)]
+    fallback_pool = substantive_chunks if len(substantive_chunks) >= 2 else tradition_chunks
+
+    sorted_by_depth = sorted(fallback_pool, key=lambda x: len(x.get("text", "")), reverse=True)
+    fallback_chunks = sorted_by_depth[:max(top_k, 2)]
+
+    return [{"chunk": c, "score": 0.45, "is_fallback": True} for c in fallback_chunks[:top_k]]
+
+
+def retrieve_top_k(dream_text: str, top_k: int = 3, tradition_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Tüm kitaplar (veya opsiyonel olarak tek bir gelenek) arasından
+    en alakalı 'top_k' pasajı gelişmiş Türkçe hassasiyetiyle getirir.
+    Boş eşleşme durumunda genel temsili pasajları güvenlik katmanı olarak sunar.
+    """
+    target_chunks = CHUNKS_DB
+    if tradition_id:
+        target_chunks = [c for c in CHUNKS_DB if c.get("tradition") == tradition_id]
+
+    if not target_chunks:
+        return []
+
+    keywords = extract_keywords(dream_text)
+    scored: List[Dict[str, Any]] = []
+
+    if keywords:
+        for c in target_chunks:
+            rel_score = score_passage_relevance(keywords, c)
+            if rel_score > 0:
+                scored.append({"chunk": c, "score": rel_score, "is_fallback": False})
 
         scored.sort(key=lambda x: x["score"], reverse=True)
 
     if scored:
         return scored[:top_k]
 
-    # Eşleşme yoksa o gelenekten temsili ilk parçayı döner
-    return [{"chunk": tradition_chunks[0], "score": 0.40}]
+    # Güvenlik Katmanı: En zengin 2 temsili pasajı dön
+    substantive = [c for c in target_chunks if c.get("is_substantive", len(c.get("text", "")) >= 90)]
+    fallback_pool = substantive if len(substantive) >= 2 else target_chunks
+    sorted_by_depth = sorted(fallback_pool, key=lambda x: len(x.get("text", "")), reverse=True)
+    fallback_chunks = sorted_by_depth[:max(top_k, 2)]
+
+    return [{"chunk": c, "score": 0.45, "is_fallback": True} for c in fallback_chunks[:top_k]]
 
 
 # -----------------------------------------------------------------------------
@@ -371,29 +531,33 @@ async def interpret_dream(request: DreamInterpretRequest):
 
     other_trads = [t for t in TRADITIONS.keys() if t != preferred_trad]
 
-    # Her gelenekten en alakalı 1 pasajı çek
-    matched_chunks: Dict[str, Dict[str, Any]] = {}
+    # Her gelenekten en alakalı pasajları çek (top_k=2; birincil ve kilitli gelenekler için zengin bağlam)
+    matched_chunks: Dict[str, List[Dict[str, Any]]] = {}
     sources_payload: List[SourceUsedItem] = []
 
     for t_id in TRADITIONS.keys():
-        matches = retrieve_by_tradition(dream_text, t_id, top_k=1)
+        matches = retrieve_by_tradition(dream_text, t_id, top_k=2)
         if matches:
-            match = matches[0]
-            matched_chunks[t_id] = match
-            sources_payload.append(
-                SourceUsedItem(
-                    source=match["chunk"]["source"],
-                    tradition=t_id,
-                    excerpt=match["chunk"]["text"],
-                    relevance_score=round(match["score"], 4)
+            matched_chunks[t_id] = matches
+            for m in matches:
+                sources_payload.append(
+                    SourceUsedItem(
+                        source=m["chunk"]["source"],
+                        tradition=t_id,
+                        excerpt=m["chunk"]["text"],
+                        relevance_score=round(m["score"], 4)
+                    )
                 )
-            )
 
-    primary_chunk_text = matched_chunks.get(preferred_trad, {}).get("chunk", {}).get("text", "")
+    primary_matches = matched_chunks.get(preferred_trad, [])
+    primary_chunk_text = "\n\n".join([m["chunk"]["text"] for m in primary_matches]) if primary_matches else ""
+
     other_context_lines = []
     for t_id in other_trads:
-        txt = matched_chunks.get(t_id, {}).get("chunk", {}).get("text", "")
-        other_context_lines.append(f"[{TRADITIONS[t_id]['title']} Kaynak]: {txt}")
+        t_matches = matched_chunks.get(t_id, [])
+        if t_matches:
+            t_text = "\n".join([f"- {m['chunk']['text']}" for m in t_matches])
+            other_context_lines.append(f"[{TRADITIONS[t_id]['title']} Kaynak]:\n{t_text}")
 
     # Sembol çıkarımı (Türkçe anahtar kelimeler)
     keywords = extract_keywords(dream_text)
@@ -530,17 +694,18 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         )
 
     trad_info = TRADITIONS[tradition_id]
-    matches = retrieve_by_tradition(request.dream_text, tradition_id, top_k=1)
-    chunk_text_content = matches[0]["chunk"]["text"] if matches else ""
+    matches = retrieve_by_tradition(request.dream_text, tradition_id, top_k=2)
+    chunk_text_content = "\n\n".join([m["chunk"]["text"] for m in matches]) if matches else ""
 
     sources_payload = [
         SourceUsedItem(
-            source=matches[0]["chunk"]["source"],
+            source=m["chunk"]["source"],
             tradition=tradition_id,
-            excerpt=chunk_text_content,
-            relevance_score=round(matches[0]["score"], 4)
+            excerpt=m["chunk"]["text"],
+            relevance_score=round(m["score"], 4)
         )
-    ] if matches else []
+        for m in matches
+    ]
 
     system_prompt = (
         f"Sen 'Oneiro', kadim sembollerin bilge tercümanısın. "
