@@ -27,7 +27,8 @@ logging.basicConfig(
 logger = logging.getLogger("oneiro_rag")
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
-BOOKS_DIR = os.getenv("BOOKS_DIR", os.path.join(os.path.dirname(__file__), "books"))
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+BOOKS_DIR = os.getenv("BOOKS_DIR", os.path.join(BACKEND_DIR, "books"))
 
 # DeepSeek Async Client (OpenAI uyumlu SDK)
 deepseek_client: Optional[AsyncOpenAI] = None
