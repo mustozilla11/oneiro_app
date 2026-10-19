@@ -20,9 +20,10 @@ from backend.main import (
     lifespan,
     CHUNKS_DB,
     index_books,
-    retrieve_top_k,
     DreamInterpretRequest,
     DreamInterpretResponse,
+    UnlockTraditionRequest,
+    UnlockTraditionResponse,
     SourceUsedItem,
     BOOKS_DIR
 )
@@ -32,9 +33,10 @@ __all__ = [
     "lifespan",
     "CHUNKS_DB",
     "index_books",
-    "retrieve_top_k",
     "DreamInterpretRequest",
     "DreamInterpretResponse",
+    "UnlockTraditionRequest",
+    "UnlockTraditionResponse",
     "SourceUsedItem",
     "BOOKS_DIR"
 ]

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../subscription/presentation/providers/user_subscription_provider.dart';
+import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../providers/dream_provider.dart';
 import '../widgets/glow_container.dart';
 import 'dream_loading_screen.dart';
@@ -61,6 +63,12 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
       return;
     }
 
+    final subState = ref.read(userSubscriptionProvider);
+    if (!subState.canAnalyzeDream) {
+      PaywallModal.show(context);
+      return;
+    }
+
     ref.read(dreamProvider.notifier).setDreamText(text);
 
     // Yükleme & Reklam koordinasyon ekranına geçiş
@@ -90,31 +98,34 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
               Center(
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.neonPurple.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: AppColors.neonPurple.withOpacity(0.35),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
-                          const SizedBox(width: 6),
-                          Text(
-                            'ONEIRO ASTRAL PORTAL',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 2.0,
-                              color: AppColors.ancientGold,
-                            ),
+                    GestureDetector(
+                      onTap: () => PaywallModal.show(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.neonPurple.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: AppColors.neonPurple.withOpacity(0.35),
+                            width: 1,
                           ),
-                        ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
+                            const SizedBox(width: 6),
+                            Text(
+                              'ONEIRO ASTRAL PORTAL',
+                              style: GoogleFonts.cinzel(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 2.0,
+                                color: AppColors.ancientGold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),

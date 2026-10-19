@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
+import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -197,6 +200,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Kadim Gezgin Plus & Jeton Cüzdanı Kartı
+              Consumer(
+                builder: (context, ref, _) {
+                  final sub = ref.watch(userSubscriptionProvider);
+                  return Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: sub.isPremium
+                          ? const LinearGradient(colors: [Color(0xFF261D0C), Color(0xFF140F04)])
+                          : null,
+                      color: sub.isPremium ? null : AppColors.surfaceCardElevated,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: sub.isPremium ? AppColors.ancientGold : AppColors.borderGold,
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (sub.isPremium ? AppColors.ancientGold : AppColors.neonPurple).withOpacity(0.15),
+                          blurRadius: 16,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: (sub.isPremium ? AppColors.ancientGold : AppColors.neonPurple).withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            sub.isPremium ? Icons.auto_awesome : Icons.token_rounded,
+                            color: sub.isPremium ? AppColors.ancientGold : AppColors.electricLavender,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sub.isPremium ? 'KADİM GEZGİN PLUS' : 'KADİM JETON CÜZDANI',
+                                style: GoogleFonts.cinzel(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                  color: AppColors.ancientGold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                sub.isPremium
+                                    ? 'Sınırsız Analiz & Sıfır Reklam'
+                                    : '${sub.dreamCredits} Jeton Mevcut (Günde 1 Ücretsiz)',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: AppColors.textSilver,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => PaywallModal.show(context),
+                          style: TextButton.styleFrom(
+                            backgroundColor: AppColors.ancientGold.withOpacity(0.2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(
+                            sub.isPremium ? 'Yönet' : 'Yükselt',
+                            style: GoogleFonts.cinzel(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.ancientGold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 24),

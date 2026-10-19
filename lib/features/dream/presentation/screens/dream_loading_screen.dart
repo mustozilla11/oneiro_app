@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/ads/ad_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../providers/dream_provider.dart';
 import 'dream_result_screen.dart';
@@ -17,99 +17,93 @@ class DreamLoadingScreen extends ConsumerStatefulWidget {
 }
 
 class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
-  int _currentTipIndex = 0;
-  Timer? _tipTimer;
-  Timer? _hardDeadlineTimer;
-  DreamInterpretation? _analyzedResult;
-  bool _isAdDismissed = false;
+  int _currentStepIndex = 0;
+  Timer? _stepTimer;
+  Timer? _safetyTimeoutTimer;
   bool _hasNavigated = false;
 
-  final List<String> _mysticalPhrases = const [
-    'Kadim semboller ve bilinçaltı taranıyor...',
-    'Kadim kütüphaneler uykusundan uyanıyor...',
-    'Mısır ve Mezopotamya papirüsleri çözümleniyor...',
-    'Carl Jung arketipsel bilinçdışı taranıyor...',
-    'DeepSeek 5 kadim gelenek ışığında rüyanızı çözümlüyor...',
-    'Günün kadim uyarısı mühürleniyor...',
+  final List<Map<String, String>> _progressiveSteps = const [
+    {
+      'step': '1. AŞAMA',
+      'title': 'Kadim yazmalar ve semboller taranıyor...',
+      'subtitle': 'İbn-i Sîrîn ve Doğu tabletleri aralanıyor',
+      'icon': '📜',
+    },
+    {
+      'step': '2. AŞAMA',
+      'title': 'Doğu ve Batı arketipleri karşılaştırılıyor...',
+      'subtitle': 'Artemidorus ve Carl Jung hafızası taranıyor',
+      'icon': '🏛️',
+    },
+    {
+      'step': '3. AŞAMA',
+      'title': 'Bilinçaltı aynası aralanıyor...',
+      'subtitle': 'Rüyanızın gizli işaretleri mühürleniyor',
+      'icon': '🌌',
+    },
   ];
 
   @override
   void initState() {
     super.initState();
-    _startTipCycle();
-    _orchestrateAnalysisAndAd();
+    _startProgressiveSteps();
+    _executeAnalysis();
 
-    // 60 Saniyelik Kesin Süre Sınırı (Render Cold Start Toleransı)
-    // Render ücretsiz sunucusu uykudayken 40-50 saniyede uyanabilir.
-    // 60 saniye boyunca gerçek sunucu yanıtını bekler, süre aşılırsa güvenli fallback açar.
-    _hardDeadlineTimer = Timer(const Duration(seconds: 60), () {
-      debugPrint('[DreamLoadingScreen] 60 saniyelik tolerans süresi doldu. Sonuç ekranına geçiliyor.');
-      _isAdDismissed = true;
-      _ensureResultAndNavigate();
+    // 45 Saniyelik Emniyet Zaman Aşımı (Render Cold Start için)
+    _safetyTimeoutTimer = Timer(const Duration(seconds: 45), () {
+      debugPrint('[DreamLoadingScreen] Emniyet süresi doldu. Güvenli geçiş yapılıyor.');
+      _navigateToResult();
     });
   }
 
   @override
   void dispose() {
-    _tipTimer?.cancel();
-    _hardDeadlineTimer?.cancel();
+    _stepTimer?.cancel();
+    _safetyTimeoutTimer?.cancel();
     super.dispose();
   }
 
-  void _startTipCycle() {
-    _tipTimer = Timer.periodic(const Duration(milliseconds: 2600), (timer) {
+  void _startProgressiveSteps() {
+    _stepTimer = Timer.periodic(const Duration(milliseconds: 2000), (timer) {
       if (mounted) {
         setState(() {
-          _currentTipIndex = (_currentTipIndex + 1) % _mysticalPhrases.length;
+          _currentStepIndex = (_currentStepIndex + 1) % _progressiveSteps.length;
         });
       }
     });
   }
 
-  Future<void> _orchestrateAnalysisAndAd() async {
-    // 1. Rüya Analizini Başlat (Render FastAPI RAG + DeepSeek)
-    final analysisFuture = ref.read(dreamProvider.notifier).analyzeDream();
+  Future<void> _executeAnalysis() async {
+    // Kullanıcının günlük hakkını veya jetonunu tüket
+    ref.read(userSubscriptionProvider.notifier).consumeDreamAttempt();
 
-    // 2. Reklamı Başlat
-    AdService.instance.showInterstitialWithFallback(
-      maxTimeout: const Duration(seconds: 15),
-      onCompleted: () {
-        debugPrint('[DreamLoadingScreen] Reklam kapatıldı veya tamamlandı.');
-        _isAdDismissed = true;
-        // Eğer API yanıtı zaten geldiyse hemen geç
-        if (_analyzedResult != null) {
-          _ensureResultAndNavigate();
-        }
-      },
-    );
-
-    // Analiz sonucunu bekle
+    // DeepSeek + RAG Analizini Başlat
     try {
-      _analyzedResult = await analysisFuture;
-      debugPrint('[DreamLoadingScreen] Analiz sonucu hazırlandı.');
-      // Eğer kullanıcı reklamı zaten kapattıysa hemen sonuç ekranına geç
-      if (_isAdDismissed) {
-        _ensureResultAndNavigate();
+      final result = await ref.read(dreamProvider.notifier).analyzeDream();
+      if (result != null && mounted) {
+        // En az 2.5 saniye mistik animasyon keyfi yaşatmak için kısa pay
+        await Future.delayed(const Duration(milliseconds: 1200));
+        _navigateToResult(result);
+      } else {
+        _navigateToResult();
       }
     } catch (e) {
-      debugPrint('[DreamLoadingScreen] Analiz hatası: $e');
+      debugPrint('[DreamLoadingScreen] Analiz çağrısı hatası: $e');
+      _navigateToResult();
     }
   }
 
-  void _ensureResultAndNavigate() {
+  void _navigateToResult([DreamInterpretation? specificResult]) {
     if (!mounted || _hasNavigated) return;
-
     _hasNavigated = true;
-    _hardDeadlineTimer?.cancel();
-    _tipTimer?.cancel();
+    _stepTimer?.cancel();
+    _safetyTimeoutTimer?.cancel();
 
-    // Eğer bir sebeple sonuç henüz hazır değilse, rüya verisinden güvenli analiz üret
     final state = ref.read(dreamProvider);
-    final result = _analyzedResult ??
+    final result = specificResult ??
         state.interpretation ??
         DreamInterpretation.mockFromRequest(
           dreamText: state.dreamText.isNotEmpty ? state.dreamText : 'Bilinmeyen Gizemli Rüya',
-          emotion: state.selectedEmotion,
         );
 
     Navigator.of(context).pushReplacement(
@@ -126,19 +120,20 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentStep = _progressiveSteps[_currentStepIndex];
+
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Mistik Dönen Astral Çember & Parıldayan Rün
+              // Mistik Dönen Astral Çember
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Dış Işıltı Halkası
                   Container(
                     width: 140,
                     height: 140,
@@ -148,114 +143,140 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                         BoxShadow(
                           color: AppColors.neonPurple.withOpacity(0.3),
                           blurRadius: 40,
-                          spreadRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: AppColors.ancientGold.withOpacity(0.15),
+                          blurRadius: 60,
+                          spreadRadius: 4,
                         ),
                       ],
                     ),
                   ),
 
-                  // Dönen Dış Halka
-                  Container(
+                  // Dönen Dış İnce Çember
+                  SizedBox(
                     width: 120,
                     height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.neonPurple.withOpacity(0.4),
-                        width: 2,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                      ),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.8,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
+                      backgroundColor: AppColors.ancientGold.withOpacity(0.2),
                     ),
-                  )
-                      .animate(onPlay: (controller) => controller.repeat())
-                      .rotate(duration: 4.seconds, curve: Curves.linear),
+                  ),
 
-                  // Ters Dönen İç Altın Halka
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.ancientGold.withOpacity(0.5),
-                        width: 1.5,
-                      ),
+                  // Merkez Mistik İkon
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: Text(
+                      currentStep['icon']!,
+                      key: ValueKey<int>(_currentStepIndex),
+                      style: const TextStyle(fontSize: 42),
                     ),
-                  )
-                      .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                      .rotate(duration: 3.seconds, curve: Curves.easeInOut),
-
-                  // Merkezdeki Mistisizm İkonu
-                  const Icon(
-                    Icons.auto_awesome,
-                    size: 40,
-                    color: AppColors.ancientGold,
-                  )
-                      .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                      .scale(
-                        begin: const Offset(0.85, 0.85),
-                        end: const Offset(1.15, 1.15),
-                        duration: 1500.ms,
-                        curve: Curves.easeInOut,
-                      ),
+                  ),
                 ],
               ),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 36),
 
-              // Ana Başlık
-              Text(
-                'KADİM BİLGELİK UYANIYOR',
-                style: GoogleFonts.cinzel(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2.0,
-                  color: AppColors.textPureWhite,
+              // Aşama Rozeti
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Container(
+                  key: ValueKey<int>(_currentStepIndex),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.neonPurple.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.ancientGold.withOpacity(0.35),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    currentStep['step']!,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2.0,
+                      color: AppColors.ancientGold,
+                    ),
+                  ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // Dinamik Değişen Mistik Cümle
+              // Dinamik Aşamalı Mistik Başlık
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.0, 0.2),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
+                duration: const Duration(milliseconds: 400),
                 child: Text(
-                  _mysticalPhrases[_currentTipIndex],
-                  key: ValueKey<int>(_currentTipIndex),
+                  currentStep['title']!,
+                  key: ValueKey<String>(currentStep['title']!),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    color: AppColors.textSilver,
-                    height: 1.5,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: AppColors.textPureWhite,
+                    shadows: [
+                      Shadow(
+                        color: AppColors.neonPurple.withOpacity(0.5),
+                        blurRadius: 16,
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 8),
 
-              // İnce Mistik Yükleme Barı
-              SizedBox(
-                width: 180,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: const LinearProgressIndicator(
-                    backgroundColor: AppColors.surfaceCard,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
-                    minHeight: 3,
+              // Alt Başlık / Fısıltı
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Text(
+                  currentStep['subtitle']!,
+                  key: ValueKey<String>(currentStep['subtitle']!),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: AppColors.textMuted,
+                    height: 1.4,
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 36),
+
+              // İlerleme Çubukları (3 Aşamalı Gösterge)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (idx) {
+                  final isActive = idx == _currentStepIndex;
+                  final isDone = idx < _currentStepIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: isActive ? 28 : 10,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? AppColors.ancientGold
+                          : isDone
+                              ? AppColors.neonPurple
+                              : AppColors.borderSubtle,
+                      borderRadius: BorderRadius.circular(2),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: AppColors.ancientGold.withOpacity(0.5),
+                                blurRadius: 8,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  );
+                }),
               ),
             ],
           ),

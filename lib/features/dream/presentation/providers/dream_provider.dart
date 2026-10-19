@@ -11,13 +11,15 @@ class DreamState {
   final String dreamText;
   final String selectedEmotion;
   final bool isLoading;
+  final bool isUnlocking;
   final DreamInterpretation? interpretation;
   final String? errorMessage;
 
   const DreamState({
     this.dreamText = '',
-    this.selectedEmotion = 'Huzurlu',
+    this.selectedEmotion = 'Mistik',
     this.isLoading = false,
+    this.isUnlocking = false,
     this.interpretation,
     this.errorMessage,
   });
@@ -26,6 +28,7 @@ class DreamState {
     String? dreamText,
     String? selectedEmotion,
     bool? isLoading,
+    bool? isUnlocking,
     DreamInterpretation? interpretation,
     String? errorMessage,
   }) {
@@ -33,6 +36,7 @@ class DreamState {
       dreamText: dreamText ?? this.dreamText,
       selectedEmotion: selectedEmotion ?? this.selectedEmotion,
       isLoading: isLoading ?? this.isLoading,
+      isUnlocking: isUnlocking ?? this.isUnlocking,
       interpretation: interpretation ?? this.interpretation,
       errorMessage: errorMessage,
     );
@@ -82,6 +86,40 @@ class DreamNotifier extends StateNotifier<DreamState> {
         errorMessage: 'Kadim alemlerle bağlantı kurulamadı: $e',
       );
       return null;
+    }
+  }
+
+  /// Kilitli geleneğin tam tabirini açar ve state'teki kartı günceller
+  Future<bool> unlockTradition(String traditionId) async {
+    if (state.interpretation == null) return false;
+
+    state = state.copyWith(isUnlocking: true);
+
+    try {
+      final unlockedItem = await _repository.unlockTradition(
+        state.dreamText.isNotEmpty ? state.dreamText : state.interpretation!.dreamText,
+        traditionId,
+      );
+
+      final updatedLocked = state.interpretation!.lockedTraditions.map((trad) {
+        if (trad.traditionId == traditionId) {
+          return unlockedItem;
+        }
+        return trad;
+      }).toList();
+
+      final updatedInterpretation = state.interpretation!.copyWith(
+        lockedTraditions: updatedLocked,
+      );
+
+      state = state.copyWith(
+        isUnlocking: false,
+        interpretation: updatedInterpretation,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isUnlocking: false);
+      return false;
     }
   }
 }

@@ -1,6 +1,7 @@
 class ApiConstants {
   static const String baseUrl = "https://oneiro-app.onrender.com";
   static const String interpretEndpoint = "$baseUrl/interpret";
+  static const String unlockTraditionEndpoint = "$baseUrl/interpret/unlock-tradition";
   static const String healthEndpoint = "$baseUrl/health";
 
   /// Canlı Render.com backend'ine bağlanmak için mock modu kapalı (false)

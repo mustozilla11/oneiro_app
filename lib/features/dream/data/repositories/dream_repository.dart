@@ -7,6 +7,7 @@ import '../../domain/models/dream_request.dart';
 
 abstract class IDreamRepository {
   Future<DreamInterpretation> interpretDream(DreamRequest request);
+  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId);
 }
 
 class DreamRepository implements IDreamRepository {
@@ -17,9 +18,8 @@ class DreamRepository implements IDreamRepository {
 
   @override
   Future<DreamInterpretation> interpretDream(DreamRequest request) async {
-    // 1. Sunucu es geçme (Mock / Test) modu kontrolü
     if (ApiConstants.useMockBackend) {
-      debugPrint('[DreamRepository] Mock modu devrede: Sunucu es geçiliyor, zengin mistik lorem tabir üretiliyor.');
+      debugPrint('[DreamRepository] Mock modu devrede: Zengin mistik lorem tabir üretiliyor.');
       await Future.delayed(const Duration(milliseconds: 400));
       return DreamInterpretation.mockFromRequest(
         dreamText: request.dreamText,
@@ -28,7 +28,7 @@ class DreamRepository implements IDreamRepository {
     }
 
     try {
-      debugPrint('[DreamRepository] RAG + DeepSeek backend servisine istek gönderiliyor...');
+      debugPrint('[DreamRepository] Teaser tabanlı RAG backend servisine istek gönderiliyor...');
       final response = await _dioClient.dio.post(
         ApiConstants.interpretEndpoint,
         data: request.toJson(),
@@ -58,6 +58,71 @@ class DreamRepository implements IDreamRepository {
       return DreamInterpretation.mockFromRequest(
         dreamText: request.dreamText,
         emotion: request.emotion,
+      );
+    }
+  }
+
+  @override
+  Future<TraditionAnalysisItem> unlockTradition(String dreamText, String traditionId) async {
+    if (ApiConstants.useMockBackend) {
+      await Future.delayed(const Duration(milliseconds: 400));
+      return _mockUnlockedTradition(traditionId);
+    }
+
+    try {
+      debugPrint('[DreamRepository] "$traditionId" geleneğinin kilidi açılıyor...');
+      final response = await _dioClient.dio.post(
+        ApiConstants.unlockTraditionEndpoint,
+        data: {
+          'dream_text': dreamText,
+          'tradition_id': traditionId,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        return TraditionAnalysisItem(
+          traditionId: data['tradition_id'] as String? ?? traditionId,
+          title: data['title'] as String? ?? 'Kadim Bilgelik',
+          scholar: data['scholar'] as String? ?? 'Kadim Ekol',
+          interpretation: data['interpretation'] as String? ?? 'Analiz tamamlandı.',
+          isUnlocked: true,
+        );
+      } else {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error: 'Kilit açma yanıtı geçersiz: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      debugPrint('[DreamRepository] Kilit açma API hatası: $e. Fallback kullanılıyor.');
+      return _mockUnlockedTradition(traditionId);
+    }
+  }
+
+  TraditionAnalysisItem _mockUnlockedTradition(String traditionId) {
+    if (traditionId == 'antik_akdeniz') {
+      return const TraditionAnalysisItem(
+        traditionId: 'antik_akdeniz',
+        title: 'Antik Akdeniz Bilgeliği',
+        scholar: 'Artemidorus (Oneirocritica)',
+        interpretation:
+            'Artemidorus ve Antik Akdeniz geleneklerine göre, rüyanızdaki bu işaretler dünyevi bir fırsata ve '
+            'önünüzdeki günlerde alacağınız önemli bir kadersel habere delalet eder. Antik bilgelik, '
+            'beklenmedik bir rehberle tanışacağınızı ve basiretinizin artacağını fısıldar.',
+        isUnlocked: true,
+      );
+    } else {
+      return const TraditionAnalysisItem(
+        traditionId: 'psikoloji',
+        title: 'Derinlik Psikolojisi',
+        scholar: 'Carl G. Jung & Sigmund Freud',
+        interpretation:
+            'Carl Gustav Jung analitik psikolojisi ışığında bu sembol, bilinçdışınızdaki "Gölge" (Shadow) arketipiyle '
+            'yüzleşmenizi temsil eder. Bastırılmış duygularınız rüya tiyatrosunda beden bularak, sezgisel benliğinizin '
+            'kontrolü ele almasını ve içsel bir bütünlüğe (Individuation) ulaşmasını talep ediyor.',
+        isUnlocked: true,
       );
     }
   }

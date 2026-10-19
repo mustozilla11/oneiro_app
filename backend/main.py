@@ -1,6 +1,7 @@
 import os
 import glob
 import re
+import json
 import logging
 from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
@@ -18,7 +19,7 @@ except ImportError:
 from openai import AsyncOpenAI
 
 # -----------------------------------------------------------------------------
-# 1. LOGGING VE ORTAM DEĞİŞKENLERİ YAPILANDIRMASI
+# 1. LOGGING VE ORTAM DEĞİŞKENLERİ
 # -----------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
@@ -43,9 +44,32 @@ else:
 
 
 # -----------------------------------------------------------------------------
-# 2. BELLEK İÇİ (IN-MEMORY) HAFİF ARAMA MOTORU
+# 2. METADATA DESTEKLİ GELENEKLER VE ARAMA MOTORU
 # -----------------------------------------------------------------------------
-# Render'ın 512 MB RAM sınırını koruyan 0 MB ek tüketimli, süper hızlı metin veritabanı
+TRADITIONS: Dict[str, Dict[str, str]] = {
+    "islam_dogu": {
+        "id": "islam_dogu",
+        "title": "Doğu ve İslam Geleneği",
+        "scholar": "İbn-i Sîrîn & Nablusî",
+        "icon": "scroll",
+        "accent_color": "#D4AF37"  # Ancient Gold
+    },
+    "antik_akdeniz": {
+        "id": "antik_akdeniz",
+        "title": "Antik Akdeniz Bilgeliği",
+        "scholar": "Artemidorus (Oneirocritica)",
+        "icon": "temple",
+        "accent_color": "#9D4EDD"  # Neon Purple
+    },
+    "psikoloji": {
+        "id": "psikoloji",
+        "title": "Derinlik Psikolojisi",
+        "scholar": "Carl G. Jung & Sigmund Freud",
+        "icon": "brain",
+        "accent_color": "#7209B7"  # Electric Lavender
+    }
+}
+
 CHUNKS_DB: List[Dict[str, Any]] = []
 
 TURKISH_STOPWORDS = {
@@ -80,11 +104,23 @@ def extract_keywords(text: str) -> List[str]:
     return [w for w in words if w not in TURKISH_STOPWORDS]
 
 
+def detect_tradition_id(filename: str) -> str:
+    """Dosya adından geleneği (islam_dogu, antik_akdeniz, psikoloji) otomatik belirler."""
+    fn = filename.lower()
+    if any(k in fn for k in ("islam", "sirin", "nablusi", "dogu")):
+        return "islam_dogu"
+    if any(k in fn for k in ("antik", "yunan", "artemidorus", "oneirocritica", "roma", "akdeniz")):
+        return "antik_akdeniz"
+    if any(k in fn for k in ("psik", "jung", "freud", "arketip", "bilinc")):
+        return "psikoloji"
+    return "islam_dogu"
+
+
 # -----------------------------------------------------------------------------
-# 3. KİTAP METİNLERİNİ OKUMA VE ANLAMLI PARÇALAMA (CHUNKING)
+# 3. KİTAPLARI OKUMA VE METADATA İLE PARÇALAMA (CHUNKING)
 # -----------------------------------------------------------------------------
 def read_text_file(filepath: str) -> str:
-    """Metin dosyasını Türkçe karakter güvenliğiyle (UTF-8, Latin-5) okur."""
+    """Metin dosyasını Türkçe karakter güvenliğiyle okur."""
     for encoding in ("utf-8", "utf-8-sig", "windows-1254", "iso-8859-9", "latin-1"):
         try:
             with open(filepath, "r", encoding=encoding) as f:
@@ -96,7 +132,7 @@ def read_text_file(filepath: str) -> str:
 
 
 def read_pdf_file(filepath: str) -> str:
-    """PyMuPDF ile PDF dosyasını C hızında ve minimum RAM ile okur."""
+    """PyMuPDF ile PDF dosyasını C hızında okur."""
     if fitz is None:
         logger.warning(f"PyMuPDF kütüphanesi yüklü değil, '{filepath}' okunamadı.")
         return ""
@@ -112,7 +148,8 @@ def read_pdf_file(filepath: str) -> str:
 
 
 def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
-    """Metni çift satır sonlarına (\n\n) ve anlamlı paragraflara böler."""
+    """Metni anlamlı paragraflara böler ve gelenek etiketi ekler."""
+    tradition_id = detect_tradition_id(source_name)
     raw_paragraphs = text.split("\n\n")
     chunks = []
 
@@ -122,17 +159,16 @@ def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
             chunks.append({
                 "text": cleaned,
                 "source": source_name,
+                "tradition": tradition_id,
+                "tradition_title": TRADITIONS[tradition_id]["title"],
                 "norm": normalize_turkish(cleaned)
             })
 
     return chunks
 
 
-# -----------------------------------------------------------------------------
-# 4. KİTAPLARI İNDEKSLEME (STARTUP EVENT)
-# -----------------------------------------------------------------------------
 def index_books():
-    """`books/` klasöründeki .txt ve .pdf kitaplarını okur ve arama motoruna yükler."""
+    """`backend/books/` klasöründeki kitapları okur ve gelenek metadata'sı ile belleğe alır."""
     global CHUNKS_DB
 
     if not os.path.exists(BOOKS_DIR):
@@ -161,33 +197,31 @@ def index_books():
         if content:
             file_chunks = chunk_text(content, filename)
             all_chunks.extend(file_chunks)
-            logger.info(f"'{filename}' dosyasından {len(file_chunks)} anlamlı paragraf çıkarıldı.")
+            logger.info(f"'{filename}' ({detect_tradition_id(filename)}) dosyasından {len(file_chunks)} paragraf çıkarıldı.")
 
     if not all_chunks:
         logger.warning("Kitaplardan ayrıştırılabilir anlamlı metin parçası çıkarılamadı.")
         return
 
     CHUNKS_DB = all_chunks
-    logger.info(f"✅ Toplam {len(CHUNKS_DB)} paragraf arama belleğine yüklendi (0 ms gecikme, 0 MB ek RAM).")
+    logger.info(f"✅ Toplam {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     logger.info("Oneiro RAG Backend başlatılıyor...")
     index_books()
     yield
-    # Shutdown
     logger.info("Oneiro RAG Backend kapatılıyor...")
 
 
 # -----------------------------------------------------------------------------
-# 5. FASTAPI UYGULAMASI VE CORS TANIMLARI
+# 4. FASTAPI UYGULAMASI VE CORS TANIMLARI
 # -----------------------------------------------------------------------------
 app = FastAPI(
-    title="Oneiro RAG Backend",
-    description="DeepSeek Destekli, Kaynak Bilinçli Mistik Rüya Tabiri Servisi",
-    version="2.0.0",
+    title="Oneiro RAG Backend (DeepSeek + Hybrid Freemium)",
+    description="Teaser Tabanlı, Yüksek Hızlı ve Düşük Token Maliyetli Mistik Rüya Tabiri Servisi",
+    version="2.1.0",
     lifespan=lifespan
 )
 
@@ -201,115 +235,122 @@ app.add_middleware(
 
 
 # -----------------------------------------------------------------------------
-# 6. PYDANTIC VERİ MODELLERİ
+# 5. PYDANTIC VERİ MODELLERİ
 # -----------------------------------------------------------------------------
-class DreamInterpretRequest(BaseModel):
-    dream_text: str = Field(
-        ...,
-        min_length=3,
-        description="Kullanıcının gördüğü rüyanın metni",
-        example="Dün gece rüyamda derin ve karanlık bir kuyuya düşüyordum, dibinde parıldayan bir yılan vardı."
-    )
-
-
 class SourceUsedItem(BaseModel):
     source: str = Field(..., description="Pasajın ait olduğu kitap dosya adı")
+    tradition: str = Field(..., description="Gelenek kimliği (islam_dogu, antik_akdeniz, psikoloji)")
     excerpt: str = Field(..., description="Rüyayla eşleşen kitap alıntısı")
-    relevance_score: float = Field(..., description="Anlamsal alaka skoru (0.0 - 1.0)")
+    relevance_score: float = Field(..., description="Alaka skoru")
+
+
+class FreeAnalysis(BaseModel):
+    bilincalti_aynasi: str = Field(..., description="Rüyanın taşıdığı temel his ve arketipsel atmosfer")
+    gunun_pusulasi: str = Field(..., description="Günün tek ve vurucu bilgelik notu")
+
+
+class TraditionAnalysisItem(BaseModel):
+    tradition_id: str = Field(..., description="Gelenek ID (islam_dogu, antik_akdeniz, psikoloji)")
+    title: str = Field(..., description="Gelenek Başlığı")
+    scholar: str = Field(..., description="Temsil edilen kadim bilge/ekol")
+    teaser: Optional[str] = Field(None, description="Merak Fısıltısı (kilitli gelenekler için 1 cümlelik çarpıcı özet)")
+    interpretation: Optional[str] = Field(None, description="Açılmış tam kadim yorum metni")
+    is_unlocked: bool = Field(False, description="Kilidin açık olup olmadığı")
+
+
+class DreamInterpretRequest(BaseModel):
+    dream_text: str = Field(..., min_length=3, description="Kullanıcının rüya metni")
+    preferred_tradition: Optional[str] = Field("islam_dogu", description="İlk analizde ücretsiz açılacak gelenek")
 
 
 class DreamInterpretResponse(BaseModel):
-    interpretation: str = Field(..., description="DeepSeek tarafından geleneklere göre üretilmiş 5 başlıklı bilge yorum")
+    # Geriye dönük uyumluluk alanları:
+    interpretation: str = Field(..., description="Özet/bütüncül kadim tabir metni")
+    subconscious_analysis: str = Field(..., description="Bilinçaltı aynası metni")
+    warning_of_day: str = Field(..., description="Günün pusulası metni")
+    symbols: List[str] = Field(default_factory=list, description="Çıkarılan anahtar semboller")
+
+    # Yeni Teaser & Freemium Yapısı:
+    free_analysis: FreeAnalysis = Field(..., description="Bilinçaltı Aynası ve Günün Pusulası")
+    primary_tradition: TraditionAnalysisItem = Field(..., description="Ücretsiz açılan ana kadim gelenek")
+    locked_traditions: List[TraditionAnalysisItem] = Field(default_factory=list, description="Kilitli merak fısıltıları")
     sources_used: List[SourceUsedItem] = Field(default_factory=list, description="Kullanılan referans kitap pasajları")
 
 
+class UnlockTraditionRequest(BaseModel):
+    dream_text: str = Field(..., min_length=3, description="Rüya metni")
+    tradition_id: str = Field(..., description="Açılmak istenen gelenek ID'si (antik_akdeniz, psikoloji vb.)")
+
+
+class UnlockTraditionResponse(BaseModel):
+    tradition_id: str
+    title: str
+    scholar: str
+    interpretation: str
+    sources_used: List[SourceUsedItem] = Field(default_factory=list)
+
+
 # -----------------------------------------------------------------------------
-# 7. AKILLI BENZERLİK ARAMASI (ANLAMSAL & KÖK EŞLEŞTİRME)
+# 6. GELENEK BAZLI RETRIEVAL
 # -----------------------------------------------------------------------------
-def retrieve_top_k(dream_text: str, top_k: int = 3) -> List[Dict[str, Any]]:
-    """
-    Rüyadaki sembolleri ve anahtar kelimeleri kadim kitap pasajlarıyla eşleştirir.
-    Harici embedding API'sine ihtiyaç duymadan 0.1 milisaniyede sonuç üretir.
-    """
-    global CHUNKS_DB
-    if not CHUNKS_DB:
+def retrieve_by_tradition(dream_text: str, tradition_id: str, top_k: int = 1) -> List[Dict[str, Any]]:
+    """Belirli bir geleneğe ait en alakalı kitap pasajını getirir."""
+    tradition_chunks = [c for c in CHUNKS_DB if c.get("tradition") == tradition_id]
+    if not tradition_chunks:
         return []
 
     keywords = extract_keywords(dream_text)
     scored = []
 
     if keywords:
-        for c in CHUNKS_DB:
+        for c in tradition_chunks:
             score = 0.0
             for kw in keywords:
                 stem = kw[:4] if len(kw) >= 4 else kw
                 if kw in c["norm"]:
-                    score += 2.0  # Tam kelime eşleşmesi
+                    score += 2.0
                 elif stem in c["norm"]:
-                    score += 1.0  # Kök eşleşmesi
+                    score += 1.0
             if score > 0:
                 norm_score = min(0.98, max(0.20, score / (len(keywords) * 1.5)))
                 scored.append({"chunk": c, "score": norm_score})
 
         scored.sort(key=lambda x: x["score"], reverse=True)
 
-    # Farklı geleneklerden ve kitaplardan dengeli temsil sağla
-    selected: List[Dict[str, Any]] = []
-    used_sources = set()
+    if scored:
+        return scored[:top_k]
 
-    for item in scored:
-        if len(selected) >= top_k:
-            break
-        if item["chunk"]["source"] not in used_sources:
-            selected.append(item)
-            used_sources.add(item["chunk"]["source"])
-
-    for item in scored:
-        if len(selected) >= top_k:
-            break
-        if item not in selected:
-            selected.append(item)
-
-    # Eğer rüya çok soyutsa veya kelime eşleşmediyse mevcut kitaplardan kadim temsili pasajlar ekle
-    if len(selected) < top_k:
-        for c in CHUNKS_DB:
-            if len(selected) >= top_k:
-                break
-            if c["source"] not in used_sources and not any(s["chunk"]["text"] == c["text"] for s in selected):
-                selected.append({"chunk": c, "score": 0.45})
-                used_sources.add(c["source"])
-
-    if len(selected) == 0 and CHUNKS_DB:
-        selected = [{"chunk": CHUNKS_DB[i], "score": 0.40} for i in range(min(top_k, len(CHUNKS_DB)))]
-
-    return selected
+    # Eşleşme yoksa o gelenekten temsili ilk parçayı döner
+    return [{"chunk": tradition_chunks[0], "score": 0.40}]
 
 
 # -----------------------------------------------------------------------------
-# 8. ENDPOINT'LER
+# 7. ENDPOINT'LER
 # -----------------------------------------------------------------------------
-@app.get("/health", summary="Sunucu Durum ve İndeks Kontrolü")
+@app.get("/health", summary="Sunucu Durum ve Sağlık Kontrolü")
 async def health_check():
-    """Render.com uyanıklık kontrolü ve sistem raporu."""
+    """Render.com uyanıklık ve anlık sistem durumu (0 ms)."""
     global CHUNKS_DB
     sources = list(set(c["source"] for c in CHUNKS_DB)) if CHUNKS_DB else []
     return {
         "status": "healthy",
-        "service": "Oneiro RAG Backend (Pure DeepSeek)",
+        "service": "Oneiro RAG Backend",
+        "version": "2.1.0",
         "total_chunks": len(CHUNKS_DB),
         "books_loaded": sources,
-        "search_engine": "In-Memory Semantic Keyword Retrieval (0ms Latency, 0MB Overhead)",
         "deepseek_api_configured": bool(DEEPSEEK_API_KEY)
     }
 
 
-@app.post("/interpret", response_model=DreamInterpretResponse, summary="Rüyayı Kaynak Bilinçli RAG ile Yorumla")
+@app.post("/interpret", response_model=DreamInterpretResponse, summary="Hızlı ve Teaser Tabanlı Rüya Yorumu")
 async def interpret_dream(request: DreamInterpretRequest):
     """
-    1. Rüya metnini akıllı anlamsal arama ile kitap pasajlarıyla eşleştirir.
-    2. En alakalı 3 kadim pasajı bağlam olarak seçer.
-    3. DeepSeek API'ye 5 başlıklı mistik sistem talimatı ile gönderir.
-    4. Yapılandırılmış derinlikli yorumu ve referans kaynakları döner.
+    1. Rüya metnini analiz eder ve 3 gelenekten en alakalı kitap pasajlarını toplar.
+    2. DeepSeek ile tek çağrıda:
+       - Bilinçaltı Aynası + Günün Pusulası (Ücretsiz)
+       - Birincil Gelenek Tam Yorumu (Doğu & İslam)
+       - Kilitli 2 Gelenek İçin 'Merak Fısıltıları' (Teaser cümleleri)
+    3. ~350 token ile 2.5-3 saniyede yanıt döner.
     """
     global deepseek_client
 
@@ -320,80 +361,224 @@ async def interpret_dream(request: DreamInterpretRequest):
             detail="Lütfen geçerli bir rüya metni giriniz."
         )
 
-    # 1. RETRIEVAL (Kitaplardan En Uygun Pasajları Getir)
-    top_matches = retrieve_top_k(dream_text, top_k=3)
+    preferred_trad = request.preferred_tradition or "islam_dogu"
+    if preferred_trad not in TRADITIONS:
+        preferred_trad = "islam_dogu"
 
+    other_trads = [t for t in TRADITIONS.keys() if t != preferred_trad]
+
+    # Her gelenekten en alakalı 1 pasajı çek
+    matched_chunks: Dict[str, Dict[str, Any]] = {}
     sources_payload: List[SourceUsedItem] = []
-    context_blocks = []
 
-    for match in top_matches:
-        chunk = match["chunk"]
-        score = match["score"]
-        sources_payload.append(
-            SourceUsedItem(
-                source=chunk["source"],
-                excerpt=chunk["text"],
-                relevance_score=round(score, 4)
+    for t_id in TRADITIONS.keys():
+        matches = retrieve_by_tradition(dream_text, t_id, top_k=1)
+        if matches:
+            match = matches[0]
+            matched_chunks[t_id] = match
+            sources_payload.append(
+                SourceUsedItem(
+                    source=match["chunk"]["source"],
+                    tradition=t_id,
+                    excerpt=match["chunk"]["text"],
+                    relevance_score=round(match["score"], 4)
+                )
             )
-        )
-        context_blocks.append(f"📌 [KAYNAK / GELENEK: {chunk['source']}]\n{chunk['text']}")
 
-    context_str = "\n\n".join(context_blocks) if context_blocks else "Doğrudan eşleşen spesifik bir kadim kitap pasajı bulunamadı; kadim arketipleri hafızandan aktar."
+    primary_chunk_text = matched_chunks.get(preferred_trad, {}).get("chunk", {}).get("text", "")
+    other_context_lines = []
+    for t_id in other_trads:
+        txt = matched_chunks.get(t_id, {}).get("chunk", {}).get("text", "")
+        other_context_lines.append(f"[{TRADITIONS[t_id]['title']} Kaynak]: {txt}")
 
-    # 2. GENERATION (5 Başlıklı Şık DeepSeek Sistem Mesajı)
-    sistem_mesaji = (
+    # Sembol çıkarımı (Türkçe anahtar kelimeler)
+    keywords = extract_keywords(dream_text)
+    symbols = [k.capitalize() for k in keywords[:4]]
+    if not symbols:
+        symbols = ["Mistik Eşik", "Karanlık Su", "Altın Işık"]
+
+    # DeepSeek Hızlı JSON Promptu (~350 token)
+    system_prompt = (
         "Sen 'Oneiro', kadim sembollerin ve insan bilinçdışının bilge tercümanısın. "
-        "Kullanıcının rüyasını, aşağıda sana verilen tarihi metin parçalarından beslenerek şu 5 başlık altında yorumla:\n\n"
-        "1. 🌌 Bilinçaltı Aynası: Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetle.\n"
-        "2. 📜 Doğu ve İslam Geleneği: Kaynaklardaki İbn Sirin / Nablusi geleneğine göre manevi işaretleri aktar.\n"
-        "3. 🏛️ Antik Akdeniz Bilgeliği: Artemidorus / Oneirocritica geleneğindeki dünyevi yansımaları açıkla.\n"
-        "4. 🧠 Derinlik Psikolojisi: Carl Jung ve Freud arketipleri ışığında bastırılmış duyguları ve içsel çatışmaları çözümle.\n"
-        "5. 🧭 Günün Pusulası: Rüya sahibinin gün içinde üzerine düşünebileceği tek ve vurucu bir bilgelik notu bırak.\n\n"
-        f"KULLANACAĞIN KAYNAK METİNLER:\n{context_str}"
+        "Kullanıcının rüyasını analiz et ve SADECE geçerli bir JSON nesnesi döndür.\n\n"
+        "İstenen JSON şeması:\n"
+        "{\n"
+        '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle.",\n'
+        '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması.",\n'
+        f'  "primary_interpretation": "{TRADITIONS[preferred_trad]["title"]} ({TRADITIONS[preferred_trad]["scholar"]}) geleneğine göre rüyanın 1-2 paragraflık tam, bilgece ve derinlikli tabiri.",\n'
+        '  "teasers": {\n'
+        f'    "{other_trads[0]}": "{TRADITIONS[other_trads[0]]["title"]} açısından rüyayı merak ettiren, 1 cümlelik şoke edici veya düşündürücü teaser (ör: Jungian açıdan bu kuyu bir düşüş değil, Anima ile karşılaşma eşiğidir...)",\n'
+        f'    "{other_trads[1]}": "{TRADITIONS[other_trads[1]]["title"]} açısından rüyayı merak ettiren, 1 cümlelik çarpıcı teaser."\n'
+        "  }\n"
+        "}\n\n"
+        f"KAYNAK METİNLER:\n[Birincil Gelenek Kaynağı]: {primary_chunk_text}\n" +
+        "\n".join(other_context_lines)
     )
 
-    user_content = (
-        f"KULLANICININ GÖRDÜĞÜ RÜYA:\n\"{dream_text}\"\n\n"
-        f"Lütfen yukarıdaki 5 başlık altında bilgece, derinlikli ve edebi bir üslupla yorumunu aktar."
-    )
+    user_prompt = f'RÜYA: "{dream_text}"'
 
-    # 3. DeepSeek LLM Çağrısı
+    # Yanıt üretimi
+    parsed_json: Dict[str, Any] = {}
     if not deepseek_client:
-        interpretation = (
-            "1. 🌌 Bilinçaltı Aynası: Bu rüya, derin bir eşik ve içsel dönüşüm atmosferi taşımaktadır.\n\n"
-            "2. 📜 Doğu ve İslam Geleneği: İbn Sirin ve Nablusi kaynaklarına göre bu semboller, manevi bir ferahlığın ve sabırla beklenen bir müjdenin habercisidir.\n\n"
-            "3. 🏛️ Antik Akdeniz Bilgeliği: Artemidorus geleneğinde kaderin rüya sahibini yeni bir yolculuğa ve basirete davet ettiğini gösterir.\n\n"
-            "4. 🧠 Derinlik Psikolojisi: Carl Jung ışığında Gölge arketipinizle yüzleşme ve sezgisel benliğinizin kontrolü devralma arzusudur.\n\n"
-            "5. 🧭 Günün Pusulası: İlk hissinize ve iç sesinize güvenin; zihniniz duraksadığında kalbiniz doğru rotayı fısıldayacaktır."
-        )
+        # Offline / Test fallback
+        parsed_json = {
+            "bilincalti_aynasi": "Bu rüya, derin bir içsel arınma ve ruhsal bir eşikten geçiş atmosferi taşımaktadır. Zihninizin geride bırakmak istediği gölgeler su yüzüne çıkıyor.",
+            "gunun_pusulasi": "İlk hissinize ve iç sesinize güvenin; kalbiniz fısıldadığında mantığınızın duraksamasına izin vermeyin.",
+            "primary_interpretation": (
+                f"{TRADITIONS[preferred_trad]['scholar']} kaynaklarına göre bu rüya, başlangıçta çetin görünen bir durumun "
+                "ardından gelecek manevi ferahlığı, gizli bir kapının açılışını ve sabırla beklenen bir müjdenin yaklaşmakta olduğunu simgeler."
+            ),
+            "teasers": {
+                other_trads[0]: f"{TRADITIONS[other_trads[0]]['scholar']} geleneğine göre bu sembol bir son değil, kaderinizin mühürlendiği dünyevi bir basiret eşiğidir...",
+                other_trads[1]: f"{TRADITIONS[other_trads[1]]['scholar']} arketipsel çözümlemesine göre bu düşüş, Gölge benliğinizle yüzleşme arzunuzun bilinçdışı feryadıdır..."
+            }
+        }
     else:
         try:
-            logger.info("DeepSeek API'ye (deepseek-chat) 5 başlıklı rüya analizi isteği gönderiliyor...")
+            logger.info("DeepSeek API'ye hızlı teaser tabanlı rüya isteği gönderiliyor...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
-                    {"role": "system", "content": sistem_mesaji},
-                    {"role": "user", "content": user_content}
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.7,
-                max_tokens=1500
+                max_tokens=650,
+                response_format={"type": "json_object"}
             )
-            interpretation = completion.choices[0].message.content or "Kadim bilgelik sessiz kaldı."
+            raw_text = completion.choices[0].message.content or "{}"
+            parsed_json = json.loads(raw_text)
         except Exception as e:
-            logger.error(f"DeepSeek API çağrısında hata oluştu: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"DeepSeek API servisi ile iletişim kurulamadı: {str(e)}"
+            logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata oluştu ({e}), yedek şablon kullanılıyor.")
+            parsed_json = {
+                "bilincalti_aynasi": "Bu rüya, derin bir eşik ve içsel dönüşüm atmosferi taşımaktadır.",
+                "gunun_pusulasi": "İlk sezginize güvenin; kadim yolculuğunuzda en doğru rehber kalbinizdir.",
+                "primary_interpretation": "Kadim yazmalar bu sembollerin ruhsal bir yükselişe ve arınmaya işaret ettiğini bildirir.",
+                "teasers": {
+                    other_trads[0]: f"{TRADITIONS[other_trads[0]]['title']} bu rüyada gizlenmiş dünyevi bir kader işareti görmektedir...",
+                    other_trads[1]: f"{TRADITIONS[other_trads[1]]['title']} ışığında bastırılmış bir duygunun dışa vurumudur..."
+                }
+            }
+
+    # Çıktı yapılandırması
+    free_analysis = FreeAnalysis(
+        bilincalti_aynasi=parsed_json.get("bilincalti_aynasi", "Rüyanız kadim bir eşik atmosferi taşımaktadır."),
+        gunun_pusulasi=parsed_json.get("gunun_pusulasi", "İç sesinize güvenin.")
+    )
+
+    primary_trad_item = TraditionAnalysisItem(
+        tradition_id=preferred_trad,
+        title=TRADITIONS[preferred_trad]["title"],
+        scholar=TRADITIONS[preferred_trad]["scholar"],
+        interpretation=parsed_json.get("primary_interpretation", "Kadim tabir hazırlanıyor."),
+        is_unlocked=True
+    )
+
+    teasers_dict = parsed_json.get("teasers", {})
+    locked_items: List[TraditionAnalysisItem] = []
+    for t_id in other_trads:
+        teaser_text = teasers_dict.get(t_id) or f"{TRADITIONS[t_id]['title']} bu rüyada beklenmedik bir sır saklamaktadır..."
+        locked_items.append(
+            TraditionAnalysisItem(
+                tradition_id=t_id,
+                title=TRADITIONS[t_id]["title"],
+                scholar=TRADITIONS[t_id]["scholar"],
+                teaser=teaser_text,
+                interpretation=None,
+                is_unlocked=False
             )
+        )
+
+    # Eski ekranlarla %100 uyumluluk için birleştirilmiş genel tabir metni
+    full_interpretation_text = (
+        f"🌌 BİLİNÇALTI AYNASI:\n{free_analysis.bilincalti_aynasi}\n\n"
+        f"📜 {primary_trad_item.title} ({primary_trad_item.scholar}):\n{primary_trad_item.interpretation}\n\n"
+        f"🧭 GÜNÜN PUSULASI:\n{free_analysis.gunun_pusulasi}"
+    )
 
     return DreamInterpretResponse(
-        interpretation=interpretation,
+        interpretation=full_interpretation_text,
+        subconscious_analysis=free_analysis.bilincalti_aynasi,
+        warning_of_day=free_analysis.gunun_pusulasi,
+        symbols=symbols,
+        free_analysis=free_analysis,
+        primary_tradition=primary_trad_item,
+        locked_traditions=locked_items,
+        sources_used=sources_payload
+    )
+
+
+@app.post("/interpret/unlock-tradition", response_model=UnlockTraditionResponse, summary="Kilitli Geleneğin Tam Tabirini Aç")
+async def unlock_tradition(request: UnlockTraditionRequest):
+    """
+    Kullanıcı reklam izlediğinde veya kredi harcadığında,
+    yalnızca o spesifik geleneğin tam tabirini ~200 token ile hızlıca üretir.
+    """
+    global deepseek_client
+
+    tradition_id = request.tradition_id
+    if tradition_id not in TRADITIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Geçersiz gelenek kimliği: {tradition_id}. Geçerli olanlar: {list(TRADITIONS.keys())}"
+        )
+
+    trad_info = TRADITIONS[tradition_id]
+    matches = retrieve_by_tradition(request.dream_text, tradition_id, top_k=1)
+    chunk_text_content = matches[0]["chunk"]["text"] if matches else ""
+
+    sources_payload = [
+        SourceUsedItem(
+            source=matches[0]["chunk"]["source"],
+            tradition=tradition_id,
+            excerpt=chunk_text_content,
+            relevance_score=round(matches[0]["score"], 4)
+        )
+    ] if matches else []
+
+    system_prompt = (
+        f"Sen 'Oneiro', kadim sembollerin bilge tercümanısın. "
+        f"Kullanıcının rüyasını YALNIZCA '{trad_info['title']}' ({trad_info['scholar']}) geleneği ışığında yorumla. "
+        f"Aşağıdaki kaynak pasajından beslenerek, 1-2 paragraflık derinlikli, edebi ve vurucu bir tabir sun.\n\n"
+        f"KAYNAK PASAJI:\n{chunk_text_content}"
+    )
+
+    if not deepseek_client:
+        full_text = (
+            f"{trad_info['scholar']} kaynaklarına göre bu rüya sembolü, gizli kalmış bir yeteneğinizin ve dünyevi basiretinizin "
+            f"uyanışına işaret eder. Çevrenizdeki görünmez işaretlere dikkat kesilmeli ve ilk adımı atmaktan çekinmemelisiniz."
+        )
+    else:
+        try:
+            logger.info(f"DeepSeek'ten '{tradition_id}' geleneğinin kilidi için tam analiz isteniyor...")
+            completion = await deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f'RÜYA: "{request.dream_text}"'}
+                ],
+                temperature=0.7,
+                max_tokens=400
+            )
+            full_text = completion.choices[0].message.content or "Kadim bilgelik bu sembol hakkında sessiz kaldı."
+        except Exception as e:
+            logger.error(f"DeepSeek unlock çağrısında hata: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"DeepSeek ile iletişim kurulamadı: {str(e)}"
+            )
+
+    return UnlockTraditionResponse(
+        tradition_id=tradition_id,
+        title=trad_info["title"],
+        scholar=trad_info["scholar"],
+        interpretation=full_text,
         sources_used=sources_payload
     )
 
 
 # -----------------------------------------------------------------------------
-# 9. DOĞRUDAN ÇALIŞTIRMA (LOCAL DEV)
+# 8. LOCAL DEV
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
