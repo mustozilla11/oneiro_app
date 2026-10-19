@@ -18,23 +18,22 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
   late final TextEditingController _textController;
   final FocusNode _focusNode = FocusNode();
 
-  final List<Map<String, String>> _emotions = const [
-    {'label': 'Huzurlu', 'emoji': '🕊️'},
-    {'label': 'Ürkütücü', 'emoji': '🌑'},
-    {'label': 'Karışık', 'emoji': '🌀'},
-    {'label': 'Lucid', 'emoji': '✨'},
-    {'label': 'Romantik', 'emoji': '🌙'},
-    {'label': 'Gergin', 'emoji': '⚡'},
-  ];
-
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange);
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -74,18 +73,19 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dreamState = ref.watch(dreamProvider);
+    final hasFocus = _focusNode.hasFocus;
 
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+
               // Üst Astral Başlık
               Center(
                 child: Column(
@@ -117,7 +117,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     Text(
                       'Bilinçaltının Fısıltıları',
                       textAlign: TextAlign.center,
@@ -134,61 +134,90 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Rüyanızdaki sembolleri, arketipleri ve gizli mesajları kadim bilgelikle çözün.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color: AppColors.textMuted,
-                        height: 1.4,
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Rüyanızdaki sembolleri, arketipleri ve kadim işaretleri çözün.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
 
-              // Geniş, kenarları hafif ışıltılı Rüya Yazma Alanı
-              Text(
-                'RÜYANIZI ANLATIN',
-                style: GoogleFonts.cinzel(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
-                  color: AppColors.electricLavender,
+              // Enine Geniş, Sağda-Solda Neredeyse Boşluk Bırakmayan ve Yazıldıkça Boyuna Esneyen Rüya Penceresi
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'RÜYANIZI ANLATIN',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.5,
+                        color: AppColors.electricLavender,
+                      ),
+                    ),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _textController,
+                      builder: (context, value, _) {
+                        if (value.text.isEmpty) return const SizedBox.shrink();
+                        final words = value.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+                        return Text(
+                          '$words kelime',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: AppColors.textDim,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
+              // Genişleyen Rüya Giriş Penceresi
               GlowContainer(
-                glowColor: _focusNode.hasFocus ? AppColors.neonPurple : AppColors.deepViolet,
-                blurRadius: _focusNode.hasFocus ? 20 : 12,
-                spreadRadius: 1,
-                borderRadius: BorderRadius.circular(20),
+                glowColor: hasFocus ? AppColors.neonPurple : AppColors.deepViolet.withOpacity(0.6),
+                blurRadius: hasFocus ? 22 : 10,
+                spreadRadius: hasFocus ? 1.5 : 0.5,
+                borderRadius: BorderRadius.circular(18),
                 backgroundColor: AppColors.surfaceInput,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 child: TextField(
                   controller: _textController,
                   focusNode: _focusNode,
-                  maxLines: 7,
-                  minLines: 5,
+                  minLines: 8,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
+                    fontSize: 15.5,
                     color: AppColors.textPureWhite,
                     height: 1.6,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Dün gece ne gördünüz? Bir su kenarı, uçsuz bucaksız bir gökyüzü ya da tanıdık bir ses...',
+                    hintText: 'Dün gece ne gördünüz? Hatırladığınız tüm mekanları, kişileri, renkleri ve sembolleri özgürce buraya yazın...',
                     hintStyle: GoogleFonts.plusJakartaSans(
                       color: AppColors.textDim,
-                      fontSize: 14,
+                      fontSize: 14.5,
                       height: 1.5,
                     ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(20),
+                    contentPadding: EdgeInsets.zero,
                   ),
                   onChanged: (val) {
                     ref.read(dreamProvider.notifier).setDreamText(val);
@@ -198,114 +227,48 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
 
               const SizedBox(height: 24),
 
-              // Hızlı Duygu Seçimi Çipleri
-              Text(
-                'RÜYADAKİ TEMEL HİS',
-                style: GoogleFonts.cinzel(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
-                  color: AppColors.electricLavender,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: _emotions.map((emotion) {
-                  final isSelected = dreamState.selectedEmotion == emotion['label'];
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      ref.read(dreamProvider.notifier).setEmotion(emotion['label']!);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.neonPurple.withOpacity(0.2)
-                            : AppColors.surfaceCard,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.ancientGold
-                              : AppColors.borderSubtle,
-                          width: isSelected ? 1.5 : 1,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.ancientGold.withOpacity(0.2),
-                                  blurRadius: 12,
-                                  spreadRadius: 1,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(emotion['emoji']!, style: const TextStyle(fontSize: 16)),
-                          const SizedBox(width: 8),
-                          Text(
-                            emotion['label']!,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected ? AppColors.textPureWhite : AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 36),
-
               // "Tabiri Çöz" Butonu
-              Container(
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neonPurple.withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
                     borderRadius: BorderRadius.circular(18),
-                    onTap: _onSolvePressed,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome,
-                            color: AppColors.ancientGold,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'TABİRİ ÇÖZ',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2.0,
-                              color: AppColors.textPureWhite,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.neonPurple.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(18),
+                      onTap: _onSolvePressed,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome,
+                              color: AppColors.ancientGold,
+                              size: 20,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 12),
+                            Text(
+                              'TABİRİ ÇÖZ',
+                              style: GoogleFonts.cinzel(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2.0,
+                                color: AppColors.textPureWhite,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
