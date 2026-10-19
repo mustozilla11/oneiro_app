@@ -70,10 +70,244 @@ TRADITIONS: Dict[str, Dict[str, str]] = {
     }
 }
 
+TRADITIONS_I18N: Dict[str, Dict[str, Dict[str, str]]] = {
+    "islam_dogu": {
+        "tr": {"title": "Doğu ve İslam Geleneği", "scholar": "İbn-i Sîrîn & Nablusî"},
+        "en": {"title": "Eastern & Islamic Tradition", "scholar": "Ibn Sirin & Al-Nabulsi"},
+        "ru": {"title": "Восточная и Исламская традиция", "scholar": "Ибн Сирин и Ан-Набулси"},
+        "de": {"title": "Östliche und Islamische Tradition", "scholar": "Ibn Sirin & Al-Nabulsi"},
+        "es": {"title": "Tradición Oriental e Islámica", "scholar": "Ibn Sirin y Al-Nabulsi"},
+        "ar": {"title": "التقليد الشرقي والإسلامي", "scholar": "ابن سيرين والنابلسي"},
+        "fr": {"title": "Tradition Orientale et Islamique", "scholar": "Ibn Sirin et Al-Nabulsi"}
+    },
+    "antik_akdeniz": {
+        "tr": {"title": "Antik Akdeniz Bilgeliği", "scholar": "Artemidorus (Oneirocritica)"},
+        "en": {"title": "Ancient Mediterranean Wisdom", "scholar": "Artemidorus (Oneirocritica)"},
+        "ru": {"title": "Античная Средиземноморская Мудрость", "scholar": "Артемидор (Онейрокритика)"},
+        "de": {"title": "Antike Weisheit des Mittelmeers", "scholar": "Artemidorus (Oneirocritica)"},
+        "es": {"title": "Sabiduría del Mediterráneo Antiguo", "scholar": "Artemidoro (Oneirocrítica)"},
+        "ar": {"title": "حكمة البحر الأبيض المتوسط القديمة", "scholar": "أرتيميدوروس (أونيروكريتيكا)"},
+        "fr": {"title": "Sagesse Méditerranéenne Antique", "scholar": "Artémidore (Oneirocritica)"}
+    },
+    "psikoloji": {
+        "tr": {"title": "Derinlik Psikolojisi", "scholar": "Carl G. Jung & Sigmund Freud"},
+        "en": {"title": "Depth Psychology", "scholar": "Carl G. Jung & Sigmund Freud"},
+        "ru": {"title": "Глубинная Психология", "scholar": "Карл Г. Юнг и Зигмунд Фрейд"},
+        "de": {"title": "Tiefenpsychologie", "scholar": "Carl G. Jung & Sigmund Freud"},
+        "es": {"title": "Psicología Profunda", "scholar": "Carl G. Jung y Sigmund Freud"},
+        "ar": {"title": "علم النفس العميق", "scholar": "كارل غ. يونغ وسيغموند فرويد"},
+        "fr": {"title": "Psychologie des Profondeurs", "scholar": "Carl G. Jung et Sigmund Freud"}
+    }
+}
+
+
+def get_tradition_metadata(tradition_id: str, lang: str = "tr") -> Dict[str, str]:
+    """İstenen dilde gelenek başlığı ve bilgin adını döner (tr, en, ru, de, es, ar, fr)."""
+    base = TRADITIONS.get(tradition_id, TRADITIONS["islam_dogu"])
+    i18n_lang = TRADITIONS_I18N.get(tradition_id, {}).get(lang)
+    if not i18n_lang:
+        i18n_lang = TRADITIONS_I18N.get(tradition_id, {}).get("en", {
+            "title": base["title"],
+            "scholar": base["scholar"]
+        })
+    return {
+        "id": tradition_id,
+        "title": i18n_lang["title"],
+        "scholar": i18n_lang["scholar"],
+        "icon": base.get("icon", "scroll"),
+        "accent_color": base.get("accent_color", "#D4AF37")
+    }
+
+
+def detect_language(text: str) -> str:
+    """Metnin dilini sıfır harici bağımlılıkla ve 0 ms gecikmeyle tespit eder (ru, ar, tr, de, es, fr, en)."""
+    if re.search(r"[\u0400-\u04FF]", text):
+        return "ru"
+    if re.search(r"[\u0600-\u06FF]", text):
+        return "ar"
+    if re.search(r"[çğıöşüÇĞİÖŞÜ]", text):
+        return "tr"
+
+    lower = text.lower()
+    words = set(re.findall(r"\b[^\W\d_]{2,}\b", lower, flags=re.UNICODE))
+
+    # Almanca belirteçleri
+    if len(words.intersection({"ich", "und", "nicht", "der", "die", "das", "ein", "eine", "mit", "war", "im"})) >= 2:
+        return "de"
+
+    # İspanyolca belirteçleri
+    if len(words.intersection({"que", "los", "las", "por", "para", "con", "una", "este", "habia", "sueno", "del"})) >= 2:
+        return "es"
+
+    # Fransızca belirteçleri
+    if len(words.intersection({"les", "des", "dans", "pour", "avec", "une", "est", "reve", "sur"})) >= 2:
+        return "fr"
+
+    # İngilizce belirteçleri
+    if len(words.intersection({"the", "and", "was", "were", "with", "that", "this", "from", "saw", "dream", "fell"})) >= 2:
+        return "en"
+
+    # Türkçe stopwords
+    if len(words.intersection({"ve", "bir", "bu", "da", "de", "icin", "ben", "gordum", "ruyada", "kuyu", "yilan"})) >= 1:
+        return "tr"
+
+    return "en"
+
+
 CHUNKS_DB: List[Dict[str, Any]] = []
 
-TURKISH_STOPWORDS = {
-    # Genel edat, bağlaç, zamirler
+# Kadim arketipleri Türkçe kitap dizinine bağlayan çok dilli köprü sözlüğü (RU, EN, DE, ES, FR, AR)
+CROSS_LINGUAL_SYMBOLS: Dict[str, str] = {
+    # YILAN / SNAKE
+    "snake": "yilan", "snakes": "yilan", "serpent": "yilan", "serpents": "yilan", "viper": "yilan",
+    "змея": "yilan", "змеи": "yilan", "змею": "yilan", "змеей": "yilan", "змей": "yilan", "змее": "yilan", "гадюка": "yilan",
+    "schlange": "yilan", "schlangen": "yilan", "natter": "yilan",
+    "serpiente": "yilan", "serpientes": "yilan", "vibora": "yilan",
+    "couleuvre": "yilan", "vipere": "yilan",
+    "ثعبان": "yilan", "افعى": "yilan", "حية": "yilan",
+
+    # KUYU / WELL / PIT
+    "well": "kuyu", "wells": "kuyu", "pit": "kuyu", "shaft": "kuyu",
+    "колодец": "kuyu", "колодца": "kuyu", "колодце": "kuyu", "колодцем": "kuyu", "яма": "kuyu", "яме": "kuyu",
+    "brunnen": "kuyu", "schacht": "kuyu", "pozo": "kuyu", "puits": "kuyu",
+    "بئر": "kuyu", "حفرة": "kuyu",
+
+    # SU / NEHİR / GÖL / WATER / RIVER / LAKE
+    "water": "su", "waters": "su", "river": "nehir", "lake": "gol", "stream": "su",
+    "вода": "su", "воде": "su", "воду": "su", "водой": "su", "река": "nehir", "реке": "nehir", "озеро": "gol", "ручей": "su",
+    "wasser": "su", "fluss": "nehir", "see": "gol", "bach": "su",
+    "agua": "su", "rio": "nehir", "lago": "gol",
+    "eau": "su", "riviere": "nehir", "lac": "gol",
+    "ماء": "su", "نهر": "nehir", "بحيرة": "gol",
+
+    # DENİZ / OKYANUS / DALGA / FIRTINA
+    "sea": "deniz", "ocean": "deniz", "wave": "dalga", "waves": "dalga", "storm": "firtina", "tempest": "firtina",
+    "море": "deniz", "моря": "deniz", "морю": "deniz", "морем": "deniz", "океан": "deniz",
+    "волна": "dalga", "волны": "dalga", "буря": "firtina", "шторм": "firtina",
+    "meer": "deniz", "ozean": "deniz", "welle": "dalga", "wellen": "dalga", "sturm": "firtina",
+    "mar": "deniz", "oceano": "deniz", "ola": "dalga", "olas": "dalga", "tormenta": "firtina",
+    "mer": "deniz", "ocean": "deniz", "vague": "dalga", "tempete": "firtina",
+    "بحر": "deniz", "محيط": "deniz", "موج": "dalga", "عاصفة": "firtina",
+
+    # UÇMAK / FLY
+    "fly": "ucmak", "flying": "ucmak", "flight": "ucmak", "soar": "ucmak", "wings": "kanat", "wing": "kanat",
+    "лететь": "ucmak", "летал": "ucmak", "летала": "ucmak", "полет": "ucmak", "лечу": "ucmak", "крылья": "kanat", "крыло": "kanat",
+    "fliegen": "ucmak", "flug": "ucmak", "fluegel": "kanat", "flügel": "kanat",
+    "volar": "ucmak", "vuelo": "ucmak", "alas": "kanat",
+    "voler": "ucmak", "vol": "ucmak", "ailes": "kanat",
+    "طيران": "ucmak", "يطير": "ucmak", "جناح": "kanat", "اجنحة": "kanat",
+
+    # DÜŞMEK / UÇURUM / FALL / ABYSS
+    "fall": "dusmek", "falling": "dusmek", "fell": "dusmek", "cliff": "ucurum", "abyss": "ucurum", "precipice": "ucurum",
+    "падать": "dusmek", "падал": "dusmek", "падала": "dusmek", "падение": "dusmek", "упал": "dusmek",
+    "обрыв": "ucurum", "пропасть": "ucurum", "бездна": "ucurum",
+    "fallen": "dusmek", "fiel": "dusmek", "abgrund": "ucurum",
+    "caer": "dusmek", "caida": "dusmek", "abismo": "ucurum",
+    "tomber": "dusmek", "chute": "dusmek", "gouffre": "ucurum",
+    "سقوط": "dusmek", "يسقط": "dusmek", "هاوية": "ucurum", "جرف": "ucurum",
+
+    # BOĞULMAK / DROWN
+    "drown": "bogulmak", "drowning": "bogulmak", "sink": "bogulmak", "sinking": "bogulmak",
+    "тонуть": "bogulmak", "утонул": "bogulmak", "захлебнуться": "bogulmak",
+    "ertrinken": "bogulmak", "versinken": "bogulmak",
+    "ahogarse": "bogulmak", "hundirse": "bogulmak",
+    "se noyer": "bogulmak", "couler": "bogulmak",
+    "غرق": "bogulmak", "يغرق": "bogulmak",
+
+    # KAPI / ANAHTAR / DOOR / KEY
+    "door": "kapi", "doors": "kapi", "gate": "kapi", "gates": "kapi", "portal": "kapi",
+    "key": "anahtar", "keys": "anahtar",
+    "дверь": "kapi", "двери": "kapi", "дверью": "kapi", "ворота": "kapi",
+    "ключ": "anahtar", "ключи": "anahtar", "ключом": "anahtar",
+    "tur": "kapi", "tuer": "kapi", "tor": "kapi", "schluessel": "anahtar", "schlüssel": "anahtar",
+    "puerta": "kapi", "puertas": "kapi", "porton": "kapi", "llave": "anahtar", "llaves": "anahtar",
+    "porte": "kapi", "portail": "kapi", "cle": "anahtar", "clef": "anahtar",
+    "باب": "kapi", "بوابة": "kapi", "مفتاح": "anahtar",
+
+    # KARTAL / KUŞ / EAGLE / BIRD
+    "eagle": "kartal", "eagles": "kartal", "bird": "kus", "birds": "kus",
+    "орел": "kartal", "орла": "kartal", "птица": "kus", "птицы": "kus", "птицу": "kus",
+    "adler": "kartal", "vogel": "kus", "voegel": "kus",
+    "aguila": "kartal", "pajaro": "kus", "ave": "kus",
+    "aigle": "kartal", "oiseau": "kus",
+    "نسر": "kartal", "طائر": "kus", "طيور": "kus",
+
+    # AYNA / LABİRENT / MIRROR / LABYRINTH
+    "mirror": "ayna", "mirrors": "ayna", "labyrinth": "labirent", "maze": "labirent",
+    "зеркало": "ayna", "зеркале": "ayna", "лабиринт": "labirent",
+    "spiegel": "ayna", "espejo": "ayna", "laberinto": "labirent",
+    "miroir": "ayna", "labyrinthe": "labirent",
+    "مرآة": "ayna", "متاهة": "labirent",
+
+    # EV / ODA / MERDİVEN / HOUSE / ROOM / STAIRS
+    "house": "ev", "home": "ev", "room": "oda", "rooms": "oda", "stairs": "merdiven", "staircase": "merdiven",
+    "дом": "ev", "доме": "ev", "комната": "oda", "комнате": "oda", "лестница": "merdiven",
+    "haus": "ev", "zimmer": "oda", "treppe": "merdiven",
+    "casa": "ev", "habitacion": "oda", "escalera": "merdiven",
+    "maison": "ev", "chambre": "oda", "escalier": "merdiven",
+    "منزل": "ev", "بيت": "ev", "غرفة": "oda", "درج": "merdiven",
+
+    # GÖLGE / KARANLIK / IŞIK / SHADOW / DARK / LIGHT
+    "shadow": "golge", "shadows": "golge", "shade": "golge",
+    "dark": "karanlik", "darkness": "karanlik", "gloom": "karanlik", "black": "kara",
+    "light": "isik", "beam": "isik", "ray": "isik",
+    "тень": "golge", "тени": "golge", "тьма": "karanlik", "темный": "karanlik", "темнота": "karanlik", "мрак": "karanlik", "свет": "isik",
+    "schatten": "golge", "dunkel": "karanlik", "dunkelheit": "karanlik", "licht": "isik",
+    "sombra": "golge", "sombras": "golge", "oscuridad": "karanlik", "oscuro": "karanlik", "luz": "isik",
+    "ombre": "golge", "obscurite": "karanlik", "sombre": "karanlik", "lumiere": "isik",
+    "ظل": "golge", "ظلال": "golge", "ظلام": "karanlik", "نور": "isik", "ضوء": "isik",
+
+    # ATEŞ / GÜNEŞ / AY / YILDIZ
+    "fire": "ates", "flame": "ates", "sun": "gunes", "moon": "ay", "star": "yildiz", "stars": "yildiz",
+    "огонь": "ates", "пламя": "ates", "солнце": "gunes", "луна": "ay", "звезда": "yildiz", "звезды": "yildiz",
+    "feuer": "ates", "flamme": "ates", "sonne": "gunes", "mond": "ay", "stern": "yildiz", "sterne": "yildiz",
+    "fuego": "ates", "llama": "ates", "sol": "gunes", "luna": "ay", "estrella": "yildiz",
+    "feu": "ates", "flamme": "ates", "soleil": "gunes", "lune": "ay", "etoile": "yildiz",
+    "نار": "ates", "لهب": "ates", "شمس": "gunes", "قمر": "ay", "نجم": "yildiz", "نجوم": "yildiz",
+
+    # DİŞ / KAN / TEETH / BLOOD
+    "teeth": "dis", "tooth": "dis", "blood": "kan", "bleeding": "kan",
+    "зуб": "dis", "зубы": "dis", "кровь": "kan",
+    "zahn": "dis", "zaehne": "dis", "zähne": "dis", "blut": "kan",
+    "diente": "dis", "dientes": "dis", "sangre": "kan",
+    "dent": "dis", "dents": "dis", "sang": "kan",
+    "سن": "dis", "أسنان": "dis", "دم": "kan",
+
+    # ÖLÜM / MEZAR / DEATH / GRAVE
+    "death": "olum", "dead": "olu", "grave": "mezar", "cemetery": "mezar", "tomb": "mezar",
+    "смерть": "olum", "мертвый": "olu", "мертвая": "olu", "могила": "mezar", "кладбище": "mezar",
+    "tod": "olum", "tot": "olu", "grab": "mezar", "friedhof": "mezar",
+    "muerte": "olum", "muerto": "olu", "tumba": "mezar", "cementerio": "mezar",
+    "mort": "olum", "tombe": "mezar", "cimetiere": "mezar",
+    "موت": "olum", "ميت": "olu", "قبر": "mezar", "مقبرة": "mezar",
+
+    # ASLAN / KURT / KÖPEK / KEDİ / AT
+    "lion": "aslan", "wolf": "kurt", "dog": "kopek", "hound": "kopek", "cat": "kedi", "horse": "at",
+    "лев": "aslan", "волк": "kurt", "собака": "kopek", "пес": "kopek", "кошка": "kedi", "кот": "kedi", "лошадь": "at", "конь": "at",
+    "loewe": "aslan", "löwe": "aslan", "wolf": "kurt", "hund": "kopek", "katze": "kedi", "pferd": "at",
+    "leon": "aslan", "lobo": "kurt", "perro": "kopek", "gato": "kedi", "caballo": "at",
+    "lion": "aslan", "loup": "kurt", "chien": "kopek", "chat": "kedi", "cheval": "at",
+    "اسد": "aslan", "ذئب": "kurt", "كلب": "kopek", "قطة": "kedi", "حصان": "at",
+
+    # ALTIN / PARA / HAZİNE / YÜZÜK
+    "gold": "altin", "golden": "altin", "money": "para", "treasure": "hazine", "ring": "yuzuk",
+    "золото": "altin", "золотой": "altin", "деньги": "para", "сокровище": "hazine", "клад": "hazine", "кольцо": "yuzuk",
+    "gold": "altin", "geld": "para", "schatz": "hazine", "ring": "yuzuk",
+    "oro": "altin", "dinero": "para", "tesoro": "hazine", "anillo": "yuzuk",
+    "or": "altin", "argent": "para", "tresor": "hazine", "bague": "yuzuk",
+    "ذهب": "altin", "مال": "para", "كنز": "hazine", "خاتم": "yuzuk",
+
+    # TAPINAK / SUNAK / RAHİP
+    "temple": "tapinak", "altar": "sunak", "priest": "rahip", "church": "tapinak",
+    "храм": "tapinak", "алтарь": "sunak", "жрец": "rahip", "священник": "rahip", "церковь": "tapinak",
+    "tempel": "tapinak", "altar": "sunak", "priester": "rahip", "kirche": "tapinak",
+    "templo": "tapinak", "altar": "sunak", "sacerdote": "rahip", "iglesia": "tapinak",
+    "temple": "tapinak", "autel": "sunak", "pretre": "rahip", "eglise": "tapinak",
+    "معبد": "tapinak", "مذبح": "sunak", "كاهن": "rahip", "كنيسة": "tapinak"
+}
+
+MULTILINGUAL_STOPWORDS = {
+    # Türkçe
     "ve", "ile", "bu", "şu", "o", "bir", "de", "da", "ki", "için", "gibi", "kadar",
     "daha", "çok", "en", "ama", "fakat", "ancak", "çünkü", "mi", "mı", "mu", "mü",
     "ben", "sen", "biz", "siz", "onlar", "bana", "beni", "sana", "seni", "ona", "onu",
@@ -84,17 +318,41 @@ TURKISH_STOPWORDS = {
     "diye", "bunu", "buna", "bunun", "şunu", "sunu", "şuna", "suna", "şunun", "sunun",
     "olan", "olmak", "eden", "etmek", "vardı", "vardi", "yoktu", "oldu", "olmuş", "olmus", "olacak",
     "ayrıca", "ayrica", "birden", "aniden", "artık", "artik", "şimdi", "simdi",
-    # Rüya anlatımında çok sık geçen dolgu fiil ve zaman zarfları
     "rüyada", "ruyada", "rüyamda", "ruyamda", "rüya", "ruya", "rüyam", "ruyam",
     "gördüm", "gordum", "görüyorum", "goruyorum", "görmek", "gormek",
     "dün", "dun", "gece", "sabah", "sonra", "önce", "once",
     "baktım", "baktim", "gittim", "geldim", "vardım", "vardim", "çıktım", "ciktim",
-    "yerde", "yere", "zaman", "bazen"
+    "yerde", "yere", "zaman", "bazen",
+
+    # English
+    "the", "and", "was", "were", "had", "have", "with", "for", "that", "this", "there",
+    "from", "into", "over", "about", "dream", "dreamt", "saw", "seeing", "been", "myself",
+    "they", "their", "them", "what", "which", "when", "where", "then", "just", "some",
+
+    # Russian
+    "что", "это", "как", "был", "была", "было", "были", "мне", "меня", "его", "для",
+    "или", "если", "тоже", "только", "когда", "где", "куда", "здесь", "сон", "сне",
+    "видел", "видела", "приснилось", "потом", "очень", "себя", "свой", "своем", "своей",
+
+    # German
+    "der", "die", "das", "ein", "eine", "einer", "einem", "einen", "und", "mit", "für",
+    "auf", "aus", "von", "nach", "über", "war", "waren", "hatte", "hatten", "traum", "traumte",
+    "ich", "mich", "mir", "wir", "uns", "sie", "ihr", "nicht", "auch", "dann",
+
+    # Spanish
+    "que", "los", "las", "una", "uno", "unas", "unos", "por", "para", "con", "sin",
+    "sobre", "este", "esta", "estaba", "habia", "sueno", "sone", "vi", "veia", "pero",
+
+    # French
+    "les", "des", "dans", "pour", "avec", "une", "est", "etait", "reve", "reveur", "j'ai",
+
+    # Arabic
+    "في", "من", "على", "إلى", "الى", "عن", "مع", "هذا", "هذه", "كان", "كانت", "حلم", "حلمت", "رايت", "رأيت"
 }
 
 
 def normalize_turkish(text: str) -> str:
-    """Türkçe karakterleri eşleştirme için küçük harfe ve arama standardına dönüştürür."""
+    """Türkçe karakterleri küçük harfe ve arama standardına dönüştürür."""
     t = text.lower()
     mapping = {
         "ı": "i", "İ": "i", "I": "i",
@@ -110,12 +368,60 @@ def normalize_turkish(text: str) -> str:
 
 
 def extract_keywords(text: str) -> List[str]:
-    """Metindeki anlamlı anahtar kelimeleri ve sembol köklerini ayıklar."""
-    norm = normalize_turkish(text)
-    words = re.findall(r"\b[a-z0-9]{3,}\b", norm)
-    meaningful = [w for w in words if w not in TURKISH_STOPWORDS]
-    # Eğer tüm kelimeler stopword'e takıldıysa, en az 3 harfli orijinal kelimeleri koru
-    return meaningful if meaningful else words
+    """
+    Çok dilli rüya metnindeki sembolleri ayıklar.
+    Yabancı dildeki (Rusça, İngilizce, Almanca vb.) sembolleri
+    CROSS_LINGUAL_SYMBOLS köprüsü ile Türkçeleştirip kitap aramasına hazır hale getirir.
+    """
+    clean_text = text.lower()
+    norm = normalize_turkish(clean_text)
+    words = re.findall(r"\b[^\W\d_]{3,}\b", norm, flags=re.UNICODE)
+
+    meaningful: List[str] = []
+    mapped_symbols: List[str] = []
+
+    for w in words:
+        if w in MULTILINGUAL_STOPWORDS:
+            continue
+        meaningful.append(w)
+        if w in CROSS_LINGUAL_SYMBOLS:
+            tr_sym = CROSS_LINGUAL_SYMBOLS[w]
+            if tr_sym not in mapped_symbols:
+                mapped_symbols.append(tr_sym)
+
+    # Önce Türkçe RAG indeksine denk gelen kadim sembol kökleri, sonra kullanıcının özgün kelimeleri
+    combined = mapped_symbols + [w for w in meaningful if w not in mapped_symbols]
+    return combined if combined else words
+
+
+def extract_user_symbols(text: str, lang: str = "tr") -> List[str]:
+    """Kullanıcının kendi dilinde arayüzde gösterilecek 3-4 anahtar sembolü ayıklar."""
+    words = re.findall(r"\b[^\W\d_]{3,}\b", text.lower(), flags=re.UNICODE)
+    meaningful = [w.capitalize() for w in words if w not in MULTILINGUAL_STOPWORDS]
+
+    # Varsa en belirgin kelimeleri seç
+    if meaningful:
+        # Tekrarları temizle sırayı koru
+        seen = set()
+        unique = []
+        for w in meaningful:
+            if w not in seen:
+                seen.add(w)
+                unique.append(w)
+        if unique:
+            return unique[:4]
+
+    # Dil bazlı mistik varsayılanlar
+    defaults: Dict[str, List[str]] = {
+        "ru": ["Мистический Порог", "Темная Вода", "Золотой Свет"],
+        "en": ["Mystic Threshold", "Dark Waters", "Golden Light"],
+        "de": ["Mystische Schwelle", "Dunkles Wasser", "Goldenes Licht"],
+        "es": ["Umbral Místico", "Aguas Oscuras", "Luz Dorada"],
+        "ar": ["العتبة الصوفية", "الماء المظلم", "الضوء الذهبي"],
+        "fr": ["Seuil Mystique", "Eau Sombre", "Lumière Dorée"],
+        "tr": ["Mistik Eşik", "Karanlık Su", "Altın Işık"]
+    }
+    return defaults.get(lang, defaults["tr"])
 
 
 def detect_tradition_id(filename: str) -> str:
@@ -171,7 +477,7 @@ def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
         cleaned = " ".join(p.split()).strip()
         if len(cleaned) >= 35:
             norm = normalize_turkish(cleaned)
-            words_list = re.findall(r"\b[a-z0-9]{3,}\b", norm)
+            words_list = re.findall(r"\b[^\W\d_]{3,}\b", norm, flags=re.UNICODE)
             chunks.append({
                 "text": cleaned,
                 "source": source_name,
@@ -332,7 +638,7 @@ def score_passage_relevance(dream_keywords: List[str], chunk: Dict[str, Any]) ->
     chunk_norm = chunk.get("norm", "")
     chunk_words = chunk.get("words", set())
     if not chunk_words and chunk_norm:
-        chunk_words = set(re.findall(r"\b[a-z0-9]{3,}\b", chunk_norm))
+        chunk_words = set(re.findall(r"\b[^\W\d_]{3,}\b", chunk_norm, flags=re.UNICODE))
 
     total_score = 0.0
     matched_keywords_count = 0
@@ -525,11 +831,17 @@ async def interpret_dream(request: DreamInterpretRequest):
 
     logger.info(f"Rüya analizi talebi alındı. Kullanıcı ID: {request.user_id or 'Misafir/Anonim'}")
 
+    lang = detect_language(dream_text)
     preferred_trad = request.preferred_tradition or "islam_dogu"
     if preferred_trad not in TRADITIONS:
         preferred_trad = "islam_dogu"
 
     other_trads = [t for t in TRADITIONS.keys() if t != preferred_trad]
+
+    # Dil ve gelenek metadata'ları
+    primary_meta = get_tradition_metadata(preferred_trad, lang)
+    other_meta_0 = get_tradition_metadata(other_trads[0], lang)
+    other_meta_1 = get_tradition_metadata(other_trads[1], lang)
 
     # Her gelenekten en alakalı pasajları çek (top_k=2; birincil ve kilitli gelenekler için zengin bağlam)
     matched_chunks: Dict[str, List[Dict[str, Any]]] = {}
@@ -556,54 +868,107 @@ async def interpret_dream(request: DreamInterpretRequest):
     for t_id in other_trads:
         t_matches = matched_chunks.get(t_id, [])
         if t_matches:
+            t_meta = get_tradition_metadata(t_id, lang)
             t_text = "\n".join([f"- {m['chunk']['text']}" for m in t_matches])
-            other_context_lines.append(f"[{TRADITIONS[t_id]['title']} Kaynak]:\n{t_text}")
+            other_context_lines.append(f"[{t_meta['title']} Kaynak]:\n{t_text}")
 
-    # Sembol çıkarımı (Türkçe anahtar kelimeler)
-    keywords = extract_keywords(dream_text)
-    symbols = [k.capitalize() for k in keywords[:4]]
-    if not symbols:
-        symbols = ["Mistik Eşik", "Karanlık Su", "Altın Işık"]
+    # Sembol çıkarımı (Kullanıcının dilindeki özgün semboller)
+    symbols = extract_user_symbols(dream_text, lang)
 
-    # DeepSeek Hızlı JSON Promptu (~350 token)
+    # DeepSeek Hızlı JSON Promptu (~350-400 token, Çok Dilli)
     system_prompt = (
-        "Sen 'Oneiro', kadim sembollerin ve insan bilinçdışının bilge tercümanısın. "
-        "Kullanıcının rüyasını analiz et ve SADECE geçerli bir JSON nesnesi döndür.\n\n"
+        "Sen 'Oneiro', kadim rüya sembollerinin, arketiplerin ve insan bilinçdışının çok dilli bilge tercümanısın.\n\n"
+        "🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
+        "- Kullanıcının rüyayı yazdığı dili otomatik tespit et (Rusça, İngilizce, Türkçe, Almanca, İspanyolca, Arapça, Fransızca vb.).\n"
+        "- JSON çıktısındaki 'bilincalti_aynasi', 'gunun_pusulasi', 'primary_interpretation' ve 'teasers' alanlarını KESİNLİKLE VE İSTİSNASIZ kullanıcının yazdığı dilde üret!\n"
+        "- Kaynak metinler Türkçe olsa dahi, kitaptaki kadim bilgeliği ve sembol mesajlarını kullanıcının diline akıcı, derinlikli, edebi ve mistik bir üslupla aktar.\n"
+        "- Dil asla kullanıcının rüya metninden farklı olmamalıdır.\n\n"
         "İstenen JSON şeması:\n"
         "{\n"
-        '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle.",\n'
-        '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması.",\n'
-        f'  "primary_interpretation": "{TRADITIONS[preferred_trad]["title"]} ({TRADITIONS[preferred_trad]["scholar"]}) geleneğine göre rüyanın 1-2 paragraflık tam, bilgece ve derinlikli tabiri.",\n'
+        '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle (kullanıcı dilinde).",\n'
+        '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması (kullanıcı dilinde).",\n'
+        f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın 1-2 paragraflık tam, bilgece ve derinlikli tabiri (kullanıcı dilinde).",\n'
         '  "teasers": {\n'
-        f'    "{other_trads[0]}": "{TRADITIONS[other_trads[0]]["title"]} açısından rüyayı merak ettiren, 1 cümlelik şoke edici veya düşündürücü teaser (ör: Jungian açıdan bu kuyu bir düşüş değil, Anima ile karşılaşma eşiğidir...)",\n'
-        f'    "{other_trads[1]}": "{TRADITIONS[other_trads[1]]["title"]} açısından rüyayı merak ettiren, 1 cümlelik çarpıcı teaser."\n'
+        f'    "{other_trads[0]}": "{other_meta_0["title"]} açısından rüyayı merak ettiren, 1 cümlelik şoke edici veya düşündürücü teaser (kullanıcı dilinde)",\n'
+        f'    "{other_trads[1]}": "{other_meta_1["title"]} açısından rüyayı merak ettiren, 1 cümlelik çarpıcı teaser (kullanıcı dilinde)."\n'
         "  }\n"
         "}\n\n"
-        f"KAYNAK METİNLER:\n[Birincil Gelenek Kaynağı]: {primary_chunk_text}\n" +
+        f"KAYNAK METİNLER (KADİM BİLGELİK PASAJLARI):\n[Birincil Gelenek Kaynağı]: {primary_chunk_text}\n" +
         "\n".join(other_context_lines)
     )
 
     user_prompt = f'RÜYA: "{dream_text}"'
 
-    # Yanıt üretimi
-    parsed_json: Dict[str, Any] = {}
-    if not deepseek_client:
-        # Offline / Test fallback
-        parsed_json = {
+    # Çok dilli offline / test fallback sözlükleri
+    offline_fallbacks = {
+        "ru": {
+            "bilincalti_aynasi": "Этот сон несет в себе атмосферу глубокого очищения и перехода через внутренний порог. Тени, которые вы стремитесь оставить позади, выходят на поверхность.",
+            "gunun_pusulasi": "Доверяйте своему первому чувству и тихому голосу сердца; не позволяйте сомнениям заглушить интуицию.",
+            "primary_interpretation": f"Согласно источникам традиции '{primary_meta['title']}' ({primary_meta['scholar']}), этот сон предвещает преодоление видимых трудностей, открытие тайных врат и скорое обретение духовного спокойствия и мудрости.",
+            "teasers": {
+                other_trads[0]: f"С точки зрения традиции '{other_meta_0['title']}', этот знак предвещает судьбоносный поворот в мирских делах...",
+                other_trads[1]: f"В свете традиции '{other_meta_1['title']}', это падение символизирует зов Тени и встречу с глубинным Я..."
+            }
+        },
+        "en": {
+            "bilincalti_aynasi": "This dream carries an atmosphere of deep inner renewal and passage through a spiritual threshold. Hidden shadows are surfacing to be integrated.",
+            "gunun_pusulasi": "Trust your first instinct; when the heart whispers ancient truth, let not doubt hesitate.",
+            "primary_interpretation": f"According to the wisdom of {primary_meta['title']} ({primary_meta['scholar']}), this dream signifies that what initially seems challenging will soon lead to profound spiritual clarity, wisdom, and an opening of hidden doors.",
+            "teasers": {
+                other_trads[0]: f"Through the lens of {other_meta_0['title']}, this symbol reveals an unexpected twist of fate waiting in waking life...",
+                other_trads[1]: f"Under {other_meta_1['title']}, this descent is not a collapse, but a summons to encounter your hidden Shadow..."
+            }
+        },
+        "de": {
+            "bilincalti_aynasi": "Dieser Traum trägt eine Atmosphäre tiefer innerer Wandlung und des Übergangs über eine seelische Schwelle in sich.",
+            "gunun_pusulasi": "Vertraue deiner ersten Eingebung; dein Herz ist in dieser Reise der treueste Führer.",
+            "primary_interpretation": f"Nach den Quellen der {primary_meta['title']} ({primary_meta['scholar']}) kündigt dieser Traum nach anfänglicher Prüfung geistige Klarheit und Erleichterung an.",
+            "teasers": {
+                other_trads[0]: f"Aus Sicht von {other_meta_0['title']} verbirgt dieser Traum ein entscheidendes Zeichen des Schicksals...",
+                other_trads[1]: f"Im Lichte von {other_meta_1['title']} ist dieser Abstieg ein unbewusster Ruf zur Auseinandersetzung mit dem Schatten..."
+            }
+        },
+        "es": {
+            "bilincalti_aynasi": "Este sueño encierra una atmósfera de profunda purificación interior y el cruce de un umbral espiritual.",
+            "gunun_pusulasi": "Confía en tu primera intuición; cuando el corazón susurra, la duda debe callar.",
+            "primary_interpretation": f"Según la tradición de {primary_meta['title']} ({primary_meta['scholar']}), este sueño señala que una situación ardua se transformará en sabiduría y bendición.",
+            "teasers": {
+                other_trads[0]: f"Desde la óptica de {other_meta_0['title']}, este símbolo oculta una revelación crucial sobre tu destino...",
+                other_trads[1]: f"Bajo {other_meta_1['title']}, este descenso es un encuentro arquetípico con tu Sombra interior..."
+            }
+        },
+        "ar": {
+            "bilincalti_aynasi": "يحمل هذا الحلم أجواء تطهير داخلي عميق وعبور نحو عتبة روحية جديدة.",
+            "gunun_pusulasi": "ثق بإحساسك الأول وحدسك الداخلي؛ فالقلب حين يهمس لا يخطئ بوصلته.",
+            "primary_interpretation": f"وفقاً لمصادر {primary_meta['title']} ({primary_meta['scholar']})، فإن هذا الحلم يبشر بانفراجة روحية ومقام حكمة بعد مرحلة من الصبر والترقب.",
+            "teasers": {
+                other_trads[0]: f"من منظور {other_meta_0['title']}، فإن هذا الرمز يحمل إشارة قدرية مفاجئة في حياتك الواقعية...",
+                other_trads[1]: f"في ضوء {other_meta_1['title']}، يعبر هذا الهبوط عن مواجهة ملحة مع الظل الروحي لتحقيق التوازن الذاتي..."
+            }
+        },
+        "tr": {
             "bilincalti_aynasi": "Bu rüya, derin bir içsel arınma ve ruhsal bir eşikten geçiş atmosferi taşımaktadır. Zihninizin geride bırakmak istediği gölgeler su yüzüne çıkıyor.",
             "gunun_pusulasi": "İlk hissinize ve iç sesinize güvenin; kalbiniz fısıldadığında mantığınızın duraksamasına izin vermeyin.",
             "primary_interpretation": (
-                f"{TRADITIONS[preferred_trad]['scholar']} kaynaklarına göre bu rüya, başlangıçta çetin görünen bir durumun "
+                f"{primary_meta['title']} ({primary_meta['scholar']}) kaynaklarına göre bu rüya, başlangıçta çetin görünen bir durumun "
                 "ardından gelecek manevi ferahlığı, gizli bir kapının açılışını ve sabırla beklenen bir müjdenin yaklaşmakta olduğunu simgeler."
             ),
             "teasers": {
-                other_trads[0]: f"{TRADITIONS[other_trads[0]]['scholar']} geleneğine göre bu sembol bir son değil, kaderinizin mühürlendiği dünyevi bir basiret eşiğidir...",
-                other_trads[1]: f"{TRADITIONS[other_trads[1]]['scholar']} arketipsel çözümlemesine göre bu düşüş, Gölge benliğinizle yüzleşme arzunuzun bilinçdışı feryadıdır..."
+                other_trads[0]: f"{other_meta_0['scholar']} geleneğine göre bu sembol bir son değil, kaderinizin mühürlendiği dünyevi bir basiret eşiğidir...",
+                other_trads[1]: f"{other_meta_1['scholar']} arketipsel çözümlemesine göre bu düşüş, Gölge benliğinizle yüzleşme arzunuzun bilinçdışı feryadıdır..."
             }
         }
+    }
+
+    # Yanıt üretimi
+    parsed_json: Dict[str, Any] = {}
+    default_payload = offline_fallbacks.get(lang, offline_fallbacks["tr"])
+
+    if not deepseek_client:
+        parsed_json = default_payload
     else:
         try:
-            logger.info("DeepSeek API'ye hızlı teaser tabanlı rüya isteği gönderiliyor...")
+            logger.info("DeepSeek API'ye çok dilli teaser tabanlı rüya isteği gönderiliyor...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -617,51 +982,54 @@ async def interpret_dream(request: DreamInterpretRequest):
             raw_text = completion.choices[0].message.content or "{}"
             parsed_json = json.loads(raw_text)
         except Exception as e:
-            logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata oluştu ({e}), yedek şablon kullanılıyor.")
-            parsed_json = {
-                "bilincalti_aynasi": "Bu rüya, derin bir eşik ve içsel dönüşüm atmosferi taşımaktadır.",
-                "gunun_pusulasi": "İlk sezginize güvenin; kadim yolculuğunuzda en doğru rehber kalbinizdir.",
-                "primary_interpretation": "Kadim yazmalar bu sembollerin ruhsal bir yükselişe ve arınmaya işaret ettiğini bildirir.",
-                "teasers": {
-                    other_trads[0]: f"{TRADITIONS[other_trads[0]]['title']} bu rüyada gizlenmiş dünyevi bir kader işareti görmektedir...",
-                    other_trads[1]: f"{TRADITIONS[other_trads[1]]['title']} ışığında bastırılmış bir duygunun dışa vurumudur..."
-                }
-            }
+            logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata oluştu ({e}), çok dilli yedek şablon kullanılıyor.")
+            parsed_json = default_payload
 
     # Çıktı yapılandırması
     free_analysis = FreeAnalysis(
-        bilincalti_aynasi=parsed_json.get("bilincalti_aynasi", "Rüyanız kadim bir eşik atmosferi taşımaktadır."),
-        gunun_pusulasi=parsed_json.get("gunun_pusulasi", "İç sesinize güvenin.")
+        bilincalti_aynasi=parsed_json.get("bilincalti_aynasi", default_payload["bilincalti_aynasi"]),
+        gunun_pusulasi=parsed_json.get("gunun_pusulasi", default_payload["gunun_pusulasi"])
     )
 
     primary_trad_item = TraditionAnalysisItem(
         tradition_id=preferred_trad,
-        title=TRADITIONS[preferred_trad]["title"],
-        scholar=TRADITIONS[preferred_trad]["scholar"],
-        interpretation=parsed_json.get("primary_interpretation", "Kadim tabir hazırlanıyor."),
+        title=primary_meta["title"],
+        scholar=primary_meta["scholar"],
+        interpretation=parsed_json.get("primary_interpretation", default_payload["primary_interpretation"]),
         is_unlocked=True
     )
 
     teasers_dict = parsed_json.get("teasers", {})
     locked_items: List[TraditionAnalysisItem] = []
     for t_id in other_trads:
-        teaser_text = teasers_dict.get(t_id) or f"{TRADITIONS[t_id]['title']} bu rüyada beklenmedik bir sır saklamaktadır..."
+        t_meta = get_tradition_metadata(t_id, lang)
+        fallback_teaser = default_payload["teasers"].get(t_id, f"{t_meta['title']} bu rüyada beklenmedik bir sır saklamaktadır...")
+        teaser_text = teasers_dict.get(t_id) or fallback_teaser
         locked_items.append(
             TraditionAnalysisItem(
                 tradition_id=t_id,
-                title=TRADITIONS[t_id]["title"],
-                scholar=TRADITIONS[t_id]["scholar"],
+                title=t_meta["title"],
+                scholar=t_meta["scholar"],
                 teaser=teaser_text,
                 interpretation=None,
                 is_unlocked=False
             )
         )
 
-    # Eski ekranlarla %100 uyumluluk için birleştirilmiş genel tabir metni
+    # Eski ekranlarla %100 uyumluluk için birleştirilmiş genel tabir metni (Lokalize Başlıklar)
+    headers = {
+        "ru": ("🌌 ЗЕРКАЛО ПОДСОЗНАНИЯ", "📜", "🧭 КОМПАС ДНЯ"),
+        "en": ("🌌 SUBCONSCIOUS MIRROR", "📜", "🧭 COMPASS OF THE DAY"),
+        "de": ("🌌 SPIEGEL DES UNTERBEWUSSTSEINS", "📜", "🧭 KOMPASS DES TAGES"),
+        "es": ("🌌 ESPEJO DEL SUBCONSCIENTE", "📜", "🧭 BRÚJULA DEL DÍA"),
+        "ar": ("🌌 مرآة اللاوعي", "📜", "🧭 بوصلة اليوم"),
+        "tr": ("🌌 BİLİNÇALTI AYNASI", "📜", "🧭 GÜNÜN PUSULASI")
+    }
+    h_sub, h_trad, h_comp = headers.get(lang, headers["tr"])
     full_interpretation_text = (
-        f"🌌 BİLİNÇALTI AYNASI:\n{free_analysis.bilincalti_aynasi}\n\n"
-        f"📜 {primary_trad_item.title} ({primary_trad_item.scholar}):\n{primary_trad_item.interpretation}\n\n"
-        f"🧭 GÜNÜN PUSULASI:\n{free_analysis.gunun_pusulasi}"
+        f"{h_sub}:\n{free_analysis.bilincalti_aynasi}\n\n"
+        f"{h_trad} {primary_trad_item.title} ({primary_trad_item.scholar}):\n{primary_trad_item.interpretation}\n\n"
+        f"{h_comp}:\n{free_analysis.gunun_pusulasi}"
     )
 
     return DreamInterpretResponse(
@@ -680,7 +1048,7 @@ async def interpret_dream(request: DreamInterpretRequest):
 async def unlock_tradition(request: UnlockTraditionRequest):
     """
     Kullanıcı reklam izlediğinde veya kredi harcadığında,
-    yalnızca o spesifik geleneğin tam tabirini ~200 token ile hızlıca üretir.
+    yalnızca o spesifik geleneğin tam tabirini kullanıcının dilinde ~200 token ile hızlıca üretir.
     """
     global deepseek_client
 
@@ -693,7 +1061,8 @@ async def unlock_tradition(request: UnlockTraditionRequest):
             detail=f"Geçersiz gelenek kimliği: {tradition_id}. Geçerli olanlar: {list(TRADITIONS.keys())}"
         )
 
-    trad_info = TRADITIONS[tradition_id]
+    lang = detect_language(request.dream_text)
+    trad_meta = get_tradition_metadata(tradition_id, lang)
     matches = retrieve_by_tradition(request.dream_text, tradition_id, top_k=2)
     chunk_text_content = "\n\n".join([m["chunk"]["text"] for m in matches]) if matches else ""
 
@@ -708,17 +1077,25 @@ async def unlock_tradition(request: UnlockTraditionRequest):
     ]
 
     system_prompt = (
-        f"Sen 'Oneiro', kadim sembollerin bilge tercümanısın. "
-        f"Kullanıcının rüyasını YALNIZCA '{trad_info['title']}' ({trad_info['scholar']}) geleneği ışığında yorumla. "
-        f"Aşağıdaki kaynak pasajından beslenerek, 1-2 paragraflık derinlikli, edebi ve vurucu bir tabir sun.\n\n"
+        f"Sen 'Oneiro', kadim sembollerin bilge ve çok dilli tercümanısın.\n\n"
+        f"🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
+        f"- Kullanıcının rüyayı yazdığı dili otomatik tespit et ve yorumunu KESİNLİKLE kullanıcının dilinde üret.\n"
+        f"- Kullanıcının rüyasını YALNIZCA '{trad_meta['title']}' ({trad_meta['scholar']}) geleneği ışığında yorumla.\n"
+        f"- Aşağıdaki kaynak pasajından beslenerek, 1-2 paragraflık derinlikli, edebi, mistik ve vurucu bir tabir sun.\n\n"
         f"KAYNAK PASAJI:\n{chunk_text_content}"
     )
 
+    unlock_offline_fallbacks = {
+        "ru": f"Согласно традиции '{trad_meta['title']}' ({trad_meta['scholar']}), этот символ указывает на пробуждение вашей скрытой силы и духовной проницательности. Обратите внимание на невидимые знаки вокруг вас.",
+        "en": f"According to {trad_meta['title']} ({trad_meta['scholar']}), this dream symbol marks the awakening of a latent insight and personal wisdom. Pay close attention to subtle synchronicities surrounding you.",
+        "de": f"Nach der Überlieferung der {trad_meta['title']} ({trad_meta['scholar']}) deutet dieses Symbol auf das Erwachen einer verborgenen Gabe und geistigen Schärfe hin.",
+        "es": f"Según la tradición de {trad_meta['title']} ({trad_meta['scholar']}), este símbolo representa el despertar de una sabiduría latente y una visión profunda.",
+        "ar": f"وفقاً لتقاليد {trad_meta['title']} ({trad_meta['scholar']})، يشير هذا الرمز إلى يقظة حكمة باطنية وبصيرة نافذة ترشدك في مسارك القادم.",
+        "tr": f"{trad_meta['scholar']} kaynaklarına göre bu rüya sembolü, gizli kalmış bir yeteneğinizin ve dünyevi basiretinizin uyanışına işaret eder. Çevrenizdeki görünmez işaretlere dikkat kesilmeli ve ilk adımı atmaktan çekinmemelisiniz."
+    }
+
     if not deepseek_client:
-        full_text = (
-            f"{trad_info['scholar']} kaynaklarına göre bu rüya sembolü, gizli kalmış bir yeteneğinizin ve dünyevi basiretinizin "
-            f"uyanışına işaret eder. Çevrenizdeki görünmez işaretlere dikkat kesilmeli ve ilk adımı atmaktan çekinmemelisiniz."
-        )
+        full_text = unlock_offline_fallbacks.get(lang, unlock_offline_fallbacks["tr"])
     else:
         try:
             logger.info(f"DeepSeek'ten '{tradition_id}' geleneğinin kilidi için tam analiz isteniyor...")
@@ -731,7 +1108,7 @@ async def unlock_tradition(request: UnlockTraditionRequest):
                 temperature=0.7,
                 max_tokens=400
             )
-            full_text = completion.choices[0].message.content or "Kadim bilgelik bu sembol hakkında sessiz kaldı."
+            full_text = completion.choices[0].message.content or unlock_offline_fallbacks.get(lang, unlock_offline_fallbacks["tr"])
         except Exception as e:
             logger.error(f"DeepSeek unlock çağrısında hata: {e}")
             raise HTTPException(
@@ -741,8 +1118,8 @@ async def unlock_tradition(request: UnlockTraditionRequest):
 
     return UnlockTraditionResponse(
         tradition_id=tradition_id,
-        title=trad_info["title"],
-        scholar=trad_info["scholar"],
+        title=trad_meta["title"],
+        scholar=trad_meta["scholar"],
         interpretation=full_text,
         sources_used=sources_payload
     )
