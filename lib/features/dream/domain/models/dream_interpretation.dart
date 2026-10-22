@@ -42,12 +42,16 @@ class TraditionAnalysisItem {
   });
 
   factory TraditionAnalysisItem.fromJson(Map<String, dynamic> json) {
+    final rawInterp = json['interpretation'] as String?;
+    final cleanInterp = rawInterp
+        ?.replaceAll(RegExp(r'\s*\(Kaynak\s*\d+\)\s*$', caseSensitive: false), '')
+        .trim();
     return TraditionAnalysisItem(
       traditionId: json['tradition_id'] as String? ?? 'islam_dogu',
       title: json['title'] as String? ?? 'Doğu ve İslam Geleneği',
       scholar: json['scholar'] as String? ?? 'İbn-i Sîrîn & Nablusî',
       teaser: json['teaser'] as String?,
-      interpretation: json['interpretation'] as String?,
+      interpretation: cleanInterp,
       isUnlocked: json['is_unlocked'] as bool? ?? false,
     );
   }
@@ -164,13 +168,16 @@ class DreamInterpretation {
     if (json['primary_tradition'] is Map<String, dynamic>) {
       primaryTradition = TraditionAnalysisItem.fromJson(json['primary_tradition'] as Map<String, dynamic>);
     } else {
+      final rawInterp = json['interpretation'] as String? ??
+          json['ancient_interpretation'] as String? ??
+          'Kadim kaynaklar bu sembolün derin bir ruhsal dönüşüme ve yaklaşan hayra işaret ettiğini bildirir.';
       primaryTradition = TraditionAnalysisItem(
         traditionId: 'islam_dogu',
         title: 'Doğu ve İslam Geleneği',
         scholar: 'İbn-i Sîrîn & Nablusî',
-        interpretation: json['interpretation'] as String? ??
-            json['ancient_interpretation'] as String? ??
-            'Kadim kaynaklar bu sembolün derin bir ruhsal dönüşüme ve yaklaşan hayra işaret ettiğini bildirir.',
+        interpretation: rawInterp
+            .replaceAll(RegExp(r'\s*\(Kaynak\s*\d+\)\s*$', caseSensitive: false), '')
+            .trim(),
         isUnlocked: true,
       );
     }
@@ -182,7 +189,6 @@ class DreamInterpretation {
           .map((item) => TraditionAnalysisItem.fromJson(item as Map<String, dynamic>))
           .toList();
     } else {
-      // Mock / Default Teaser'lar
       lockedTraditions = [
         const TraditionAnalysisItem(
           traditionId: 'antik_akdeniz',
@@ -228,7 +234,7 @@ class DreamInterpretation {
     };
   }
 
-  /// Dinamik ve Zengin Mock / Fallback Üreticisi
+  /// Dinamik ve Zengin Mock / Fallback Üreticisi (Seçilen geleneğe göre dinamik)
   factory DreamInterpretation.mockFromRequest({
     required String dreamText,
     String? emotion,
@@ -246,6 +252,51 @@ class DreamInterpretation {
         : ['Karanlık Su', 'Uçurum', 'Altın Işık', 'Kuzgun'];
 
     final symbolWord = extractedSymbols.first;
+    final selectedId = (preferredTradition == 'antik_akdeniz' || preferredTradition == 'psikoloji')
+        ? preferredTradition!
+        : 'islam_dogu';
+
+    final allTraditions = <String, TraditionAnalysisItem>{
+      'islam_dogu': TraditionAnalysisItem(
+        traditionId: 'islam_dogu',
+        title: 'Doğu ve İslam Geleneği',
+        scholar: 'İbn-i Sîrîn & Nablusî',
+        teaser: 'İbn-i Sîrîn ve Nablusî kaynaklarına göre "$symbolWord" sembolü, sabrın ardından açılacak manevi bir kapının müjdesidir...',
+        interpretation:
+            'Kadim İbn-i Sîrîn ve İmam Nablusî yazmalarına göre, bu rüyada görülen "$symbolWord" sembolü, '
+            'başlangıçta çetin veya karmaşık görünen bir meselenin ardından gelecek selamet, rızık genişliği ve manevi mertebeye delalet eder.\n\n'
+            'Rüya sahibinin kalbindeki niyetin halis olduğu ve yakın vakitte beklenmedik bir ferahlık kapısının aralanacağı bildirilmektedir.',
+        isUnlocked: selectedId == 'islam_dogu',
+      ),
+      'antik_akdeniz': TraditionAnalysisItem(
+        traditionId: 'antik_akdeniz',
+        title: 'Antik Akdeniz Bilgeliği',
+        scholar: 'Artemidorus (Oneirocritica)',
+        teaser: 'Artemidorus\'a göre "$symbolWord" sembolü, beklemediğiniz dünyevi bir kazancın veya gizli bir basiret sınavının habercisidir...',
+        interpretation:
+            'Efesli Artemidorus\'un Oneirocritica külliyatına ve Antik Akdeniz kehanet geleneğine göre, rüyanızdaki "$symbolWord" imgesi '
+            'dünyevi yolculuğunuzda karşınıza çıkacak önemli bir dönüm noktasına ve kadersel bir habere işaret eder.\n\n'
+            'Antik bilgeler bu sembolü, kişinin kendi iradesini ve basiretini ortaya koyarak çevresindeki belirsizlikleri aşacağının güçlü bir alameti sayar.',
+        isUnlocked: selectedId == 'antik_akdeniz',
+      ),
+      'psikoloji': TraditionAnalysisItem(
+        traditionId: 'psikoloji',
+        title: 'Derinlik Psikolojisi',
+        scholar: 'Carl G. Jung & Freud',
+        teaser: 'Jungian psikanalize göre bu rüya, bastırdığınız bir çatışmanın Anima arketipleriyle gün yüzüne çıkma çağrısıdır...',
+        interpretation:
+            'Carl Gustav Jung ve derinlik psikolojisi perspektifinden "$symbolWord" sembolü, bilinçdışınızdaki "Gölge" ve öz-benlik arketiplerinin '
+            'bütünleşme (bireyleşme) sürecini temsil eder.\n\n'
+            'Günlük yaşamda ertelenen veya bastırılan bir içsel potansiyeliniz, rüya sahnesinde sembolleşerek farkındalık düzeyine yükselmek ve içsel dengenizi yenilemek istemektedir.',
+        isUnlocked: selectedId == 'psikoloji',
+      ),
+    };
+
+    final primary = allTraditions[selectedId]!;
+    final locked = allTraditions.entries
+        .where((e) => e.key != selectedId)
+        .map((e) => e.value.copyWith(interpretation: null, isUnlocked: false))
+        .toList();
 
     return DreamInterpretation(
       id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
@@ -254,37 +305,13 @@ class DreamInterpretation {
       symbols: extractedSymbols.take(4).toList(),
       freeAnalysis: const FreeAnalysis(
         bilincaltiAynasi:
-            'Carl Jung arketipsel psikolojisine göre bu rüya, Gölge ve sezgisel benliğinizin yüzleşmesini yansıtıyor. '
-            'Bilinçdışınız, kontrolü yalnızca mantığa bırakmak yerine kadim sezgilerinize kulak vermeniz gerektiğini fısıldıyor.',
+            'Bilinçdışınız bu rüyada sezgisel benliğiniz ile günlük düşünceleriniz arasındaki ince eşiği yansıtıyor. '
+            'Kontrolü yalnızca mantığa bırakmak yerine içsel sezgilerinize kulak vermeniz gereken bir dönemdesiniz.',
         gununPusulasi:
             'Bugün zihninizi bulandıran aceleci kararlardan uzak durun; kalbinizin ilk sessiz hissi en doğru rotadır.',
       ),
-      primaryTradition: TraditionAnalysisItem(
-        traditionId: 'islam_dogu',
-        title: 'Doğu ve İslam Geleneği',
-        scholar: 'İbn-i Sîrîn & Nablusî',
-        interpretation:
-            'Kadim İbn-i Sîrîn yazmalarına göre, bu rüyada görülen "$symbolWord" sembolü, '
-            'başlangıçta sıkıntılı görünen bir meselenin ardından gelecek selamet ve manevi mertebeye delalet eder. '
-            'Rüya sahibine sabrın ardından açılacak hayırlı kapılar müjdelenmektedir.',
-        isUnlocked: true,
-      ),
-      lockedTraditions: [
-        TraditionAnalysisItem(
-          traditionId: 'antik_akdeniz',
-          title: 'Antik Akdeniz Bilgeliği',
-          scholar: 'Artemidorus (Oneirocritica)',
-          teaser: 'Artemidorus\'a göre "$symbolWord" sembolü, beklemediğiniz dünyevi bir kazancın veya gizli bir basiret sınavının habercisidir...',
-          isUnlocked: false,
-        ),
-        const TraditionAnalysisItem(
-          traditionId: 'psikoloji',
-          title: 'Derinlik Psikolojisi',
-          scholar: 'Carl G. Jung & Freud',
-          teaser: 'Jungian psikanalize göre bu rüya, bastırdığınız bir çatışmanın Anima arketipleriyle gün yüzüne çıkma feryadıdır...',
-          isUnlocked: false,
-        ),
-      ],
+      primaryTradition: primary,
+      lockedTraditions: locked,
       createdAt: DateTime.now(),
     );
   }

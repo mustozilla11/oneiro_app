@@ -16,6 +16,7 @@ class ChatMessage {
       'id': id,
       'text': text,
       'is_user': isUser,
+      'isUser': isUser,
       'timestamp': timestamp.toIso8601String(),
     };
   }
@@ -24,7 +25,7 @@ class ChatMessage {
     return ChatMessage(
       id: json['id'] as String? ?? UniqueKey().toString(),
       text: json['text'] as String? ?? '',
-      isUser: json['is_user'] as bool? ?? false,
+      isUser: (json['is_user'] as bool?) ?? (json['isUser'] as bool?) ?? false,
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'].toString()) ?? DateTime.now()
           : DateTime.now(),

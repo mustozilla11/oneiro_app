@@ -122,9 +122,40 @@ class NotificationService {
     }
   }
 
+  static const String _prefMorningReminderEnabledKey = 'oneiro_morning_reminder_enabled';
+
+  /// Sabah hatırlatıcısının açık olup olmadığını döner (Varsayılan: true)
+  Future<bool> isMorningReminderEnabled() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_prefMorningReminderEnabledKey) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Sabah hatırlatıcısını açar veya kapatır
+  Future<void> setMorningReminderEnabled(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefMorningReminderEnabledKey, enabled);
+      if (enabled) {
+        await scheduleNextMorningNotification();
+      } else {
+        await _notificationsPlugin.cancel(1001);
+        debugPrint('[NotificationService] Sabah hatırlatıcısı kapatıldı.');
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] setMorningReminderEnabled hatası: $e');
+    }
+  }
+
   /// Cihazın yerel saatine göre her sabah 08:30 için sıradaki bildirimi zamanlar
   Future<void> scheduleNextMorningNotification() async {
     try {
+      final enabled = await isMorningReminderEnabled();
+      if (!enabled) return;
+
       final index = await _getNextNotificationIndex();
       final item = notifications[index];
 

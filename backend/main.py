@@ -465,15 +465,37 @@ def extract_user_symbols(text: str, lang: str = "tr") -> List[str]:
     return defaults.get(lang, defaults["tr"])
 
 
-def detect_tradition_id(filename: str) -> str:
-    """Dosya adından geleneği (islam_dogu, antik_akdeniz, psikoloji) otomatik belirler."""
-    fn = filename.lower()
-    if any(k in fn for k in ("islam", "sirin", "nablusi", "dogu")):
+def detect_tradition_id(filename: str, sample_text: str = "") -> str:
+    """Dosya adından veya içerik örneğinden geleneği (islam_dogu, antik_akdeniz, psikoloji) otomatik belirler."""
+    fn = normalize_turkish(filename.lower())
+    if any(k in fn for k in (
+        "islam", "sirin", "nablusi", "nabulusi", "dogu", "cafer", "sadik",
+        "suleyman", "gazali", "arabi", "tasavvuf", "kuran", "hadis", "tabirname", "diyanet"
+    )):
         return "islam_dogu"
-    if any(k in fn for k in ("antik", "yunan", "artemidorus", "oneirocritica", "roma", "akdeniz")):
+    if any(k in fn for k in (
+        "antik", "yunan", "artemidorus", "oneirocritica", "roma", "akdeniz",
+        "mitoloji", "misir", "mezopotamya", "babil", "asur", "homeros", "hipokrat", "galen", "kehanet"
+    )):
         return "antik_akdeniz"
-    if any(k in fn for k in ("psik", "jung", "freud", "arketip", "bilinc")):
+    if any(k in fn for k in (
+        "psik", "jung", "freud", "arketip", "bilinc", "analiz", "adler",
+        "fromm", "lacan", "modern", "terapi", "golge", "anima", "ego"
+    )):
         return "psikoloji"
+
+    # Dosya adı genel ise (örn. kitap1.pdf), ilk 4000 karakterlik içeriğe bakarak geleneği tespit et
+    if sample_text:
+        sample_norm = normalize_turkish(sample_text[:4000].lower())
+        scores = {
+            "islam_dogu": sum(1 for k in ("ibn sirin", "nablusi", "delalet", "tabir", "cafer", "hayra", "rizik", "hikmet", "cenab") if k in sample_norm),
+            "antik_akdeniz": sum(1 for k in ("artemidorus", "antik", "kehanet", "mitoloji", "tanri", "oneirocritica", "kader", "tapinak") if k in sample_norm),
+            "psikoloji": sum(1 for k in ("jung", "freud", "bilincalti", "bilincdisi", "arketip", "psikanaliz", "bastirilmis", "golge", "ego") if k in sample_norm),
+        }
+        best_trad = max(scores, key=scores.get)
+        if scores[best_trad] > 0:
+            return best_trad
+
     return "islam_dogu"
 
 
@@ -501,24 +523,90 @@ def read_pdf_file(filepath: str) -> str:
     try:
         with fitz.open(filepath) as doc:
             for page in doc:
-                text_content.append(page.get_text())
+                page_txt = page.get_text()
+                if page_txt and page_txt.strip():
+                    text_content.append(page_txt.strip())
         return "\n\n".join(text_content)
     except Exception as e:
         logger.error(f"PDF okunurken hata oluştu ({filepath}): {e}")
         return ""
 
 
+def _split_into_optimal_passages(text: str, target_max_chars: int = 680) -> List[str]:
+    """
+    Hem TXT hem de binlerce sayfalık PDF kitapları için akıllı paragraf bölücü.
+    - Önce çift satır sonlarından (\n\n) böler.
+    - Çok uzun PDF sayfalarını / bloklarını cümle bütünlüğünü bozmadan ~450-680 karakterlik anlamlı pasajlara ayırır.
+    """
+    raw_blocks = re.split(r"\n\s*\n", text)
+    passages: List[str] = []
+
+    for block in raw_blocks:
+        block_str = block.strip()
+        if not block_str:
+            continue
+
+        # Eğer tek bir blok çok uzunsa (ör. PDF'te tek \n ile ayrılmış satırlar varsa)
+        if len(block_str) > target_max_chars:
+            sub_lines = [ln.strip() for ln in block_str.split("\n") if ln.strip()]
+        else:
+            sub_lines = [block_str]
+
+        current_buf = ""
+        for line in sub_lines:
+            cleaned_line = " ".join(line.split()).strip()
+            if not cleaned_line:
+                continue
+
+            # Tek bir satır bile çok uzunsa cümle sonlarından (. ! ?) böl
+            if len(cleaned_line) > target_max_chars:
+                if current_buf:
+                    passages.append(current_buf.strip())
+                    current_buf = ""
+                sentences = re.split(r"(?<=[.!?])\s+", cleaned_line)
+                sent_buf = ""
+                for s in sentences:
+                    if len(sent_buf) + len(s) + 1 <= target_max_chars:
+                        sent_buf = f"{sent_buf} {s}".strip() if sent_buf else s
+                    else:
+                        if sent_buf:
+                            passages.append(sent_buf.strip())
+                        # Tek cümle bile devasa ise güvenli dilimle
+                        if len(s) > target_max_chars:
+                            for i in range(0, len(s), target_max_chars):
+                                passages.append(s[i:i + target_max_chars].strip())
+                            sent_buf = ""
+                        else:
+                            sent_buf = s
+                if sent_buf:
+                    passages.append(sent_buf.strip())
+            else:
+                if len(current_buf) + len(cleaned_line) + 1 <= target_max_chars:
+                    current_buf = f"{current_buf} {cleaned_line}".strip() if current_buf else cleaned_line
+                else:
+                    if current_buf:
+                        passages.append(current_buf.strip())
+                    current_buf = cleaned_line
+
+        if current_buf:
+            passages.append(current_buf.strip())
+
+    return passages
+
+
 def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
     """Metni anlamlı paragraflara böler, kelime kümesini indeksler ve gelenek etiketi ekler."""
-    tradition_id = detect_tradition_id(source_name)
-    raw_paragraphs = text.split("\n\n")
+    tradition_id = detect_tradition_id(source_name, sample_text=text[:4000])
+    passages = _split_into_optimal_passages(text, target_max_chars=680)
     chunks = []
 
-    for p in raw_paragraphs:
+    for p in passages:
         cleaned = " ".join(p.split()).strip()
         if len(cleaned) >= 35:
             norm = normalize_turkish(cleaned)
             words_list = re.findall(r"\b[^\W\d_]{3,}\b", norm, flags=re.UNICODE)
+            if not words_list:
+                continue
             chunks.append({
                 "text": cleaned,
                 "source": source_name,
@@ -533,18 +621,18 @@ def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
 
 
 def index_books():
-    """`backend/books/` klasöründeki kitapları okur ve gelenek metadata'sı ile belleğe alır."""
+    """`backend/books/` klasöründeki tüm kitapları (.txt, .pdf, .md) okur ve gelenek metadata'sı ile belleğe alır."""
     global CHUNKS_DB
 
     if not os.path.exists(BOOKS_DIR):
         os.makedirs(BOOKS_DIR, exist_ok=True)
         logger.warning(f"'{BOOKS_DIR}' klasörü mevcut değildi, yeni oluşturuldu.")
 
-    book_files = glob.glob(os.path.join(BOOKS_DIR, "*.*"))
-    supported_files = [f for f in book_files if f.lower().endswith((".txt", ".pdf"))]
+    book_files = sorted(glob.glob(os.path.join(BOOKS_DIR, "*.*")))
+    supported_files = [f for f in book_files if f.lower().endswith((".txt", ".pdf", ".md"))]
 
     if not supported_files:
-        logger.warning(f"'{BOOKS_DIR}' klasöründe .txt veya .pdf kitap bulunamadı.")
+        logger.warning(f"'{BOOKS_DIR}' klasöründe .txt, .pdf veya .md kitap bulunamadı.")
         return
 
     logger.info(f"İndekslenecek {len(supported_files)} adet kitap bulundu: {[os.path.basename(f) for f in supported_files]}")
@@ -554,7 +642,7 @@ def index_books():
     for filepath in supported_files:
         filename = os.path.basename(filepath)
         content = ""
-        if filepath.lower().endswith(".txt"):
+        if filepath.lower().endswith((".txt", ".md")):
             content = read_text_file(filepath)
         elif filepath.lower().endswith(".pdf"):
             content = read_pdf_file(filepath)
@@ -562,14 +650,15 @@ def index_books():
         if content:
             file_chunks = chunk_text(content, filename)
             all_chunks.extend(file_chunks)
-            logger.info(f"'{filename}' ({detect_tradition_id(filename)}) dosyasından {len(file_chunks)} paragraf çıkarıldı.")
+            detected_trad = file_chunks[0]["tradition"] if file_chunks else detect_tradition_id(filename, content[:4000])
+            logger.info(f"'{filename}' ({detected_trad}) dosyasından {len(file_chunks)} paragraf çıkarıldı.")
 
     if not all_chunks:
         logger.warning("Kitaplardan ayrıştırılabilir anlamlı metin parçası çıkarılamadı.")
         return
 
     CHUNKS_DB = all_chunks
-    logger.info(f"✅ Toplam {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
+    logger.info(f"✅ Toplam {len(supported_files)} kitaptan {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
 
 
 @asynccontextmanager
@@ -848,10 +937,10 @@ def retrieve_top_k(dream_text: str, top_k: int = 3, tradition_id: Optional[str] 
 # -----------------------------------------------------------------------------
 # 6.5. ÇİFT MOTORLU YAPAY ZEKA STRATEJİSİ (GOOGLE GEMINI FLASH + DEEPSEEK YEDEK)
 # -----------------------------------------------------------------------------
-GEMINI_MODELS = ["gemini-3.5-flash"]
-GEMINI_DEFAULT_TIMEOUT = 4.0  # Hızlı ve takılmayan yanıt için 4 saniye zaman aşımı (gecikirse derhal DeepSeek'e geçer)
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
+GEMINI_DEFAULT_TIMEOUT = 6.5  # Hızlı ve takılmayan yanıt için 6.5 saniye zaman aşımı (gecikirse derhal DeepSeek'e geçer)
 
-def _sync_gemini_post(url: str, payload: dict, timeout: float = 4.0) -> Optional[dict]:
+def _sync_gemini_post(url: str, payload: dict, timeout: float = 6.5) -> Optional[dict]:
     try:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -871,7 +960,7 @@ def _sync_gemini_post(url: str, payload: dict, timeout: float = 4.0) -> Optional
     return None
 
 
-async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 4.0) -> Optional[Dict[str, Any]]:
+async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 6.5) -> Optional[Dict[str, Any]]:
     """Google Gemini API'yi 4096 token ve düşünme payı ile çağırıp JSON çıktısı döner."""
     if not GEMINI_API_KEY:
         return None
@@ -911,7 +1000,7 @@ async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float 
     return None
 
 
-async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 4.0) -> Optional[str]:
+async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 6.5) -> Optional[str]:
     """Google Gemini API'yi 4096 token ile çağırıp metin döner."""
     if not GEMINI_API_KEY:
         return None
@@ -947,7 +1036,7 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
     return None
 
 
-async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 4.0) -> Optional[str]:
+async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 6.5) -> Optional[str]:
     """Google Gemini API ile sohbet yanıtı üretir (4096 token)."""
     if not GEMINI_API_KEY:
         return None
@@ -980,31 +1069,29 @@ async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 4.0)
 async def generate_dream_interpretation(system_prompt: str, user_prompt: str) -> Dict[str, Any]:
     """
     Hibrit Çift Motor Stratejisi:
-    1. Öncelikli olarak Google Gemini (Ücretsiz, 4096 token) çağrılır (maksimum 4.0 saniye beklenir).
-    2. 4 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
+    1. Öncelikli olarak Google Gemini (Ücretsiz, 4096 token) çağrılır.
+    2. Zaman aşımına uğrarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
     """
-    # 1. Motor: Google Gemini (Ücretsiz, 4 saniye limitli) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2] Google Gemini API çağrılıyor (Zaman aşımı: 4.0s)...")
+            logger.info(f"⚡ [1/2] Google Gemini API çağrılıyor (Zaman aşımı: {GEMINI_DEFAULT_TIMEOUT}s)...")
             gemini_res = await asyncio.wait_for(
                 call_gemini_json(system_prompt, user_prompt, timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_res and isinstance(gemini_res, dict):
-                logger.info("✅ Google Gemini başarıyla yanıt üretti (Kaynak 1).")
+                logger.info("✅ Google Gemini başarıyla yanıt üretti.")
                 if "primary_interpretation" in gemini_res and gemini_res["primary_interpretation"]:
-                    gemini_res["primary_interpretation"] = gemini_res["primary_interpretation"].strip() + "\n\n(Kaynak 1)"
+                    gemini_res["primary_interpretation"] = gemini_res["primary_interpretation"].strip()
                 return gemini_res
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini zaman sınırını aştı (4s)! DeepSeek yedek motoruna anında geçiliyor...")
+            logger.warning("⏱️ Google Gemini zaman sınırını aştı! DeepSeek yedek motoruna anında geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini çağrısında hata ({e}), DeepSeek yedek motoruna geçiliyor...")
 
-    # 2. Motor: DeepSeek (Yedek & Garantili Güçlü Motor) -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor (Kaynak 2, 3500 token)...")
+            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor (3500 token)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -1018,8 +1105,8 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
             raw_text = completion.choices[0].message.content or "{}"
             parsed = json.loads(raw_text)
             if "primary_interpretation" in parsed and parsed["primary_interpretation"]:
-                parsed["primary_interpretation"] = parsed["primary_interpretation"].strip() + "\n\n(Kaynak 2)"
-            logger.info("✅ DeepSeek API başarıyla yanıt üretti (Kaynak 2).")
+                parsed["primary_interpretation"] = parsed["primary_interpretation"].strip()
+            logger.info("✅ DeepSeek API başarıyla yanıt üretti.")
             return parsed
         except Exception as e:
             logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata: {e}")
@@ -1028,27 +1115,25 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
 
 
 async def generate_unlock_interpretation(system_prompt: str, dream_text: str) -> Optional[str]:
-    """Tekil gelenek kilit açma için 4s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
-    # 1. Motor: Google Gemini (4s) -> Kaynak 1
+    """Tekil gelenek kilit açma için Gemini + DeepSeek fallback motoru."""
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 4.0s)...")
+            logger.info(f"⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: {GEMINI_DEFAULT_TIMEOUT}s)...")
             gemini_text = await asyncio.wait_for(
                 call_gemini_text(system_prompt, f'RÜYA: "{dream_text}"', timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_text and gemini_text.strip():
-                logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü (Kaynak 1).")
-                return gemini_text.strip() + "\n\n(Kaynak 1)"
+                logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü.")
+                return gemini_text.strip()
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini unlock 4 saniyeyi aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini unlock zaman sınırını aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini unlock hatası ({e}), DeepSeek'e geçiliyor...")
 
-    # 2. Motor: DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor (Kaynak 2, 3000 token)...")
+            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor (3000 token)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -1060,8 +1145,8 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
             )
             res = completion.choices[0].message.content
             if res and res.strip():
-                logger.info("✅ DeepSeek unlock yanıtı başarıyla döndü (Kaynak 2).")
-                return res.strip() + "\n\n(Kaynak 2)"
+                logger.info("✅ DeepSeek unlock yanıtı başarıyla döndü.")
+                return res.strip()
         except Exception as e:
             logger.error(f"DeepSeek unlock hatası: {e}")
 
@@ -1069,8 +1154,7 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
 
 
 async def generate_chat_reply(message: str, system_context: Optional[str] = None, history: Optional[List[Dict[str, Any]]] = None) -> str:
-    """Tabirci sohbeti için çift motor (Gemini 4s -> DeepSeek fallback)."""
-    # 1. Gemini İçin Formatlama
+    """Tabirci sohbeti için çift motor (Gemini -> DeepSeek fallback)."""
     gemini_contents = []
     if system_context:
         gemini_contents.append({
@@ -1083,7 +1167,7 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
         })
     if history:
         for item in history:
-            is_user = item.get("isUser", True) if isinstance(item, dict) else True
+            is_user = item.get("is_user", item.get("isUser", True)) if isinstance(item, dict) else True
             text = item.get("text", "") if isinstance(item, dict) else str(item)
             if text:
                 role = "user" if is_user else "model"
@@ -1092,23 +1176,22 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
 
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Chat] Google Gemini çağrılıyor (Zaman aşımı: 4.0s)...")
+            logger.info(f"⚡ [1/2 Chat] Google Gemini çağrılıyor (Zaman aşımı: {GEMINI_DEFAULT_TIMEOUT}s)...")
             gemini_res = await asyncio.wait_for(
                 call_gemini_chat(gemini_contents, timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_res and gemini_res.strip():
-                logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü (Kaynak 1).")
-                return gemini_res.strip() + "\n\n(Kaynak 1)"
+                logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü.")
+                return gemini_res.strip()
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini chat 4 saniyeyi aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini chat zaman sınırını aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini chat hatası ({e}), DeepSeek'e geçiliyor...")
 
-    # 2. DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor (Kaynak 2, 3000 token)...")
+            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor (3000 token)...")
             deepseek_messages = []
             sys_prompt = (
                 "Sen Kadim Oneiro Rüyabilimci ve Derin Bilinçaltı Rehberisin.\n"
@@ -1123,7 +1206,7 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
 
             if history:
                 for item in history:
-                    is_user = item.get("isUser", True) if isinstance(item, dict) else True
+                    is_user = item.get("is_user", item.get("isUser", True)) if isinstance(item, dict) else True
                     text = item.get("text", "") if isinstance(item, dict) else str(item)
                     if text:
                         role = "user" if is_user else "assistant"
@@ -1139,8 +1222,8 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
             )
             reply = completion.choices[0].message.content
             if reply and reply.strip():
-                logger.info("✅ DeepSeek sohbet yanıtı başarıyla döndü (Kaynak 2).")
-                return reply.strip() + "\n\n(Kaynak 2)"
+                logger.info("✅ DeepSeek sohbet yanıtı başarıyla döndü.")
+                return reply.strip()
         except Exception as e:
             logger.error(f"DeepSeek chat hatası: {e}")
             raise HTTPException(
@@ -1164,21 +1247,56 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
 async def health_check():
     """Render.com uyanıklık ve anlık sistem durumu (0 ms)."""
     global CHUNKS_DB
-    sources = list(set(c["source"] for c in CHUNKS_DB)) if CHUNKS_DB else []
+    sources = sorted(list(set(c["source"] for c in CHUNKS_DB))) if CHUNKS_DB else []
+    by_tradition = {
+        t_id: len([c for c in CHUNKS_DB if c.get("tradition") == t_id])
+        for t_id in TRADITIONS.keys()
+    }
     return {
         "status": "healthy",
         "service": "Oneiro RAG Backend",
-        "version": "2.4.0",
+        "version": "2.5.0",
+        "total_books": len(sources),
         "total_chunks": len(CHUNKS_DB),
+        "chunks_by_tradition": by_tradition,
         "books_loaded": sources,
         "dual_ai_strategy": {
-            "primary": "Google Gemini (gemini-3.5-flash) [4s zaman aşımı, 4096 token]",
+            "primary": "Google Gemini (gemini-2.5-flash / gemini-2.0-flash) [6.5s zaman aşımı, 4096 token]",
             "fallback": "DeepSeek (deepseek-chat) [3500 token, tamamlama garantili]",
             "gemini_configured": bool(GEMINI_API_KEY),
             "deepseek_configured": bool(DEEPSEEK_API_KEY)
         },
         "render_keep_alive": True
     }
+
+
+@app.get("/books", summary="Yüklü Kitapları ve Gelenek Dağılımını Listele")
+async def list_loaded_books():
+    """`backend/books/` klasöründen indekslenmiş tüm kitapları ve paragraf sayılarını döner."""
+    global CHUNKS_DB
+    book_stats: Dict[str, Dict[str, Any]] = {}
+    for c in CHUNKS_DB:
+        src = c["source"]
+        if src not in book_stats:
+            book_stats[src] = {
+                "filename": src,
+                "tradition": c["tradition"],
+                "tradition_title": c["tradition_title"],
+                "chunks_count": 0
+            }
+        book_stats[src]["chunks_count"] += 1
+    return {
+        "total_books": len(book_stats),
+        "total_chunks": len(CHUNKS_DB),
+        "books": list(book_stats.values())
+    }
+
+
+@app.post("/books/reindex", summary="Yeni Eklenen Kitapları Yeniden İndeksle")
+async def reindex_books_endpoint():
+    """Sunucuyu yeniden başlatmaya gerek kalmadan `backend/books/` klasöründeki yeni PDF/TXT kitapları tarar."""
+    index_books()
+    return await list_loaded_books()
 
 
 @app.post("/interpret", response_model=DreamInterpretResponse, summary="Hızlı ve Teaser Tabanlı Rüya Yorumu")

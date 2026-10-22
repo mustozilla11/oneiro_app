@@ -284,6 +284,39 @@ class FirestoreService {
     return [];
   }
 
+  /// Kayıtlı bir rüyayı yerel arşivden (ve varsa buluttan) siler
+  Future<void> deleteDream(String dreamText, {String? uid, String? docId}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final localListStr = prefs.getString(_prefLocalDreamsKey);
+      if (localListStr != null && localListStr.isNotEmpty) {
+        final localList = jsonDecode(localListStr) as List<dynamic>;
+        localList.removeWhere((item) =>
+            item is Map && (item['dreamText'] as String? ?? '').trim() == dreamText.trim());
+        await prefs.setString(_prefLocalDreamsKey, jsonEncode(localList));
+        localDreamsRevision.value++;
+      }
+    } catch (e) {
+      debugPrint('[FirestoreService] deleteDream yerel silme uyarısı: $e');
+    }
+
+    if (isFirebaseAvailable && uid != null && uid.isNotEmpty && docId != null && docId.isNotEmpty) {
+      unawaited(
+        Future(() async {
+          try {
+            await firestore
+                .collection('users')
+                .doc(uid)
+                .collection('dreams')
+                .doc(docId)
+                .delete()
+                .timeout(const Duration(seconds: 3));
+          } catch (_) {}
+        }),
+      );
+    }
+  }
+
   /// Kullanıcının geçmiş rüyalarını canlı yayınlayan Stream
   Stream<List<Map<String, dynamic>>> getDreamHistoryStream(String uid) {
     if (!isFirebaseAvailable || uid.isEmpty || uid.startsWith('guest_') || uid.startsWith('dev_')) {

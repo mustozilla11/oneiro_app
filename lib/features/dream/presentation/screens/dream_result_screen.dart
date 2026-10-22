@@ -7,6 +7,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../services/firestore_service.dart';
 import '../../../chat/presentation/screens/dream_chat_screen.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../providers/dream_provider.dart';
@@ -57,18 +59,41 @@ Oneiro ile rüyalarınızın ardındaki anlamı keşfedin.
     Share.share(text);
   }
 
-  void _saveToJournal() {
+  Future<void> _saveToJournal() async {
     HapticFeedback.lightImpact();
+    final currentItem = ref.read(dreamProvider).interpretation ?? widget.interpretation;
+    final uid = AuthService.instance.currentUser?.uid ?? 'local_user';
+
     setState(() {
       _isSaved = !_isSaved;
     });
 
+    if (_isSaved) {
+      await FirestoreService.instance.saveDream(
+        uid,
+        dreamText: currentItem.dreamText,
+        interpretation: currentItem.primaryTradition.interpretation ?? currentItem.ancientInterpretation,
+        subconsciousAnalysis: currentItem.freeAnalysis.bilincaltiAynasi,
+        warningOfDay: currentItem.freeAnalysis.gununPusulasi,
+        primaryTradition: currentItem.primaryTradition.title,
+        primaryTraditionId: currentItem.primaryTradition.traditionId,
+        primaryTraditionScholar: currentItem.primaryTradition.scholar,
+        lockedTraditions: currentItem.lockedTraditions.map((t) => t.title).toList(),
+        lockedTraditionsData: currentItem.lockedTraditions.map((t) => t.toJson()).toList(),
+        symbols: currentItem.symbols,
+        emotion: currentItem.emotion,
+      );
+    } else {
+      await FirestoreService.instance.deleteDream(currentItem.dreamText, uid: uid);
+    }
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           _isSaved
               ? 'Rüya günlüğünüze mühürlendi.'
-              : 'Rüya günlüğü işareti kaldırıldı.',
+              : 'Rüya günlüğünüzden kaldırıldı.',
           style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.charcoalElevated,

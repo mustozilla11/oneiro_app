@@ -24,6 +24,7 @@ class DreamRepository implements IDreamRepository {
       return DreamInterpretation.mockFromRequest(
         dreamText: request.dreamText,
         emotion: request.emotion,
+        preferredTradition: request.preferredTradition,
       );
     }
 
@@ -58,6 +59,7 @@ class DreamRepository implements IDreamRepository {
       return DreamInterpretation.mockFromRequest(
         dreamText: request.dreamText,
         emotion: request.emotion,
+        preferredTradition: request.preferredTradition,
       );
     }
   }
@@ -85,11 +87,15 @@ class DreamRepository implements IDreamRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
+        final rawInterp = data['interpretation'] as String? ?? 'Analiz tamamlandı.';
+        final cleanInterp = rawInterp
+            .replaceAll(RegExp(r'\s*\(Kaynak\s*\d+\)\s*$', caseSensitive: false), '')
+            .trim();
         return TraditionAnalysisItem(
           traditionId: data['tradition_id'] as String? ?? traditionId,
           title: data['title'] as String? ?? 'Kadim Bilgelik',
           scholar: data['scholar'] as String? ?? 'Kadim Ekol',
-          interpretation: data['interpretation'] as String? ?? 'Analiz tamamlandı.',
+          interpretation: cleanInterp,
           isUnlocked: true,
         );
       } else {
@@ -106,7 +112,18 @@ class DreamRepository implements IDreamRepository {
   }
 
   TraditionAnalysisItem _mockUnlockedTradition(String traditionId) {
-    if (traditionId == 'antik_akdeniz') {
+    if (traditionId == 'islam_dogu') {
+      return const TraditionAnalysisItem(
+        traditionId: 'islam_dogu',
+        title: 'Doğu ve İslam Geleneği',
+        scholar: 'İbn-i Sîrîn & Nablusî',
+        interpretation:
+            'İbn-i Sîrîn ve İmam Nablusî külliyatına göre, rüyanızdaki semboller kalbinizdeki halis niyetin ve sabrın '
+            'yakın zamanda hayırlı bir kapı ve manevi ferahlıkla mükafatlandırılacağına delalet eder. '
+            'Geçici kaygılarınızın dağılacağı ve rızkınızın bereketleneceği müjdelenmektedir.',
+        isUnlocked: true,
+      );
+    } else if (traditionId == 'antik_akdeniz') {
       return const TraditionAnalysisItem(
         traditionId: 'antik_akdeniz',
         title: 'Antik Akdeniz Bilgeliği',

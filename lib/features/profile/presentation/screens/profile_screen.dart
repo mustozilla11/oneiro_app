@@ -10,6 +10,7 @@ import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/theme_selector_bar.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../services/firestore_service.dart';
+import '../../../../services/notification_service.dart';
 import '../../../dream/presentation/providers/dream_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
@@ -24,6 +25,17 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isLoading = false;
+  bool _morningReminderEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.instance.isMorningReminderEnabled().then((enabled) {
+      if (mounted) {
+        setState(() => _morningReminderEnabled = enabled);
+      }
+    });
+  }
 
   Future<void> _handleGoogleSignIn() async {
     HapticFeedback.mediumImpact();
@@ -813,9 +825,77 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 },
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-              // 6. Gizlilik & Veri Güvencesi
+              // 6. Sabah Rüya Hatırlatıcısı Ayarı (08:30)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.charcoalSurface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.borderSubtle,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.borderSubtle),
+                      ),
+                      child: Icon(
+                        Icons.notifications_none_rounded,
+                        color: AppColors.moonlight,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sabah Rüya Hatırlatıcısı (08:30)',
+                            style: AppTheme.headingStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.moonlight,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Her sabah uyanınca rüyanızı unutmadan kaydetmeniz için bildirim gönderir',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              color: AppColors.mistGrey,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Switch(
+                      value: _morningReminderEnabled,
+                      activeThumbColor: AppColors.moonlight,
+                      activeTrackColor: AppColors.moonlight.withValues(alpha: 0.25),
+                      onChanged: (val) async {
+                        HapticFeedback.selectionClick();
+                        setState(() => _morningReminderEnabled = val);
+                        await NotificationService.instance.setMorningReminderEnabled(val);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 7. Gizlilik & Veri Güvencesi
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(

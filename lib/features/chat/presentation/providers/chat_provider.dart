@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../../dream/domain/models/dream_interpretation.dart';
 import '../../data/repositories/chat_repository.dart';
@@ -13,12 +16,14 @@ class ChatState {
   final bool isTyping;
   final String? error;
   final String systemPromptContext;
+  final String dreamKey;
 
   const ChatState({
     this.messages = const [],
     this.isTyping = false,
     this.error,
     this.systemPromptContext = '',
+    this.dreamKey = '',
   });
 
   ChatState copyWith({
@@ -26,12 +31,14 @@ class ChatState {
     bool? isTyping,
     String? error,
     String? systemPromptContext,
+    String? dreamKey,
   }) {
     return ChatState(
       messages: messages ?? this.messages,
       isTyping: isTyping ?? this.isTyping,
       error: error,
       systemPromptContext: systemPromptContext ?? this.systemPromptContext,
+      dreamKey: dreamKey ?? this.dreamKey,
     );
   }
 }
@@ -42,7 +49,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   ChatNotifier(this._repository) : super(const ChatState());
 
-  void initialize(DreamInterpretation interpretation) {
+  String _computeDreamKey(DreamInterpretation interpretation) {
+    final normalized = interpretation.dreamText.trim().toLowerCase();
+    return 'oneiro_chat_history_${normalized.hashCode}';
+  }
+
+  Future<void> initialize(DreamInterpretation interpretation) async {
+    final dreamKey = _computeDreamKey(interpretation);
     final unlockedTraditionsInfo = interpretation.lockedTraditions
         .where((t) => t.isUnlocked && t.interpretation != null)
         .map((t) => '${t.title} (${t.scholar}):\n${t.interpretation}')
@@ -78,7 +91,36 @@ Kullanıcı bu rüya hakkında seninle konuşacak, sorular soracak veya rüyası
     state = ChatState(
       messages: [welcomeMessage],
       systemPromptContext: systemPrompt,
+      dreamKey: dreamKey,
     );
+
+    // Kaydedilmiş geçmiş sohbet mesajlarını yükle
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedJson = prefs.getString(dreamKey);
+      if (savedJson != null && savedJson.isNotEmpty) {
+        final List<dynamic> decoded = jsonDecode(savedJson) as List<dynamic>;
+        final loadedMessages = decoded
+            .map((e) => ChatMessage.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+        if (loadedMessages.isNotEmpty && mounted) {
+          state = state.copyWith(messages: loadedMessages);
+        }
+      }
+    } catch (e) {
+      debugPrint('[ChatNotifier] Sohbet geçmişi yükleme uyarısı: $e');
+    }
+  }
+
+  Future<void> _persistMessages(List<ChatMessage> messages) async {
+    if (state.dreamKey.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = jsonEncode(messages.map((m) => m.toJson()).toList());
+      await prefs.setString(state.dreamKey, encoded);
+    } catch (e) {
+      debugPrint('[ChatNotifier] Sohbet geçmişi kaydetme uyarısı: $e');
+    }
   }
 
   Future<void> sendMessage(String text) async {
@@ -91,11 +133,13 @@ Kullanıcı bu rüya hakkında seninle konuşacak, sorular soracak veya rüyası
       isUser: true,
     );
 
+    final updatedWithUser = [...state.messages, userMessage];
     state = state.copyWith(
-      messages: [...state.messages, userMessage],
+      messages: updatedWithUser,
       isTyping: true,
       error: null,
     );
+    await _persistMessages(updatedWithUser);
 
     try {
       final replyText = await _repository.sendChatMessage(
@@ -110,10 +154,12 @@ Kullanıcı bu rüya hakkında seninle konuşacak, sorular soracak veya rüyası
         isUser: false,
       );
 
+      final updatedWithBot = [...state.messages, botMessage];
       state = state.copyWith(
-        messages: [...state.messages, botMessage],
+        messages: updatedWithBot,
         isTyping: false,
       );
+      await _persistMessages(updatedWithBot);
     } catch (e) {
       final errorMessage = ChatMessage(
         id: _uuid.v4(),

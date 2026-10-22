@@ -10,8 +10,15 @@ import '../../../../services/firestore_service.dart';
 import '../../../dream/domain/models/dream_interpretation.dart';
 import '../../../dream/presentation/screens/dream_result_screen.dart';
 
-class DreamHistoryScreen extends ConsumerWidget {
+class DreamHistoryScreen extends ConsumerStatefulWidget {
   const DreamHistoryScreen({super.key});
+
+  @override
+  ConsumerState<DreamHistoryScreen> createState() => _DreamHistoryScreenState();
+}
+
+class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
+  String _selectedFilter = 'all'; // 'all', 'islam_dogu', 'antik_akdeniz', 'psikoloji'
 
   DreamInterpretation _reconstructInterpretation(Map<String, dynamic> item) {
     final dreamText = item['dreamText'] as String? ?? '';
@@ -62,10 +69,31 @@ class DreamHistoryScreen extends ConsumerWidget {
     );
   }
 
+  bool _matchesFilter(Map<String, dynamic> item) {
+    if (_selectedFilter == 'all') return true;
+    final id = (item['primaryTraditionId'] as String? ?? '').toLowerCase();
+    final title = (item['primaryTradition'] as String? ?? '').toLowerCase();
+    if (_selectedFilter == 'islam_dogu') {
+      return id == 'islam_dogu' || title.contains('doğu') || title.contains('islam') || id.isEmpty;
+    } else if (_selectedFilter == 'antik_akdeniz') {
+      return id == 'antik_akdeniz' || title.contains('antik') || title.contains('akdeniz');
+    } else if (_selectedFilter == 'psikoloji') {
+      return id == 'psikoloji' || title.contains('psikoloji') || title.contains('jung');
+    }
+    return true;
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     ref.watch(themeProvider);
     final currentUser = AuthService.instance.currentUser;
+
+    final filters = [
+      {'id': 'all', 'label': 'Tümü', 'color': AppColors.moonlight},
+      {'id': 'islam_dogu', 'label': 'Doğu & İslam', 'color': AppColors.islamGold},
+      {'id': 'antik_akdeniz', 'label': 'Antik Akdeniz', 'color': AppColors.mediterraneanBlue},
+      {'id': 'psikoloji', 'label': 'Psikoloji', 'color': AppColors.psychologyPurple},
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
@@ -112,7 +140,56 @@ class DreamHistoryScreen extends ConsumerWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+
+              // Gelenek Filtre Çipleri
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: filters.map((f) {
+                    final fId = f['id'] as String;
+                    final fLabel = f['label'] as String;
+                    final fColor = f['color'] as Color;
+                    final isSelected = _selectedFilter == fId;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedFilter = fId);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? fColor.withValues(alpha: 0.16)
+                                : AppColors.charcoalSurface,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: isSelected
+                                  ? fColor.withValues(alpha: 0.65)
+                                  : AppColors.borderSubtle,
+                              width: isSelected ? 1.2 : 1.0,
+                            ),
+                          ),
+                          child: Text(
+                            fLabel,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? fColor : AppColors.mistGrey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              const SizedBox(height: 18),
 
               // Canlı Yerel + Bulut Arşivi (Asla bloklanmaz, anında yüklenir)
               Expanded(
@@ -150,7 +227,9 @@ class DreamHistoryScreen extends ConsumerWidget {
                               }
                             }
 
-                            if (allDreams.isEmpty) {
+                            final filteredDreams = allDreams.where(_matchesFilter).toList();
+
+                            if (filteredDreams.isEmpty) {
                               if (localSnap.connectionState == ConnectionState.waiting) {
                                 return Center(
                                   child: CircularProgressIndicator(
@@ -164,14 +243,15 @@ class DreamHistoryScreen extends ConsumerWidget {
 
                             return ListView.separated(
                               physics: const BouncingScrollPhysics(),
-                              itemCount: allDreams.length,
+                              itemCount: filteredDreams.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 14),
                               itemBuilder: (context, index) {
-                                final item = allDreams[index];
+                                final item = filteredDreams[index];
                                 final dreamText = item['dreamText'] as String? ?? '';
                                 final dateStr = item['dateString'] as String? ?? 'Yakınlarda';
                                 final primaryTrad = item['primaryTradition'] as String? ?? 'Doğu & İslam';
                                 final primaryTradId = item['primaryTraditionId'] as String? ?? primaryTrad;
+                                final docId = item['id'] as String?;
                                 final symbols = (item['symbols'] as List<dynamic>?)
                                         ?.map((s) => s.toString())
                                         .toList() ??
@@ -187,6 +267,27 @@ class DreamHistoryScreen extends ConsumerWidget {
                                       : 'Kadim Tabir',
                                   preview: dreamText,
                                   symbols: symbols,
+                                  onDelete: () async {
+                                    HapticFeedback.lightImpact();
+                                    await FirestoreService.instance.deleteDream(
+                                      dreamText,
+                                      uid: currentUser?.uid,
+                                      docId: docId,
+                                    );
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Rüya kaydı arşivden silindi.',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        backgroundColor: AppColors.charcoalElevated,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  },
                                   onTap: () {
                                     HapticFeedback.lightImpact();
                                     final interpretation = _reconstructInterpretation(item);
@@ -230,7 +331,9 @@ class DreamHistoryScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Henüz Mühürlenmiş Bir Rüya Yok',
+            _selectedFilter == 'all'
+                ? 'Henüz Mühürlenmiş Bir Rüya Yok'
+                : 'Bu Ekolde Kayıtlı Rüya Bulunamadı',
             style: AppTheme.headingStyle(
               fontSize: 19,
               fontWeight: FontWeight.w700,
@@ -263,6 +366,7 @@ class DreamHistoryScreen extends ConsumerWidget {
     required String title,
     required String preview,
     required List<String> symbols,
+    required VoidCallback onDelete,
     required VoidCallback onTap,
   }) {
     final tradColor = AppColors.traditionColor(traditionId);
@@ -296,21 +400,38 @@ class DreamHistoryScreen extends ConsumerWidget {
                     color: AppColors.mistGrey,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: tradColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: tradColor.withValues(alpha: 0.35)),
-                  ),
-                  child: Text(
-                    traditionTitle,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: tradColor,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: tradColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: tradColor.withValues(alpha: 0.35)),
+                      ),
+                      child: Text(
+                        traditionTitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: tradColor,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: onDelete,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 16,
+                          color: AppColors.mistGrey.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
