@@ -46,8 +46,12 @@ class _MainPagerScreenState extends State<MainPagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Klavye açık mı kontrolü (viewInsets.bottom > 50)
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 50;
+
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           // 3 Sayfalı Sağa-Sola Kaydırılabilir PageView
@@ -67,11 +71,12 @@ class _MainPagerScreenState extends State<MainPagerScreen> {
             ],
           ),
 
-          // Alttaki Şık ve Küçük Nokta Belirteç (Page Indicator)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: MediaQuery.of(context).padding.bottom + 12,
+          // Alttaki Şık ve Küçük Nokta Belirteç (Klavye açıldığında klavye üstüne binmemesi için tamamen gizlenir)
+          if (!isKeyboardOpen)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: MediaQuery.of(context).padding.bottom + 12,
             child: Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
