@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +31,10 @@ void main() async {
     debugPrint('[Firebase] Yapılandırma dosyası bekleniyor (Geliştirme/Çevrimdışı Mod): $e');
   }
 
-  // 2. RevenueCat Satın Alma ve Abonelik Servisini Başlat
+  // 2. AuthService Başlatma (Kayıtlı oturumu veya Google sessiz girişini yükle)
+  await AuthService.instance.initialize();
+
+  // 3. RevenueCat Satın Alma ve Abonelik Servisini Başlat
   try {
     final currentUid = AuthService.instance.currentUser?.uid;
     await SubscriptionService.instance.initialize(uid: currentUid);
@@ -40,7 +42,7 @@ void main() async {
     debugPrint('[RevenueCat] Başlatma uyarısı: $e');
   }
 
-  // 3. AdMob Reklam Servisini Başlat
+  // 4. AdMob Reklam Servisini Başlat
   try {
     await AdService.instance.initialize();
   } catch (e) {
@@ -74,11 +76,12 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
+    return StreamBuilder<OneiroUser?>(
       stream: AuthService.instance.authStateChanges,
+      initialData: AuthService.instance.currentUser,
       builder: (context, snapshot) {
         // İlk yükleme aşaması
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: AppColors.oledBlack,
             body: Center(

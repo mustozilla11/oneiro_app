@@ -1,8 +1,9 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../services/auth_service.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
@@ -35,13 +36,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Google girişi iptal edildi.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Google bağlantısı tamamlanamadı.',
+            'Google bağlantısı kurulamadı: $e',
             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
           ),
           backgroundColor: AppColors.surfaceCardElevated,
@@ -55,6 +67,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleAppleSignIn() async {
     HapticFeedback.mediumImpact();
+
+    if (!kIsWeb && Platform.isAndroid) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.surfaceCardElevated,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.ancientGold, width: 1),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.apple, color: AppColors.ancientGold, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Apple ile Giriş',
+                style: GoogleFonts.cinzel(color: AppColors.textPureWhite, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Text(
+            'Apple ile Giriş yalnızca iOS (iPhone / iPad) cihazlarda kullanılabilir.\n\nAndroid cihazınızda Google hesabınızla bağlanabilirsiniz.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Anladım', style: GoogleFonts.plusJakartaSans(color: AppColors.ancientGold)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final user = await AuthService.instance.signInWithApple();
@@ -70,13 +117,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Apple girişi iptal edildi.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Apple bağlantısı tamamlanamadı.',
+            'Apple bağlantısı kurulamadı: $e',
             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
           ),
           backgroundColor: AppColors.surfaceCardElevated,
@@ -155,8 +213,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 28),
 
               // Profil Kartı & Kimlik Doğrulama
-              StreamBuilder<User?>(
+              StreamBuilder<OneiroUser?>(
                 stream: AuthService.instance.authStateChanges,
+                initialData: AuthService.instance.currentUser,
                 builder: (context, authSnap) {
                   final user = authSnap.data ?? AuthService.instance.currentUser;
                   final isSignedIn = user != null;

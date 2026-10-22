@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,7 +39,22 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
       final user = await AuthService.instance.signInWithGoogle();
       if (!mounted) return;
 
-      final name = user?.displayName ?? 'Kadim Gezgin';
+      if (user == null) {
+        // Kullanıcı Google penceresini kapattı veya iptal etti
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Google ile giriş iptal edildi.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return; // Ana sayfaya geçme, oturum açma ekranında kal!
+      }
+
+      final name = user.displayName ?? user.email ?? 'Gezgin';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -58,7 +75,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Giriş tamamlanamadı veya iptal edildi. Misafir olarak devam edebilirsiniz.',
+            'Google ile bağlanırken bir sorun oluştu: $e',
             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
           ),
           backgroundColor: AppColors.surfaceCardElevated,
@@ -72,13 +89,63 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
 
   Future<void> _handleAppleSignIn() async {
     HapticFeedback.mediumImpact();
+
+    // Android cihaz kontrolü
+    if (!kIsWeb && Platform.isAndroid) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.surfaceCardElevated,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.ancientGold, width: 1),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.apple, color: AppColors.ancientGold, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Apple ile Giriş',
+                style: GoogleFonts.cinzel(color: AppColors.textPureWhite, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Text(
+            'Apple ile Giriş yalnızca iOS (iPhone / iPad) cihazlarda geçerlidir.\n\nAndroid cihazınızda lütfen "Google ile Devam Et" butonunu veya "Misafir Olarak Keşfet" seçeneğini kullanın.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Anladım', style: GoogleFonts.plusJakartaSans(color: AppColors.ancientGold)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
       final user = await AuthService.instance.signInWithApple();
       if (!mounted) return;
 
-      final name = user?.displayName ?? 'Kadim Gezgin';
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Apple girişi iptal edildi.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return; // Ana sayfaya geçme, ekranda kal!
+      }
+
+      final name = user.displayName ?? user.email ?? 'Gezgin';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -99,7 +166,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Apple girişi tamamlanamadı veya iptal edildi.',
+            'Apple girişi başarısız: $e',
             style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
           ),
           backgroundColor: AppColors.surfaceCardElevated,
@@ -109,6 +176,12 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _handleGuestSignIn() async {
+    HapticFeedback.mediumImpact();
+    await AuthService.instance.signInAsGuest();
+    _navigateToHome();
   }
 
   @override
@@ -237,7 +310,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
 
               // 3. Misafir Olarak Giriş (Skip - Mağaza onayları ve hızlı giriş için zorunlu)
               TextButton(
-                onPressed: _navigateToHome,
+                onPressed: _handleGuestSignIn,
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.textDim,
                 ),
