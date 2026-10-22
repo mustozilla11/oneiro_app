@@ -407,7 +407,7 @@ def extract_keywords(text: str) -> List[str]:
 
 
 def clean_turkish_symbol_root(word: str) -> str:
-    """Türkçe rüya metinlerindeki çekim eklerini ('okuldaydım' -> 'Okul') ayıklayarak yalın kökü bulur."""
+    """Türkçe rüya metinlerindeki belirgin çekim eklerini ('okuldaydım' -> 'Okul') ayıklayarak yalın kökü bulur."""
     w = word.lower().strip()
     patterns = [
         r"(?:ler|lar)?(?:da|de|ta|te)yd(?:ım|im|ik|ük|un|ün|ı|i)$", # okuldaydım, evdeydik
@@ -419,13 +419,11 @@ def clean_turkish_symbol_root(word: str) -> str:
         r"(?:ım|im|um|üm|m)(?:da|de|ta|te)yd(?:ım|im)$", # odamdaydım
         r"(?:ım|im|um|üm|m)(?:da|de|ta|te)$", # odamda, evimde
         r"(?:umuz|ümüz|unuz|ünüz|ları|leri)$", # evimiz, okulları
-        r"(?:yı|yi|yu|yü|ı|i|u|ü)$", # okulu, evi
-        r"(?:ya|ye|a|e)$", # okula, eve
         r"(?:ler|lar)$", # okullar -> okul
     ]
     for p in patterns:
         subbed = re.sub(p, "", w)
-        if len(subbed) >= 2 and subbed != w:
+        if len(subbed) >= 3 and subbed != w:
             w = subbed
             break
     return w.capitalize()
@@ -1255,6 +1253,7 @@ async def interpret_dream(request: DreamInterpretRequest):
         "- Dil asla kullanıcının rüya metninden farklı olmamalıdır.\n\n"
         "İstenen JSON şeması:\n"
         "{\n"
+        '  "symbols": ["Rüyadaki en belirgin 3-4 anahtar sembol/nesne/kavram YALIN ve EKSİZ haliyle (örneğin: \\"Okul\\", \\"Deniz\\", \\"Kapı\\", \\"Yılan\\")"],\n'
         '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle (kullanıcı dilinde).",\n'
         '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması (kullanıcı dilinde).",\n'
         f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın en az 2-3 doyurucu, akıcı, edebi ve derinlikli paragraflık kapsamlı ve yarım kalmayan tam tabiri (kullanıcı dilinde, yaklaşık 180-260 kelime).",\n'
@@ -1341,6 +1340,18 @@ async def interpret_dream(request: DreamInterpretRequest):
         bilincalti_aynasi=parsed_json.get("bilincalti_aynasi", default_payload["bilincalti_aynasi"]),
         gunun_pusulasi=parsed_json.get("gunun_pusulasi", default_payload["gunun_pusulasi"])
     )
+
+    # Yapay zekanın tespit ettiği eksiz ve temiz anahtar semboller (varsa doğrudan önceliklendir)
+    ai_symbols = parsed_json.get("symbols")
+    if isinstance(ai_symbols, list) and len(ai_symbols) > 0:
+        clean_ai_symbols = []
+        for s in ai_symbols:
+            s_str = str(s).strip()
+            s_str = re.sub(r'^[^\w]+|[^\w]+$', '', s_str, flags=re.UNICODE)
+            if len(s_str) >= 2 and s_str.lower() not in MULTILINGUAL_STOPWORDS:
+                clean_ai_symbols.append(s_str.capitalize())
+        if clean_ai_symbols:
+            symbols = clean_ai_symbols[:4]
 
     raw_prim = parsed_json.get("primary_interpretation", default_payload["primary_interpretation"])
     clean_prim = re.sub(r"^\s*#+\s*.*(?:\n+|$)", "", raw_prim).strip()

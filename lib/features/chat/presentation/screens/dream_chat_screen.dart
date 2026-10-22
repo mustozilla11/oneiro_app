@@ -150,21 +150,46 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
       ),
       body: Column(
         children: [
-          // Bağlam İpucu Barı (Hangi rüya konuşuluyor)
+          // Bağlam İpucu Barı (Hangi rüya konuşuluyor - Modern Glassmorphic Pill)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: AppColors.surfaceDark,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceCardElevated.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.ancientGold.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
             child: Row(
               children: [
                 const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Bağlam: "${widget.interpretation.symbols.take(3).join(', ')}" sembolleri',
+                    'Aktif Bağlam: ${widget.interpretation.symbols.isNotEmpty ? widget.interpretation.symbols.take(3).join(', ') : 'Rüya Detayları'}',
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSilver,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.neonPurple.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Tüm Kaynaklar Aktif',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                      color: AppColors.ancientGold,
                     ),
                   ),
                 ),
@@ -176,7 +201,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               itemCount: chatState.messages.length + (chatState.isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == chatState.messages.length && chatState.isTyping) {
@@ -187,6 +212,10 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
               },
             ),
           ),
+
+          // Hızlı Soru Önerileri (Sohbet başında kullanıcıya ilham veren pratik butonlar)
+          if (chatState.messages.length <= 3)
+            _buildSuggestionsBar(),
 
           // Alt Mesaj Gönderme Çubuğu
           _buildInputBar(),
@@ -311,6 +340,51 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionsBar() {
+    final suggestions = [
+      '🔮 Açtığım kaynakların ortak mesajı ne?',
+      '🌌 Bu rüyadaki sembollerin kökeni nedir?',
+      '🧭 Günün pusulası bana ne öğütlüyor?',
+    ];
+
+    return Container(
+      height: 38,
+      margin: const EdgeInsets.only(bottom: 6),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: suggestions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final s = suggestions[index];
+          return ActionChip(
+            label: Text(
+              s,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: AppColors.ancientGold,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            side: BorderSide(
+              color: AppColors.borderGold.withValues(alpha: 0.6),
+              width: 1,
+            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              // Baştaki emojiyi temizleyerek metne aktar ve gönder
+              final cleanText = s.substring(2).trim();
+              _messageController.text = cleanText;
+              _sendMessage();
+            },
+          );
+        },
       ),
     );
   }
