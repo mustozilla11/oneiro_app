@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
-import 'core/theme/app_colors.dart';
 import 'core/theme/theme.dart';
 import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
 import 'features/home/presentation/screens/main_pager_screen.dart';
@@ -80,21 +79,10 @@ class AuthGate extends StatelessWidget {
       stream: AuthService.instance.authStateChanges,
       initialData: AuthService.instance.currentUser,
       builder: (context, snapshot) {
-        // İlk yükleme aşaması
-        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-          return const Scaffold(
-            backgroundColor: AppColors.oledBlack,
-            body: Center(
-              child: CircularProgressIndicator(
-                color: AppColors.ancientGold,
-                strokeWidth: 2,
-              ),
-            ),
-          );
-        }
+        final user = snapshot.data ?? AuthService.instance.currentUser;
 
         // Giriş yapmış kullanıcı -> Doğrudan Ana Sayfaya
-        if (snapshot.hasData && snapshot.data != null) {
+        if (user != null) {
           return const MainPagerScreen();
         }
 

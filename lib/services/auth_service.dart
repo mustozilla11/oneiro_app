@@ -140,8 +140,12 @@ class AuthService {
       }).catchError((e) {
         debugPrint('[AuthService] Google sessiz giriş notu: $e');
       });
+
+      // İlk durum tespitini yayınla (null olsa dahi)
+      _authStateController.add(_currentUser);
     } catch (e) {
       debugPrint('[AuthService] Başlatma hatası: $e');
+      _authStateController.add(_currentUser);
     }
   }
 
