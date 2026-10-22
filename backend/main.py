@@ -3,9 +3,12 @@ import glob
 import re
 import json
 import logging
+import asyncio
 from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
 
+import urllib.request
+import urllib.error
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -27,20 +30,29 @@ logging.basicConfig(
 )
 logger = logging.getLogger("oneiro_rag")
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6JFrUWAiBHz_NBxYykebA8XaAHR1DDN87boRiY6ywrm5g").strip()
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
+RENDER_EXTERNAL_URL = os.getenv("RENDER_EXTERNAL_URL", "https://oneiro-app.onrender.com").strip()
+
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 BOOKS_DIR = os.getenv("BOOKS_DIR", os.path.join(BACKEND_DIR, "books"))
 
-# DeepSeek Async Client (OpenAI uyumlu SDK)
+# 1. Motor: Google Gemini API (Birincil / Ücretsiz ve Hızlı / 5s Zaman Aşımı)
+if GEMINI_API_KEY:
+    logger.info("✅ Google Gemini Flash API (Birincil Motor) hazır.")
+else:
+    logger.warning("⚠️ GEMINI_API_KEY bulunamadı.")
+
+# 2. Motor: DeepSeek Async Client (İkincil / Güçlü Yedek Motor)
 deepseek_client: Optional[AsyncOpenAI] = None
 if DEEPSEEK_API_KEY:
     deepseek_client = AsyncOpenAI(
         api_key=DEEPSEEK_API_KEY,
         base_url="https://api.deepseek.com"
     )
-    logger.info("✅ DeepSeek API Client başarıyla yapılandırıldı.")
+    logger.info("✅ DeepSeek API Client (Yedek Motor) başarıyla yapılandırıldı.")
 else:
-    logger.warning("⚠️ DEEPSEEK_API_KEY ortam değişkeni bulunamadı! LLM çağrıları yapılamayabilir.")
+    logger.warning("⚠️ DEEPSEEK_API_KEY bulunamadı! Yedek LLM çağrıları yapılamayabilir.")
 
 
 # -----------------------------------------------------------------------------
@@ -531,11 +543,47 @@ def index_books():
     logger.info(f"✅ Toplam {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
 
 
+def _sync_http_ping(url: str, timeout: float = 10.0) -> bool:
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Oneiro-KeepAlive/2.2"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
+
+
+async def render_keep_alive_task():
+    """
+    Render Free Tier 15 dakika hareketsiz kalırsa uyur (cold-start gecikmesi yaşanır).
+    Bu arka plan görevi her 10 dakikada (600 sn) bir sunucuya ping atarak Render'ı 7/24 uyanık tutar.
+    """
+    await asyncio.sleep(45)  # Sunucu başladıktan 45 saniye sonra ilk ping döngüsünü başlat
+    target_url = RENDER_EXTERNAL_URL.rstrip("/") + "/health"
+    logger.info(f"🔄 Render Keep-Alive arka plan görevi aktif (Hedef: {target_url}, Aralık: 10 dk)")
+
+    while True:
+        try:
+            await asyncio.sleep(600)  # 10 dakika bekle
+            is_ok = await asyncio.to_thread(_sync_http_ping, target_url, 10.0)
+            if is_ok:
+                logger.info("💓 [Render Keep-Alive] Ping başarılı: Render sunucusu aktif tutuldu.")
+            else:
+                logger.warning("⚠️ [Render Keep-Alive] Ping yanıt vermedi veya zaman aşımına uğradı.")
+        except asyncio.CancelledError:
+            logger.info("Render Keep-Alive görevi sonlandırıldı.")
+            break
+        except Exception as e:
+            logger.debug(f"[Render Keep-Alive] Ping uyarısı: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Oneiro RAG Backend başlatılıyor...")
     index_books()
+    # Render Keep-Alive arka plan ping görevini başlat
+    keep_alive_job = asyncio.create_task(render_keep_alive_task())
     yield
+    keep_alive_job.cancel()
     logger.info("Oneiro RAG Backend kapatılıyor...")
 
 
@@ -793,6 +841,171 @@ def retrieve_top_k(dream_text: str, top_k: int = 3, tradition_id: Optional[str] 
 
 
 # -----------------------------------------------------------------------------
+# 6.5. ÇİFT MOTORLU YAPAY ZEKA STRATEJİSİ (GOOGLE GEMINI FLASH + DEEPSEEK YEDEK)
+# -----------------------------------------------------------------------------
+def _sync_gemini_post(url: str, payload: dict, timeout: float = 5.0) -> Optional[dict]:
+    try:
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status == 200:
+                body = resp.read().decode("utf-8")
+                return json.loads(body)
+    except Exception as e:
+        logger.warning(f"Google Gemini isteği uyarısı: {e}")
+    return None
+
+
+async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 5.0) -> Optional[Dict[str, Any]]:
+    """Google Gemini API'yi (gemini-flash-latest) 5 saniye zaman aşımı ile çağırır ve JSON çıktısını döner."""
+    if not GEMINI_API_KEY:
+        return None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"SİSTEM TALİMATI:\n{system_prompt}\n\nKULLANICI TALEBİ:\n{user_prompt}"}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.7,
+            "maxOutputTokens": 800
+        }
+    }
+    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+    if data:
+        candidates = data.get("candidates", [])
+        if candidates:
+            raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+            if raw_text:
+                return json.loads(raw_text)
+    return None
+
+
+async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 5.0) -> Optional[str]:
+    """Google Gemini API'yi (gemini-flash-latest) 5 saniye zaman aşımı ile çağırır ve metin döner."""
+    if not GEMINI_API_KEY:
+        return None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"SİSTEM TALİMATI:\n{system_prompt}\n\nKULLANICI TALEBİ:\n{user_prompt}"}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 600
+        }
+    }
+    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+    if data:
+        candidates = data.get("candidates", [])
+        if candidates:
+            text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+            if text:
+                return text.strip()
+    return None
+
+
+async def generate_dream_interpretation(system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+    """
+    Hibrit Çift Motor Stratejisi:
+    1. Öncelikli olarak Google Gemini (Ücretsiz) çağrılır (maksimum 5.0 saniye beklenir).
+    2. 5 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
+    """
+    # 1. Motor: Google Gemini (Ücretsiz, 5 saniye limitli)
+    if GEMINI_API_KEY:
+        try:
+            logger.info("⚡ [1/2] Google Gemini Flash API çağrılıyor (Zaman aşımı: 5.0s)...")
+            gemini_res = await asyncio.wait_for(
+                call_gemini_json(system_prompt, user_prompt, timeout=5.0),
+                timeout=5.2
+            )
+            if gemini_res and isinstance(gemini_res, dict):
+                logger.info("✅ Google Gemini 5 saniye içinde başarıyla yanıt üretti.")
+                return gemini_res
+        except asyncio.TimeoutError:
+            logger.warning("⏱️ Google Gemini 5 saniye sınırını aştı! DeepSeek yedek motoruna geçiliyor...")
+        except Exception as e:
+            logger.warning(f"⚠️ Google Gemini çağrısında hata ({e}), DeepSeek yedek motoruna geçiliyor...")
+
+    # 2. Motor: DeepSeek (Yedek & Garantili Güçlü Motor)
+    if deepseek_client:
+        try:
+            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor...")
+            completion = await deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=650,
+                response_format={"type": "json_object"}
+            )
+            raw_text = completion.choices[0].message.content or "{}"
+            parsed = json.loads(raw_text)
+            logger.info("✅ DeepSeek API başarıyla yanıt üretti.")
+            return parsed
+        except Exception as e:
+            logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata: {e}")
+
+    return {}
+
+
+async def generate_unlock_interpretation(system_prompt: str, dream_text: str) -> Optional[str]:
+    """Tekil gelenek kilit açma için 5s Gemini + DeepSeek fallback motoru."""
+    # 1. Motor: Google Gemini (5s)
+    if GEMINI_API_KEY:
+        try:
+            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 5.0s)...")
+            gemini_text = await asyncio.wait_for(
+                call_gemini_text(system_prompt, f'RÜYA: "{dream_text}"', timeout=5.0),
+                timeout=5.2
+            )
+            if gemini_text and gemini_text.strip():
+                logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü.")
+                return gemini_text.strip()
+        except asyncio.TimeoutError:
+            logger.warning("⏱️ Google Gemini unlock 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
+        except Exception as e:
+            logger.warning(f"⚠️ Google Gemini unlock hatası ({e}), DeepSeek'e geçiliyor...")
+
+    # 2. Motor: DeepSeek Fallback
+    if deepseek_client:
+        try:
+            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor...")
+            completion = await deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f'RÜYA: "{dream_text}"'}
+                ],
+                temperature=0.7,
+                max_tokens=400
+            )
+            res = completion.choices[0].message.content
+            if res and res.strip():
+                logger.info("✅ DeepSeek unlock yanıtı başarıyla döndü.")
+                return res.strip()
+        except Exception as e:
+            logger.error(f"DeepSeek unlock hatası: {e}")
+
+    return None
+
+
+# -----------------------------------------------------------------------------
 # 7. ENDPOINT'LER
 # -----------------------------------------------------------------------------
 @app.get("/health", summary="Sunucu Durum ve Sağlık Kontrolü")
@@ -803,10 +1016,16 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Oneiro RAG Backend",
-        "version": "2.1.0",
+        "version": "2.2.0",
         "total_chunks": len(CHUNKS_DB),
         "books_loaded": sources,
-        "deepseek_api_configured": bool(DEEPSEEK_API_KEY)
+        "dual_ai_strategy": {
+            "primary": "Google Gemini (gemini-flash-latest) [5s zaman aşımı]",
+            "fallback": "DeepSeek (deepseek-chat)",
+            "gemini_configured": bool(GEMINI_API_KEY),
+            "deepseek_configured": bool(DEEPSEEK_API_KEY)
+        },
+        "render_keep_alive": True
     }
 
 
@@ -960,30 +1179,11 @@ async def interpret_dream(request: DreamInterpretRequest):
         }
     }
 
-    # Yanıt üretimi
-    parsed_json: Dict[str, Any] = {}
+    # Yanıt üretimi (1. Tercih: Google Gemini Flash 5s | 2. Tercih: DeepSeek | 3. Offline Şablon)
     default_payload = offline_fallbacks.get(lang, offline_fallbacks["tr"])
-
-    if not deepseek_client:
+    parsed_json = await generate_dream_interpretation(system_prompt, user_prompt)
+    if not parsed_json or not isinstance(parsed_json, dict):
         parsed_json = default_payload
-    else:
-        try:
-            logger.info("DeepSeek API'ye çok dilli teaser tabanlı rüya isteği gönderiliyor...")
-            completion = await deepseek_client.chat.completions.create(
-                model="deepseek-chat",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                max_tokens=650,
-                response_format={"type": "json_object"}
-            )
-            raw_text = completion.choices[0].message.content or "{}"
-            parsed_json = json.loads(raw_text)
-        except Exception as e:
-            logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata oluştu ({e}), çok dilli yedek şablon kullanılıyor.")
-            parsed_json = default_payload
 
     # Çıktı yapılandırması
     free_analysis = FreeAnalysis(
@@ -1094,27 +1294,10 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         "tr": f"{trad_meta['scholar']} kaynaklarına göre bu rüya sembolü, gizli kalmış bir yeteneğinizin ve dünyevi basiretinizin uyanışına işaret eder. Çevrenizdeki görünmez işaretlere dikkat kesilmeli ve ilk adımı atmaktan çekinmemelisiniz."
     }
 
-    if not deepseek_client:
+    # 1. Tercih: Google Gemini (5s limit) | 2. Tercih: DeepSeek | 3. Offline Şablon
+    full_text = await generate_unlock_interpretation(system_prompt, request.dream_text)
+    if not full_text or not full_text.strip():
         full_text = unlock_offline_fallbacks.get(lang, unlock_offline_fallbacks["tr"])
-    else:
-        try:
-            logger.info(f"DeepSeek'ten '{tradition_id}' geleneğinin kilidi için tam analiz isteniyor...")
-            completion = await deepseek_client.chat.completions.create(
-                model="deepseek-chat",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f'RÜYA: "{request.dream_text}"'}
-                ],
-                temperature=0.7,
-                max_tokens=400
-            )
-            full_text = completion.choices[0].message.content or unlock_offline_fallbacks.get(lang, unlock_offline_fallbacks["tr"])
-        except Exception as e:
-            logger.error(f"DeepSeek unlock çağrısında hata: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"DeepSeek ile iletişim kurulamadı: {str(e)}"
-            )
 
     return UnlockTraditionResponse(
         tradition_id=tradition_id,
