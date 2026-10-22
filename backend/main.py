@@ -924,7 +924,7 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
     1. Öncelikli olarak Google Gemini (Ücretsiz) çağrılır (maksimum 5.0 saniye beklenir).
     2. 5 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
     """
-    # 1. Motor: Google Gemini (Ücretsiz, 5 saniye limitli)
+    # 1. Motor: Google Gemini (Ücretsiz, 5 saniye limitli) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
             logger.info("⚡ [1/2] Google Gemini Flash API çağrılıyor (Zaman aşımı: 5.0s)...")
@@ -933,17 +933,19 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
                 timeout=5.2
             )
             if gemini_res and isinstance(gemini_res, dict):
-                logger.info("✅ Google Gemini 5 saniye içinde başarıyla yanıt üretti.")
+                logger.info("✅ Google Gemini 5 saniye içinde başarıyla yanıt üretti (Kaynak 1).")
+                if "primary_interpretation" in gemini_res and gemini_res["primary_interpretation"]:
+                    gemini_res["primary_interpretation"] = gemini_res["primary_interpretation"].strip() + "\n\n(Kaynak 1)"
                 return gemini_res
         except asyncio.TimeoutError:
             logger.warning("⏱️ Google Gemini 5 saniye sınırını aştı! DeepSeek yedek motoruna geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini çağrısında hata ({e}), DeepSeek yedek motoruna geçiliyor...")
 
-    # 2. Motor: DeepSeek (Yedek & Garantili Güçlü Motor)
+    # 2. Motor: DeepSeek (Yedek & Garantili Güçlü Motor) -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor...")
+            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor (Kaynak 2)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -956,7 +958,9 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
             )
             raw_text = completion.choices[0].message.content or "{}"
             parsed = json.loads(raw_text)
-            logger.info("✅ DeepSeek API başarıyla yanıt üretti.")
+            if "primary_interpretation" in parsed and parsed["primary_interpretation"]:
+                parsed["primary_interpretation"] = parsed["primary_interpretation"].strip() + "\n\n(Kaynak 2)"
+            logger.info("✅ DeepSeek API başarıyla yanıt üretti (Kaynak 2).")
             return parsed
         except Exception as e:
             logger.warning(f"DeepSeek JSON çıktısı ayrıştırılırken hata: {e}")
@@ -965,8 +969,8 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
 
 
 async def generate_unlock_interpretation(system_prompt: str, dream_text: str) -> Optional[str]:
-    """Tekil gelenek kilit açma için 5s Gemini + DeepSeek fallback motoru."""
-    # 1. Motor: Google Gemini (5s)
+    """Tekil gelenek kilit açma için 5s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
+    # 1. Motor: Google Gemini (5s) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
             logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 5.0s)...")
@@ -975,17 +979,17 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
                 timeout=5.2
             )
             if gemini_text and gemini_text.strip():
-                logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü.")
-                return gemini_text.strip()
+                logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü (Kaynak 1).")
+                return gemini_text.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
             logger.warning("⏱️ Google Gemini unlock 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini unlock hatası ({e}), DeepSeek'e geçiliyor...")
 
-    # 2. Motor: DeepSeek Fallback
+    # 2. Motor: DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor...")
+            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor (Kaynak 2)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -997,8 +1001,8 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
             )
             res = completion.choices[0].message.content
             if res and res.strip():
-                logger.info("✅ DeepSeek unlock yanıtı başarıyla döndü.")
-                return res.strip()
+                logger.info("✅ DeepSeek unlock yanıtı başarıyla döndü (Kaynak 2).")
+                return res.strip() + "\n\n(Kaynak 2)"
         except Exception as e:
             logger.error(f"DeepSeek unlock hatası: {e}")
 
@@ -1035,17 +1039,17 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
                 timeout=5.2
             )
             if gemini_res and gemini_res.strip():
-                logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü.")
-                return gemini_res.strip()
+                logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü (Kaynak 1).")
+                return gemini_res.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
             logger.warning("⏱️ Google Gemini chat 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini chat hatası ({e}), DeepSeek'e geçiliyor...")
 
-    # 2. DeepSeek Fallback
+    # 2. DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor...")
+            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor (Kaynak 2)...")
             deepseek_messages = []
             sys_prompt = (
                 "Sen Kadim Oneiro Rüyabilimci ve Derin Bilinçaltı Rehberisin.\n"
@@ -1075,8 +1079,8 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
             )
             reply = completion.choices[0].message.content
             if reply and reply.strip():
-                logger.info("✅ DeepSeek sohbet yanıtı başarıyla döndü.")
-                return reply.strip()
+                logger.info("✅ DeepSeek sohbet yanıtı başarıyla döndü (Kaynak 2).")
+                return reply.strip() + "\n\n(Kaynak 2)"
         except Exception as e:
             logger.error(f"DeepSeek chat hatası: {e}")
             raise HTTPException(
