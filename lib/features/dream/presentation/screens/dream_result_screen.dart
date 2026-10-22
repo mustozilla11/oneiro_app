@@ -253,41 +253,55 @@ Oneiro ile rüyalarının ardındaki kadim sırrı keşfet.
 
             const SizedBox(height: 18),
 
-            // 3. Birincil Kadim Tabir (Doğu & İslam Geleneği - Tam Açık)
-            MysticalCard(
-              title: liveInterpretation.primaryTradition.title.toUpperCase(),
-              icon: Icons.menu_book_rounded,
-              accentColor: AppColors.ancientGold,
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.ancientGold.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      'Temsil: ${liveInterpretation.primaryTradition.scholar}',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 11,
-                        color: AppColors.ancientGold,
-                        fontWeight: FontWeight.w600,
+            // 3. Birincil Kadim Tabir (Kullanıcının Seçtiği Ekol - Tam Açık)
+            () {
+              final primId = liveInterpretation.primaryTradition.traditionId;
+              IconData primIcon = Icons.menu_book_rounded;
+              Color primAccent = AppColors.ancientGold;
+
+              if (primId == 'antik_akdeniz') {
+                primIcon = Icons.account_balance;
+                primAccent = AppColors.mediterraneanSky;
+              } else if (primId == 'psikoloji') {
+                primIcon = Icons.psychology_outlined;
+                primAccent = AppColors.subconsciousIndigo;
+              }
+
+              return MysticalCard(
+                title: liveInterpretation.primaryTradition.title.toUpperCase(),
+                icon: primIcon,
+                accentColor: primAccent,
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: primAccent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Temsil: ${liveInterpretation.primaryTradition.scholar}',
+                        style: GoogleFonts.cinzel(
+                          fontSize: 11,
+                          color: primAccent,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    liveInterpretation.primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      height: 1.7,
-                      color: AppColors.textSilver,
+                    Text(
+                      liveInterpretation.primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        height: 1.7,
+                        color: AppColors.textSilver,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
+                  ],
+                ),
+              );
+            }().animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
 
             const SizedBox(height: 18),
 

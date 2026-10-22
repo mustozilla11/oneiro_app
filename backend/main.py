@@ -64,21 +64,21 @@ TRADITIONS: Dict[str, Dict[str, str]] = {
         "title": "Doğu ve İslam Geleneği",
         "scholar": "İbn-i Sîrîn & Nablusî",
         "icon": "scroll",
-        "accent_color": "#D4AF37"  # Ancient Gold
+        "accent_color": "#D4AF37"  # Ancient Gold / Amber
     },
     "antik_akdeniz": {
         "id": "antik_akdeniz",
         "title": "Antik Akdeniz Bilgeliği",
         "scholar": "Artemidorus (Oneirocritica)",
         "icon": "temple",
-        "accent_color": "#9D4EDD"  # Neon Purple
+        "accent_color": "#0284C7"  # Mediterranean Azure / Deniz Mavisi
     },
     "psikoloji": {
         "id": "psikoloji",
         "title": "Derinlik Psikolojisi",
         "scholar": "Carl G. Jung & Sigmund Freud",
         "icon": "brain",
-        "accent_color": "#7209B7"  # Electric Lavender
+        "accent_color": "#6366F1"  # Deep Subconscious Indigo
     }
 }
 
@@ -664,6 +664,17 @@ class UnlockTraditionResponse(BaseModel):
     sources_used: List[SourceUsedItem] = Field(default_factory=list)
 
 
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, description="Kullanıcının tabirciye ilettiği soru metni")
+    system_context: Optional[str] = Field(None, description="Rüya ve önceki tabir bağlamı")
+    history: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Geçmiş sohbet mesajları")
+    user_id: Optional[str] = Field(None, description="Kullanıcı Firebase UID (opsiyonel)")
+
+
+class ChatResponse(BaseModel):
+    reply: str = Field(..., description="Kadim rüyabilimcinin ürettiği bilgece cevap")
+
+
 # -----------------------------------------------------------------------------
 # 6. GELİŞMİŞ TÜRKÇE RAG RETRIEVAL & BOŞ EŞLEŞME GÜVENLİK KATMANI
 # -----------------------------------------------------------------------------
@@ -877,7 +888,7 @@ async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float 
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.7,
-            "maxOutputTokens": 800
+            "maxOutputTokens": 1500
         }
     }
     data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
@@ -905,7 +916,7 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
         ],
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 600
+            "maxOutputTokens": 1200
         }
     }
     data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
@@ -915,6 +926,30 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
             text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
             if text:
                 return text.strip()
+    return None
+
+
+async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 5.0) -> Optional[str]:
+    """Google Gemini API ile sohbet yanıtı üretir (5 saniye limitli)."""
+    if not GEMINI_API_KEY:
+        return None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": contents,
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 1200
+        }
+    }
+    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+    if data:
+        candidates = data.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                text = parts[0].get("text", "")
+                if text:
+                    return text.strip()
     return None
 
 
@@ -951,7 +986,7 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.7,
-                max_tokens=650,
+                max_tokens=1500,
                 response_format={"type": "json_object"}
             )
             raw_text = completion.choices[0].message.content or "{}"
@@ -993,7 +1028,7 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
                     {"role": "user", "content": f'RÜYA: "{dream_text}"'}
                 ],
                 temperature=0.7,
-                max_tokens=400
+                max_tokens=1200
             )
             res = completion.choices[0].message.content
             if res and res.strip():
@@ -1003,6 +1038,92 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
             logger.error(f"DeepSeek unlock hatası: {e}")
 
     return None
+
+
+async def generate_chat_reply(message: str, system_context: Optional[str] = None, history: Optional[List[Dict[str, Any]]] = None) -> str:
+    """Tabirci sohbeti için çift motor (Gemini 5s -> DeepSeek fallback)."""
+    # 1. Gemini İçin Formatlama
+    gemini_contents = []
+    if system_context:
+        gemini_contents.append({
+            "role": "user",
+            "parts": [{"text": f"SİSTEM TALİMATI VE RÜYA BAĞLAMI:\n{system_context}\n\nLütfen bu rüyanın derinlikli bilge rehberi ol."}]
+        })
+        gemini_contents.append({
+            "role": "model",
+            "parts": [{"text": "Anladım. Rüyanızı ve kadim sembollerinizi hafızama aldım. Sorularınızı bu rüyanın ışığında, kadim bilgelikle yanıtlamaya hazırım."}]
+        })
+    if history:
+        for item in history:
+            is_user = item.get("isUser", True) if isinstance(item, dict) else True
+            text = item.get("text", "") if isinstance(item, dict) else str(item)
+            if text:
+                role = "user" if is_user else "model"
+                gemini_contents.append({"role": role, "parts": [{"text": text}]})
+    gemini_contents.append({"role": "user", "parts": [{"text": message}]})
+
+    if GEMINI_API_KEY:
+        try:
+            logger.info("⚡ [1/2 Chat] Google Gemini Flash çağrılıyor (Zaman aşımı: 5.0s)...")
+            gemini_res = await asyncio.wait_for(
+                call_gemini_chat(gemini_contents, timeout=5.0),
+                timeout=5.2
+            )
+            if gemini_res and gemini_res.strip():
+                logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü.")
+                return gemini_res.strip()
+        except asyncio.TimeoutError:
+            logger.warning("⏱️ Google Gemini chat 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
+        except Exception as e:
+            logger.warning(f"⚠️ Google Gemini chat hatası ({e}), DeepSeek'e geçiliyor...")
+
+    # 2. DeepSeek Fallback
+    if deepseek_client:
+        try:
+            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor...")
+            deepseek_messages = []
+            sys_prompt = (
+                "Sen Kadim Oneiro Rüyabilimci ve Derin Bilinçaltı Rehberisin.\n"
+                "Kullanıcının gördüğü rüya ve tabir detayları sana verildiğinde, kullanıcının sorularını "
+                "bu rüya deneyiminin doğal bir devamı olarak, derinlikli, bilgece, şefkatli, edebi ve doğrudan rüyadaki sembollere atıfta bulunarak cevapla.\n"
+                "Asla yüzeysel veya basmakalıp hazır cevaplar verme. Cevaplarını samimi, doyurucu ve edebi tut."
+            )
+            if system_context:
+                sys_prompt += f"\n\nRÜYA VE TABİR BAĞLAMI:\n{system_context}"
+            deepseek_messages.append({"role": "system", "content": sys_prompt})
+
+            if history:
+                for item in history:
+                    is_user = item.get("isUser", True) if isinstance(item, dict) else True
+                    text = item.get("text", "") if isinstance(item, dict) else str(item)
+                    if text:
+                        role = "user" if is_user else "assistant"
+                        deepseek_messages.append({"role": role, "content": text})
+
+            deepseek_messages.append({"role": "user", "content": message})
+
+            completion = await deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=deepseek_messages,
+                temperature=0.7,
+                max_tokens=1200
+            )
+            reply = completion.choices[0].message.content
+            if reply and reply.strip():
+                logger.info("✅ DeepSeek sohbet yanıtı başarıyla döndü.")
+                return reply.strip()
+        except Exception as e:
+            logger.error(f"DeepSeek chat hatası: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Kadim yapay zeka servisine ulaşılamadı: {str(e)}"
+            )
+
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Kadim rehber servisi şu anda yanıt veremiyor. Lütfen tekrar deneyin."
+    )
+
 
 
 # -----------------------------------------------------------------------------
@@ -1106,7 +1227,7 @@ async def interpret_dream(request: DreamInterpretRequest):
         "{\n"
         '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle (kullanıcı dilinde).",\n'
         '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması (kullanıcı dilinde).",\n'
-        f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın 1-2 paragraflık tam, bilgece ve derinlikli tabiri (kullanıcı dilinde).",\n'
+        f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın en az 2-3 doyurucu, akıcı, edebi ve derinlikli paragraflık kapsamlı ve yarım kalmayan tam tabiri (kullanıcı dilinde, yaklaşık 180-260 kelime).",\n'
         '  "teasers": {\n'
         f'    "{other_trads[0]}": "{other_meta_0["title"]} açısından rüyayı merak ettiren, 1 cümlelik şoke edici veya düşündürücü teaser (kullanıcı dilinde)",\n'
         f'    "{other_trads[1]}": "{other_meta_1["title"]} açısından rüyayı merak ettiren, 1 cümlelik çarpıcı teaser (kullanıcı dilinde)."\n'
@@ -1281,7 +1402,7 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         f"🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
         f"- Kullanıcının rüyayı yazdığı dili otomatik tespit et ve yorumunu KESİNLİKLE kullanıcının dilinde üret.\n"
         f"- Kullanıcının rüyasını YALNIZCA '{trad_meta['title']}' ({trad_meta['scholar']}) geleneği ışığında yorumla.\n"
-        f"- Aşağıdaki kaynak pasajından beslenerek, 1-2 paragraflık derinlikli, edebi, mistik ve vurucu bir tabir sun.\n\n"
+        f"- Aşağıdaki kaynak pasajından beslenerek, en az 2-3 derinlikli, edebi, akıcı ve sürükleyici paragraflık (yaklaşık 180-250 kelime) tatmin edici bir tabir sun. Asla sözünü yarım bırakma, son cümleyi tam bir bilgelik mesajıyla bitir.\n\n"
         f"KAYNAK PASAJI:\n{chunk_text_content}"
     )
 
@@ -1306,6 +1427,28 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         interpretation=full_text,
         sources_used=sources_payload
     )
+
+
+@app.post("/chat", response_model=ChatResponse, summary="Tabirciye Soru Sor (Rüyanın Devamı Olarak Sohbet)")
+async def chat_with_interpreter(request: ChatRequest):
+    """
+    Rüya tabiri sonrasında kullanıcının rüyasıyla ilgili devam sorularını cevaplar.
+    Google Gemini (5s) + DeepSeek yedek motoruyla gerçek zamanlı AI yanıtı üretir.
+    """
+    message = request.message.strip()
+    if not message:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Lütfen tabirciye iletmek için bir soru yazınız."
+        )
+
+    logger.info(f"Tabirciye soru soruldu. Kullanıcı ID: {request.user_id or 'Anonim'}")
+    reply = await generate_chat_reply(
+        message=message,
+        system_context=request.system_context,
+        history=request.history
+    )
+    return ChatResponse(reply=reply)
 
 
 # -----------------------------------------------------------------------------

@@ -24,13 +24,6 @@ class ChatRepository implements IChatRepository {
     required String systemPromptContext,
     required List<ChatMessage> history,
   }) async {
-    // 1. Sunucu es geçme (Mock / Test) modu kontrolü
-    if (ApiConstants.useMockBackend) {
-      debugPrint('[ChatRepository] Mock modu devrede: Sunucu es geçiliyor, akıllı bilge yanıtı üretiliyor.');
-      await Future.delayed(const Duration(milliseconds: 600));
-      return _generateMysticalFallbackReply(message);
-    }
-
     try {
       final response = await _dioClient.dio.post(
         ApiConstants.chatEndpoint,
@@ -43,33 +36,22 @@ class ChatRepository implements IChatRepository {
 
       if (response.statusCode == 200 && response.data != null) {
         if (response.data is Map<String, dynamic>) {
-          return response.data['reply'] as String? ?? 'Kadim bilgelik sessiz kaldı.';
+          final reply = response.data['reply'] as String?;
+          if (reply != null && reply.trim().isNotEmpty) {
+            return reply.trim();
+          }
+          throw Exception('Sunucudan boş yanıt döndü.');
         }
         return response.data.toString();
       } else {
         throw DioException(
           requestOptions: response.requestOptions,
-          error: 'Sohbet sunucusundan beklenmeyen yanıt',
+          error: 'Sohbet sunucusundan beklenmeyen yanıt kodu: ${response.statusCode}',
         );
       }
     } catch (e) {
-      debugPrint('[ChatRepository] Çevrimdışı/Hata durumu: $e. Akıllı simülatör yanıtı üretiliyor.');
-      await Future.delayed(const Duration(milliseconds: 600));
-      return _generateMysticalFallbackReply(message);
-    }
-  }
-
-  String _generateMysticalFallbackReply(String query) {
-    final lower = query.toLowerCase();
-    if (lower.contains('ne anlama') || lower.contains('neden') || lower.contains('nasıl')) {
-      return 'Bilinçaltın bu sembolü bir ayna gibi kullanıyor. Bu arayış, uyanık hayatında görmezden geldiğin ancak ruhunun çözmek istediği bir dügüme işaret eder. '
-          'Rüyandaki o kritik ânı hatırladığında kalbinde hissettiğin ilk his neydi? Asıl anahtar orada saklı.';
-    } else if (lower.contains('korku') || lower.contains('korktum') || lower.contains('endişe')) {
-      return 'Korku, bilinçaltının henüz aydınlatamadığı odaların bekçisidir. '
-          'Kadim bilgelikte korku uyandıran semboller, aslında kişinin aşması gereken sınır eşiklerini temsil eder.';
-    } else {
-      return 'Sorun kadim levhalarda yankılandı. Bu rüya senin sadece dün geceni değil, içindeki sezgisel kavşakları da aydınlatıyor. '
-          'Zihnini serbest bırak ve rüyandaki en canlı ayrıntıya odaklan.';
+      debugPrint('[ChatRepository] Sunucu hatası: $e');
+      rethrow;
     }
   }
 }

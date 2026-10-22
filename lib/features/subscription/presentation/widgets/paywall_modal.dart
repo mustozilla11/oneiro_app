@@ -119,8 +119,8 @@ class PaywallModal extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               onTap: () async {
                 HapticFeedback.heavyImpact();
-                final success = await SubscriptionService.instance.purchaseMonthlySubscription();
-                if (success) {
+                final result = await SubscriptionService.instance.purchaseMonthlySubscription();
+                if (result.success) {
                   await ref.read(userSubscriptionProvider.notifier).setPremium(true);
                 }
                 if (context.mounted) {
@@ -129,13 +129,16 @@ class PaywallModal extends ConsumerWidget {
                     SnackBar(
                       content: Row(
                         children: [
-                          const Icon(Icons.verified, color: AppColors.ancientGold),
+                          Icon(
+                            result.success ? Icons.verified : Icons.info_outline,
+                            color: result.success ? AppColors.ancientGold : AppColors.electricLavender,
+                          ),
                           const SizedBox(width: 12),
-                          Text(
-                            success
-                                ? 'Kadim Gezgin Plus mühürlendi! Hoş geldiniz.'
-                                : 'İşlem tamamlanamadı veya iptal edildi.',
-                            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+                          Expanded(
+                            child: Text(
+                              result.message,
+                              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, fontSize: 13),
+                            ),
                           ),
                         ],
                       ),
@@ -143,7 +146,7 @@ class PaywallModal extends ConsumerWidget {
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.ancientGold),
+                        side: BorderSide(color: result.success ? AppColors.ancientGold : AppColors.borderSubtle),
                       ),
                     ),
                   );
@@ -235,8 +238,8 @@ class PaywallModal extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               onTap: () async {
                 HapticFeedback.mediumImpact();
-                final success = await SubscriptionService.instance.purchaseCreditPack();
-                if (success) {
+                final result = await SubscriptionService.instance.purchaseCreditPack();
+                if (result.success) {
                   await ref.read(userSubscriptionProvider.notifier).addCredits(10);
                 }
                 if (context.mounted) {
@@ -245,13 +248,16 @@ class PaywallModal extends ConsumerWidget {
                     SnackBar(
                       content: Row(
                         children: [
-                          const Icon(Icons.token, color: AppColors.neonPurple),
+                          Icon(
+                            result.success ? Icons.token : Icons.info_outline,
+                            color: result.success ? AppColors.neonPurple : AppColors.electricLavender,
+                          ),
                           const SizedBox(width: 12),
-                          Text(
-                            success
-                                ? '10 Kadim Jeton cüzdanınıza eklendi!'
-                                : 'İşlem tamamlanamadı veya iptal edildi.',
-                            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+                          Expanded(
+                            child: Text(
+                              result.message,
+                              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, fontSize: 13),
+                            ),
                           ),
                         ],
                       ),
@@ -259,7 +265,7 @@ class PaywallModal extends ConsumerWidget {
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.neonPurple),
+                        side: BorderSide(color: result.success ? AppColors.neonPurple : AppColors.borderSubtle),
                       ),
                     ),
                   );

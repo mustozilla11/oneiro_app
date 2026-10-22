@@ -87,17 +87,23 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
 
     // 3. Durum: Ödüllü Video Reklam İzletme
     setState(() => _isLoading = true);
+    bool rewardEarned = false;
 
-    AdService.instance.showRewardedAd(
+    await AdService.instance.showRewardedAd(
       onUserEarnedReward: () {
+        rewardEarned = true;
         debugPrint('[LockedTraditionCard] Ödül kazanıldı, gelenek kilidi açılıyor: ${widget.tradition.traditionId}');
         _executeUnlockOnBackend();
       },
       onAdClosed: () {
-        if (mounted) setState(() => _isLoading = false);
+        if (!rewardEarned && mounted) {
+          setState(() => _isLoading = false);
+        }
       },
       onAdFailed: () {
-        if (mounted) setState(() => _isLoading = false);
+        if (!rewardEarned && mounted) {
+          setState(() => _isLoading = false);
+        }
       },
     );
   }
@@ -134,6 +140,17 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
             ),
           ),
         );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Kadim tabir açılamadı, lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -144,25 +161,45 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     final subState = ref.watch(userSubscriptionProvider);
     final isUnlocked = trad.isUnlocked;
 
-    // Gelenek İkonu ve Renk Belirleme
+    // Gelenek İkonu, Renk ve Arka Plan Gradyanı Belirleme
     IconData iconData = Icons.auto_awesome;
-    Color accentColor = AppColors.neonPurple;
+    Color accentColor = AppColors.ancientGold;
+    LinearGradient cardBgGradient = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF261D0C), Color(0xFF140F04)],
+    );
 
     if (trad.traditionId == 'antik_akdeniz') {
       iconData = Icons.account_balance;
-      accentColor = AppColors.electricLavender;
+      accentColor = AppColors.mediterraneanSky;
+      cardBgGradient = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF071F36), Color(0xFF030D18)],
+      );
     } else if (trad.traditionId == 'psikoloji') {
       iconData = Icons.psychology_outlined;
-      accentColor = AppColors.neonPurple;
+      accentColor = AppColors.subconsciousIndigo;
+      cardBgGradient = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF160F2B), Color(0xFF090614)],
+      );
     } else {
       iconData = Icons.menu_book_rounded;
       accentColor = AppColors.ancientGold;
+      cardBgGradient = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF261D0C), Color(0xFF140F04)],
+      );
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCardElevated,
+        gradient: cardBgGradient,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: isUnlocked ? accentColor.withOpacity(0.6) : AppColors.borderSubtle,
@@ -171,7 +208,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
         boxShadow: isUnlocked
             ? [
                 BoxShadow(
-                  color: accentColor.withOpacity(0.15),
+                  color: accentColor.withOpacity(0.18),
                   blurRadius: 18,
                   spreadRadius: 1,
                 ),

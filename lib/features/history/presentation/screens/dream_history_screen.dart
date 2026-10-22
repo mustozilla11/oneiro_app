@@ -95,7 +95,7 @@ class DreamHistoryScreen extends StatelessWidget {
                               return _buildDreamCard(
                                 context,
                                 date: dateStr,
-                                emotion: 'Mistik ✨',
+                                emotion: (item['emotion'] as String? ?? '').trim(),
                                 title: symbols.isNotEmpty ? symbols.take(2).join(' & ') : 'Kadim Tabir',
                                 preview: dreamText,
                                 symbols: symbols,
@@ -260,21 +260,22 @@ class DreamHistoryScreen extends StatelessWidget {
                     color: AppColors.textDim,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.neonPurple.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    emotion,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.lightLilac,
+                if (emotion.isNotEmpty && !emotion.toLowerCase().contains('mistik'))
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.neonPurple.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      emotion,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.lightLilac,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 8),

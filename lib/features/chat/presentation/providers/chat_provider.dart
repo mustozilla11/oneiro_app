@@ -43,22 +43,35 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ChatNotifier(this._repository) : super(const ChatState());
 
   void initialize(DreamInterpretation interpretation) {
+    final unlockedTraditionsInfo = interpretation.lockedTraditions
+        .where((t) => t.isUnlocked && t.interpretation != null)
+        .map((t) => '${t.title} (${t.scholar}):\n${t.interpretation}')
+        .join('\n\n');
+
     final systemPrompt = '''
 Sen Kadim Oneiro Rüyabilimci ve Derin Bilinçaltı Rehberisin.
-Kullanıcının gördüğü rüya:
-"${interpretation.dreamText}"
-Seçtiği duygu: ${interpretation.emotion}
-Çıkarılan anahtar semboller: ${interpretation.symbols.join(', ')}
-Kadim tabiri: ${interpretation.ancientInterpretation}
-Psikolojik analizi: ${interpretation.subconsciousAnalysis}
-Günün uyarısı: ${interpretation.warningOfDay}
 
-Görevin: Kullanıcı bu rüya hakkında sorular sordukça, mistik, bilge, derinlikli, şefkatli ancak net ve derin psikolojik/ezoterik içgörülerle cevap vermektir.
+KULLANICININ GÖRDÜĞÜ RÜYA:
+"${interpretation.dreamText}"
+
+RÜYANIN ÇÖZÜMLENEN KADİM DETAYLARI:
+- Çıkarılan Anahtar Semboller: ${interpretation.symbols.join(', ')}
+- Bilinçaltı Aynası: ${interpretation.freeAnalysis.bilincaltiAynasi}
+- Birincil Kadim Tabir (${interpretation.primaryTradition.title} - ${interpretation.primaryTradition.scholar}):
+${interpretation.primaryTradition.interpretation ?? interpretation.ancientInterpretation}
+${unlockedTraditionsInfo.isNotEmpty ? '\n- Açılan Diğer Kadim Ekoller:\n$unlockedTraditionsInfo' : ''}
+- Günün Pusulası: ${interpretation.freeAnalysis.gununPusulasi}
+
+GÖREVİN VE ÜSLUBUN:
+Kullanıcı bu rüya hakkında seninle konuşacak, sorular soracak veya rüyasını detaylandıracaktır.
+1. Kullanıcının sorularını bu rüyanın ve kadim tabirinin doğal bir devamı olarak ele al.
+2. Rüyadaki spesifik sembollere (${interpretation.symbols.join(', ')}) doğrudan atıfta bulunarak, derinlikli, bilgece, edebi ve şefkatli bir dille açıkla.
+3. Asla hazır şablon, genel geçer veya kopyala-yapıştır cevaplar verme. Yanıtların tatmin edici uzunlukta ve akıcı olsun.
 ''';
 
     final welcomeMessage = ChatMessage(
       id: _uuid.v4(),
-      text: 'Bilinçaltının fısıltılarını duydum. "${interpretation.symbols.join(', ')}" sembolleri derin bir kavşakta olduğuna işaret ediyor. Bu rüyada aklına takılan veya hissettiğin en derin ayrıntı neydi?',
+      text: 'Rüyanın derinliklerini inceledim. "${interpretation.symbols.take(3).join(', ')}" sembolleri bilinçaltının önemli bir eşiğine işaret ediyor. Bu rüyada aklına takılan veya hissettiğin en derin ayrıntı neydi?',
       isUser: false,
     );
 
@@ -102,7 +115,14 @@ Görevin: Kullanıcı bu rüya hakkında sorular sordukça, mistik, bilge, derin
         isTyping: false,
       );
     } catch (e) {
+      final errorMessage = ChatMessage(
+        id: _uuid.v4(),
+        text: '⚠️ Kadim rehberle bağlantı kurulamadı. Sunucuya ulaşılamadı veya bir hata oluştu, lütfen tekrar deneyiniz.',
+        isUser: false,
+      );
+
       state = state.copyWith(
+        messages: [...state.messages, errorMessage],
         isTyping: false,
         error: 'Cevap alınamadı: $e',
       );

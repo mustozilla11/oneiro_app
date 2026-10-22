@@ -283,7 +283,12 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 22),
+
+              // Birincil Kadim Ekol Seçimi (Kullanıcı hangi tabirin ilk ücretsiz açılacağını seçebilir)
+              _buildTraditionSelector(ref.watch(dreamProvider).preferredTradition),
+
+              const SizedBox(height: 26),
 
               // Amazon Sıcak Kehribar "Tabiri Çöz" Butonu
               Padding(
@@ -340,4 +345,141 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
       ),
     );
   }
+
+  Widget _buildTraditionSelector(String selectedTradition) {
+    final traditions = [
+      {
+        'id': 'islam_dogu',
+        'title': 'Doğu & İslam',
+        'scholar': 'İbn-i Sîrîn',
+        'icon': Icons.menu_book_rounded,
+        'color': AppColors.ancientGold,
+        'bg': const Color(0xFF261D0C),
+      },
+      {
+        'id': 'antik_akdeniz',
+        'title': 'Antik Akdeniz',
+        'scholar': 'Artemidorus',
+        'icon': Icons.account_balance,
+        'color': AppColors.mediterraneanSky,
+        'bg': const Color(0xFF071F36),
+      },
+      {
+        'id': 'psikoloji',
+        'title': 'Psikoloji',
+        'scholar': 'Carl Jung',
+        'icon': Icons.psychology_outlined,
+        'color': AppColors.subconsciousIndigo,
+        'bg': const Color(0xFF160F2B),
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'İLK AÇILACAK KADİM TABİR',
+                style: GoogleFonts.cinzel(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.5,
+                  color: AppColors.amazonAmberLight,
+                ),
+              ),
+              Text(
+                '✦ Öncelikli Ekol',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.ancientGold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: traditions.map((t) {
+            final id = t['id'] as String;
+            final title = t['title'] as String;
+            final scholar = t['scholar'] as String;
+            final icon = t['icon'] as IconData;
+            final color = t['color'] as Color;
+            final bg = t['bg'] as Color;
+            final isSelected = selectedTradition == id;
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  ref.read(dreamProvider.notifier).setPreferredTradition(id);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? bg : AppColors.surfaceCardElevated.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected ? color : AppColors.borderSubtle,
+                      width: isSelected ? 1.6 : 1.0,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        icon,
+                        color: isSelected ? color : AppColors.textDim,
+                        size: 20,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? AppColors.textPureWhite : AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        scholar,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected ? color : AppColors.textDim,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 }
+

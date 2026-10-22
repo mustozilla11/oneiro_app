@@ -20,6 +20,21 @@ class AppColors {
   static const Color mysticalAmber = Color(0xFFFFB703);
   static const Color antiqueBronze = Color(0xFFD4A373);
 
+  // Kadim Ekoller Özel Renk Paleti
+  // 1. Antik Akdeniz Bilgeliği (Deniz & Gökyüzü Mavisi)
+  static const Color mediterraneanAzure = Color(0xFF0284C7);
+  static const Color mediterraneanSky = Color(0xFF38BDF8);
+  static const Color mediterraneanDeep = Color(0xFF0C4A6E);
+
+  // 2. Derinlik Psikolojisi (Bilinçaltı Koyu İndigo / Gece Moru)
+  static const Color subconsciousIndigo = Color(0xFF6366F1);
+  static const Color subconsciousViolet = Color(0xFF4F46E5);
+  static const Color subconsciousDark = Color(0xFF1E1B4B);
+
+  // 3. Doğu & İslam Geleneği (Kadim Altın & Sıcak Kehribar)
+  static const Color islamicGold = Color(0xFFFFD166);
+  static const Color islamicAmber = Color(0xFFFF9900);
+
   // Metin & Tipografi Renkleri
   static const Color textPureWhite = Color(0xFFFFFFFF);
   static const Color textSilver = Color(0xFFE2E8F0);

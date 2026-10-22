@@ -1,13 +1,26 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'firestore_service.dart';
+
+class PurchaseResult {
+  final bool success;
+  final String message;
+  final bool isConfigured;
+
+  const PurchaseResult({
+    required this.success,
+    required this.message,
+    this.isConfigured = true,
+  });
+}
 
 class SubscriptionService {
   SubscriptionService._internal();
   static final SubscriptionService instance = SubscriptionService._internal();
 
-  // Test / Canlı RevenueCat Anahtarları (Proje yayına alınırken konsoldan güncellenir)
+  // Test / Canlı RevenueCat Anahtarları (RevenueCat Dashboard -> Project Settings -> API Keys)
   static const String _revenueCatApiKeyApple = "appl_oneiro_live_key_placeholder";
   static const String _revenueCatApiKeyGoogle = "goog_oneiro_live_key_placeholder";
 
@@ -33,6 +46,12 @@ class SubscriptionService {
           ? _revenueCatApiKeyApple
           : _revenueCatApiKeyGoogle;
 
+      if (apiKey.contains("placeholder")) {
+        debugPrint('[SubscriptionService] RevenueCat API anahtarı henüz tanımlanmamış (placeholder). Gerçek mağaza ödemeleri için geçerli anahtar bekleniyor.');
+        _isConfigured = false;
+        return;
+      }
+
       final configuration = PurchasesConfiguration(apiKey);
       if (uid != null && uid.isNotEmpty) {
         configuration.appUserID = uid;
@@ -51,7 +70,7 @@ class SubscriptionService {
       final customerInfo = await Purchases.getCustomerInfo();
       _handleCustomerInfoUpdate(customerInfo);
     } catch (e) {
-      debugPrint('[SubscriptionService] RevenueCat yapılandırma notu (Test/Geliştirme modu devrede): $e');
+      debugPrint('[SubscriptionService] RevenueCat başlatma hatası: $e');
       _isConfigured = false;
     }
   }
@@ -76,10 +95,7 @@ class SubscriptionService {
   /// Kullanıcı giriş yaptığında RevenueCat hesabıyla eşleştirir
   Future<void> logIn(String uid) async {
     _currentUserId = uid;
-    if (!_isConfigured) {
-      debugPrint('[SubscriptionService] Simüle edilmiş RevenueCat girişi: $uid');
-      return;
-    }
+    if (!_isConfigured) return;
 
     try {
       final logInResult = await Purchases.logIn(uid);
@@ -104,17 +120,15 @@ class SubscriptionService {
     }
   }
 
-  /// Aylık Premium Abonelik Satın Alma Akışı (39,99 TL / ay)
-  Future<bool> purchaseMonthlySubscription() async {
+  /// Aylık Premium Abonelik Satın Alma Akışı (Google Play / App Store)
+  Future<PurchaseResult> purchaseMonthlySubscription() async {
     if (!_isConfigured) {
-      debugPrint('[SubscriptionService] RevenueCat offline/mock modunda: Simüle edilmiş Premium tanımlandı.');
-      if (_currentUserId != null) {
-        await FirestoreService.instance.updatePremiumStatus(_currentUserId!, true);
-      }
-      if (onPremiumStatusChanged != null) {
-        onPremiumStatusChanged!(true);
-      }
-      return true;
+      debugPrint('[SubscriptionService] RevenueCat henüz canlı anahtarla yapılandırılmamış.');
+      return const PurchaseResult(
+        success: false,
+        isConfigured: false,
+        message: 'Google Play ödeme penceresini açmak için RevenueCat Public API anahtarı (goog_...) gereklidir.',
+      );
     }
 
     try {
@@ -125,35 +139,36 @@ class SubscriptionService {
         final customerInfo = await Purchases.purchasePackage(currentOffering.monthly!);
         final isPremium = customerInfo.entitlements.all[entitlementPremium]?.isActive ?? false;
         _handleCustomerInfoUpdate(customerInfo);
-        return isPremium;
+        return PurchaseResult(
+          success: isPremium,
+          message: isPremium ? 'Kadim Gezgin Plus aboneliği başarıyla başlatıldı!' : 'Satın alma tamamlanamadı.',
+        );
       } else {
-        debugPrint('[SubscriptionService] Aktif aylık paket bulunamadı, simülasyon onaylanıyor.');
-        if (_currentUserId != null) {
-          await FirestoreService.instance.updatePremiumStatus(_currentUserId!, true);
-        }
-        if (onPremiumStatusChanged != null) {
-          onPremiumStatusChanged!(true);
-        }
-        return true;
+        return const PurchaseResult(
+          success: false,
+          message: 'Aylık abonelik paketi Google Play / RevenueCat konsolunda henüz aktif edilmemiş.',
+        );
       }
+    } on PlatformException catch (e) {
+      debugPrint('[SubscriptionService] Satın alma iptali veya hatası: ${e.code} - ${e.message}');
+      if (e.code == '1' || e.message?.contains('cancelled') == true) {
+        return const PurchaseResult(success: false, message: 'Ödeme işlemi iptal edildi.');
+      }
+      return PurchaseResult(success: false, message: 'Ödeme hatası: ${e.message ?? e.code}');
     } catch (e) {
-      debugPrint('[SubscriptionService] Satın alma işlemi sırasında hata: $e');
-      // Kullanıcı iptali değilse simülasyona düşebilir
-      return false;
+      debugPrint('[SubscriptionService] Satın alma sırasında beklenmeyen hata: $e');
+      return PurchaseResult(success: false, message: 'Ödeme tamamlanamadı: $e');
     }
   }
 
-  /// Tek Seferlik 10 Rüya Jetonu Paketi Satın Alma Akışı (19,99 TL)
-  Future<bool> purchaseCreditPack() async {
+  /// Tek Seferlik 10 Rüya Jetonu Paketi Satın Alma Akışı
+  Future<PurchaseResult> purchaseCreditPack() async {
     if (!_isConfigured) {
-      debugPrint('[SubscriptionService] RevenueCat offline/mock modunda: 10 Jeton simüle edilerek eklendi.');
-      if (_currentUserId != null) {
-        await FirestoreService.instance.incrementCredits(_currentUserId!, 10);
-      }
-      if (onCreditsPurchased != null) {
-        onCreditsPurchased!(10);
-      }
-      return true;
+      return const PurchaseResult(
+        success: false,
+        isConfigured: false,
+        message: 'Google Play ödeme penceresini açmak için RevenueCat Public API anahtarı (goog_...) gereklidir.',
+      );
     }
 
     try {
@@ -177,20 +192,25 @@ class SubscriptionService {
         if (onCreditsPurchased != null) {
           onCreditsPurchased!(10);
         }
-        return true;
+        return const PurchaseResult(
+          success: true,
+          message: '10 Kadim Rüya Jetonu hesabınıza mühürlendi!',
+        );
       } else {
-        debugPrint('[SubscriptionService] Kredi paketi mağazada bulunamadı, simülasyon kredisi aktarılıyor.');
-        if (_currentUserId != null) {
-          await FirestoreService.instance.incrementCredits(_currentUserId!, 10);
-        }
-        if (onCreditsPurchased != null) {
-          onCreditsPurchased!(10);
-        }
-        return true;
+        return const PurchaseResult(
+          success: false,
+          message: 'Jeton paketi mağaza konsolunda henüz aktif edilmemiş.',
+        );
       }
+    } on PlatformException catch (e) {
+      debugPrint('[SubscriptionService] Jeton satın alma hatası: ${e.code} - ${e.message}');
+      if (e.code == '1' || e.message?.contains('cancelled') == true) {
+        return const PurchaseResult(success: false, message: 'Ödeme işlemi iptal edildi.');
+      }
+      return PurchaseResult(success: false, message: 'Ödeme hatası: ${e.message ?? e.code}');
     } catch (e) {
       debugPrint('[SubscriptionService] Kredi paketi satın alma hatası: $e');
-      return false;
+      return PurchaseResult(success: false, message: 'Ödeme tamamlanamadı: $e');
     }
   }
 }

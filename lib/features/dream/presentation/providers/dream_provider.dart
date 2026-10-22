@@ -12,6 +12,7 @@ final dreamRepositoryProvider = Provider<IDreamRepository>((ref) {
 class DreamState {
   final String dreamText;
   final String selectedEmotion;
+  final String preferredTradition;
   final bool isLoading;
   final bool isUnlocking;
   final DreamInterpretation? interpretation;
@@ -19,7 +20,8 @@ class DreamState {
 
   const DreamState({
     this.dreamText = '',
-    this.selectedEmotion = 'Mistik',
+    this.selectedEmotion = '',
+    this.preferredTradition = 'islam_dogu',
     this.isLoading = false,
     this.isUnlocking = false,
     this.interpretation,
@@ -29,6 +31,7 @@ class DreamState {
   DreamState copyWith({
     String? dreamText,
     String? selectedEmotion,
+    String? preferredTradition,
     bool? isLoading,
     bool? isUnlocking,
     DreamInterpretation? interpretation,
@@ -37,6 +40,7 @@ class DreamState {
     return DreamState(
       dreamText: dreamText ?? this.dreamText,
       selectedEmotion: selectedEmotion ?? this.selectedEmotion,
+      preferredTradition: preferredTradition ?? this.preferredTradition,
       isLoading: isLoading ?? this.isLoading,
       isUnlocking: isUnlocking ?? this.isUnlocking,
       interpretation: interpretation ?? this.interpretation,
@@ -52,6 +56,10 @@ class DreamNotifier extends StateNotifier<DreamState> {
 
   void setEmotion(String emotion) {
     state = state.copyWith(selectedEmotion: emotion);
+  }
+
+  void setPreferredTradition(String traditionId) {
+    state = state.copyWith(preferredTradition: traditionId);
   }
 
   void setDreamText(String text) {
@@ -75,6 +83,7 @@ class DreamNotifier extends StateNotifier<DreamState> {
       final request = DreamRequest(
         dreamText: state.dreamText.trim(),
         emotion: state.selectedEmotion,
+        preferredTradition: state.preferredTradition,
         userId: currentUid,
       );
 

@@ -8,7 +8,7 @@ class AdService {
   AdService._internal();
 
   RewardedAd? _rewardedAd;
-  bool _isRewardedAdLoading = false;
+  Completer<RewardedAd?>? _loadCompleter;
   bool _isInitialized = false;
 
   // Google Test Ad Unit IDs (Rewarded Video)
@@ -39,39 +39,44 @@ class AdService {
     }
   }
 
-  /// Ödüllü reklamı arka planda hazır bekletir
-  void preloadRewardedAd() {
-    if (!_isInitialized || kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
-    if (_rewardedAd != null || _isRewardedAdLoading) return;
+  /// Ödüllü reklamı arka planda hazır bekletir (Race-condition korumalı)
+  Future<RewardedAd?> preloadRewardedAd() async {
+    if (!_isInitialized || kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return null;
+    if (_rewardedAd != null) return _rewardedAd;
+    if (_loadCompleter != null) return _loadCompleter!.future;
 
-    _isRewardedAdLoading = true;
+    final completer = Completer<RewardedAd?>();
+    _loadCompleter = completer;
+
     RewardedAd.load(
       adUnitId: rewardedAdUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
-          debugPrint('[AdService] Ödüllü video reklam önceden yüklendi ve hazır.');
+          debugPrint('[AdService] Ödüllü video reklam yüklendi ve hazır bekliyor.');
           _rewardedAd = ad;
-          _isRewardedAdLoading = false;
+          _loadCompleter = null;
+          if (!completer.isCompleted) completer.complete(ad);
         },
         onAdFailedToLoad: (LoadAdError error) {
-          debugPrint('[AdService] Ödüllü reklam önyükleme başarısız: $error');
+          debugPrint('[AdService] Ödüllü reklam yükleme başarısız: $error');
           _rewardedAd = null;
-          _isRewardedAdLoading = false;
+          _loadCompleter = null;
+          if (!completer.isCompleted) completer.complete(null);
         },
       ),
     );
+
+    return completer.future;
   }
 
-  /// Ödüllü Video Reklamı (Rewarded Ad) gösterir.
-  /// Kullanıcı videoyu tamamladığında `onUserEarnedReward` tetiklenir.
-  /// Reklam yüklenemezse veya maxTimeout (örneğin 10 saniye) aşılırsa fallback devreye girer
-  /// ve kullanıcının rüya tabiri kilidi açılmaya devam eder.
+  /// Ödüllü Video Reklamı gösterir.
+  /// İlk tıkta hemen açılması için var olan veya yüklenmekte olan reklamı bekler.
   Future<void> showRewardedAd({
     required VoidCallback onUserEarnedReward,
     VoidCallback? onAdClosed,
     VoidCallback? onAdFailed,
-    Duration maxTimeout = const Duration(seconds: 10),
+    Duration maxTimeout = const Duration(seconds: 8),
   }) async {
     bool hasRewarded = false;
 
@@ -82,95 +87,68 @@ class AdService {
       }
     }
 
-    // Platform desteği yoksa (Desktop/Web/Emülatör internetsiz) simülasyon yap
+    // Platform desteği yoksa (Desktop/Web/Simülasyon)
     if (!_isInitialized || kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-      debugPrint('[AdService] Simülasyon: 2 saniye sonra ödül veriliyor.');
-      await Future.delayed(const Duration(milliseconds: 2000));
+      debugPrint('[AdService] Simülasyon: Reklam simüle ediliyor, 1.5s sonra kilit açılıyor.');
+      await Future.delayed(const Duration(milliseconds: 1500));
       grantRewardOnce();
       onAdClosed?.call();
       return;
     }
 
-    // Eğer hazırda yüklü reklam varsa doğrudan göster
-    if (_rewardedAd != null) {
-      final ad = _rewardedAd!;
-      _rewardedAd = null; // Tüketildi
+    RewardedAd? adToShow = _rewardedAd;
 
-      ad.fullScreenContentCallback = FullScreenContentCallback(
-        onAdShowedFullScreenContent: (ad) {
-          debugPrint('[AdService] Ödüllü video tam ekranda başladı.');
-        },
-        onAdDismissedFullScreenContent: (ad) {
-          debugPrint('[AdService] Ödüllü video kapatıldı.');
-          ad.dispose();
-          preloadRewardedAd(); // Bir sonraki için yenisini hazırla
-          onAdClosed?.call();
-        },
-        onAdFailedToShowFullScreenContent: (ad, error) {
-          debugPrint('[AdService] Ödüllü video gösterim hatası: $error');
-          ad.dispose();
-          grantRewardOnce(); // Kullanıcı mağdur olmasın
-          preloadRewardedAd();
-          onAdClosed?.call();
-        },
-      );
+    // Hazırda reklam yoksa ama şu an yükleniyorsa o yüklemeyi bekle
+    if (adToShow == null) {
+      debugPrint('[AdService] Hazır reklam yok, yükleme tamamlanması bekleniyor...');
+      try {
+        adToShow = await preloadRewardedAd().timeout(maxTimeout, onTimeout: () {
+          debugPrint('[AdService] Reklam yükleme zaman aşımına uğradı, kullanıcı mağdur olmasın diye kilit açılıyor.');
+          return null;
+        });
+      } catch (e) {
+        debugPrint('[AdService] Reklam bekleme istisnası: $e');
+        adToShow = null;
+      }
+    }
 
-      await ad.show(onUserEarnedReward: (ad, reward) {
+    if (adToShow == null) {
+      // Reklam ağı arızasında veya zaman aşımında kullanıcıyı bekletme, ödülü ver
+      debugPrint('[AdService] Reklam temin edilemedi; otomatik kilit açılıyor.');
+      grantRewardOnce();
+      onAdClosed?.call();
+      return;
+    }
+
+    // Reklam bulundu, göster
+    _rewardedAd = null; // Kullanıldı
+
+    adToShow.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        debugPrint('[AdService] Ödüllü video tam ekranda başladı.');
+      },
+      onAdDismissedFullScreenContent: (ad) {
+        debugPrint('[AdService] Ödüllü video kapatıldı.');
+        ad.dispose();
+        preloadRewardedAd(); // Bir sonraki tıklama için arka planda hemen yenisini hazırla
+        onAdClosed?.call();
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('[AdService] Ödüllü video gösterim hatası: $error');
+        ad.dispose();
+        grantRewardOnce(); // Hata olduysa kullanıcıyı mağdur etme
+        preloadRewardedAd();
+        onAdClosed?.call();
+      },
+    );
+
+    try {
+      await adToShow.show(onUserEarnedReward: (ad, reward) {
         debugPrint('[AdService] Kullanıcı ödüllü videoyu tamamladı: ${reward.amount} ${reward.type}');
         grantRewardOnce();
       });
-      return;
-    }
-
-    // Hazırda reklam yoksa anlık yüklemeyi dene, timeout ile emniyete al
-    Timer? timeoutTimer = Timer(maxTimeout, () {
-      debugPrint('[AdService] Reklam yükleme zaman aşımına uğradı ($maxTimeout). Fallback ile kilit açılıyor.');
-      grantRewardOnce();
-      onAdClosed?.call();
-    });
-
-    try {
-      _isRewardedAdLoading = true;
-      await RewardedAd.load(
-        adUnitId: rewardedAdUnitId,
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          onAdLoaded: (ad) {
-            timeoutTimer.cancel();
-            _isRewardedAdLoading = false;
-
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                ad.dispose();
-                preloadRewardedAd();
-                onAdClosed?.call();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                ad.dispose();
-                grantRewardOnce();
-                preloadRewardedAd();
-                onAdClosed?.call();
-              },
-            );
-
-            ad.show(onUserEarnedReward: (ad, reward) {
-              debugPrint('[AdService] Ödül kazanıldı.');
-              grantRewardOnce();
-            });
-          },
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('[AdService] Anlık reklam yüklenemedi: $error');
-            timeoutTimer.cancel();
-            _isRewardedAdLoading = false;
-            grantRewardOnce(); // Reklam ağı arızasında kullanıcıyı bekletme, ödülü ver
-            onAdClosed?.call();
-          },
-        ),
-      );
     } catch (e) {
-      debugPrint('[AdService] Reklam çalıştırma istisnası: $e');
-      timeoutTimer.cancel();
-      _isRewardedAdLoading = false;
+      debugPrint('[AdService] ad.show istisnası: $e');
       grantRewardOnce();
       onAdClosed?.call();
     }
@@ -178,5 +156,6 @@ class AdService {
 
   void dispose() {
     _rewardedAd?.dispose();
+    _rewardedAd = null;
   }
 }
