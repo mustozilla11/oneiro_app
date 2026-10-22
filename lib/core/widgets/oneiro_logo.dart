@@ -8,12 +8,14 @@ import 'package:flutter/material.dart';
 class OneiroLogo extends StatefulWidget {
   final double size;
   final bool animate;
+  final bool monochrome;
   final VoidCallback? onTap;
 
   const OneiroLogo({
     super.key,
     this.size = 96,
     this.animate = true,
+    this.monochrome = false,
     this.onTap,
   });
 
@@ -28,7 +30,7 @@ class _OneiroLogoState extends State<OneiroLogo> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    if (widget.animate) {
+    if (widget.animate && !widget.monochrome) {
       _initAnimation();
     }
   }
@@ -47,9 +49,9 @@ class _OneiroLogoState extends State<OneiroLogo> with SingleTickerProviderStateM
   @override
   void didUpdateWidget(OneiroLogo oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.animate && _controller == null) {
+    if (widget.animate && !widget.monochrome && _controller == null) {
       _initAnimation();
-    } else if (!widget.animate && _controller != null) {
+    } else if ((!widget.animate || widget.monochrome) && _controller != null) {
       _controller?.dispose();
       _controller = null;
       _glowAnimation = null;
@@ -66,20 +68,26 @@ class _OneiroLogoState extends State<OneiroLogo> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     Widget content;
 
-    if (widget.animate && _glowAnimation != null) {
+    if (widget.animate && !widget.monochrome && _glowAnimation != null) {
       content = AnimatedBuilder(
         animation: _glowAnimation!,
         builder: (context, child) {
           return CustomPaint(
             size: Size(widget.size, widget.size),
-            painter: OneiroLogoPainter(glowFactor: _glowAnimation!.value),
+            painter: OneiroLogoPainter(
+              glowFactor: _glowAnimation!.value,
+              monochrome: widget.monochrome,
+            ),
           );
         },
       );
     } else {
       content = CustomPaint(
         size: Size(widget.size, widget.size),
-        painter: const OneiroLogoPainter(glowFactor: 1.0),
+        painter: OneiroLogoPainter(
+          glowFactor: 1.0,
+          monochrome: widget.monochrome,
+        ),
       );
     }
 
@@ -97,8 +105,12 @@ class _OneiroLogoState extends State<OneiroLogo> with SingleTickerProviderStateM
 /// Oneiro 512x512 referans uzayını istenen boyuta pürüzsüz ölçekleyen CustomPainter
 class OneiroLogoPainter extends CustomPainter {
   final double glowFactor;
+  final bool monochrome;
 
-  const OneiroLogoPainter({this.glowFactor = 1.0});
+  const OneiroLogoPainter({
+    this.glowFactor = 1.0,
+    this.monochrome = false,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -109,6 +121,56 @@ class OneiroLogoPainter extends CustomPainter {
     canvas.scale(scale, scale);
 
     const center = Offset(256, 256);
+
+    // --- MONOCHROME APPLE STİLİ (TAM BEYAZ VE NET VEKTÖR) ---
+    if (monochrome) {
+      // 1. Ay (Saf Beyaz Hilal)
+      final crescentPath = Path()
+        ..moveTo(296, 110)
+        ..cubicTo(184, 110, 114, 190, 114, 270)
+        ..cubicTo(114, 350, 184, 402, 274, 402)
+        ..cubicTo(292, 402, 312, 398, 328, 390)
+        ..cubicTo(256, 376, 204, 330, 194, 270)
+        ..cubicTo(184, 210, 234, 142, 296, 110)
+        ..close();
+      canvas.drawPath(crescentPath, Paint()..color = Colors.white);
+
+      // 2. Yıldız (Saf Beyaz 4 Köşeli Elmas)
+      final starPath = Path()
+        ..moveTo(282, 154)
+        ..quadraticBezierTo(282, 176, 262, 176)
+        ..quadraticBezierTo(282, 176, 282, 198)
+        ..quadraticBezierTo(282, 176, 302, 176)
+        ..quadraticBezierTo(282, 176, 282, 154)
+        ..close();
+      canvas.drawPath(starPath, Paint()..color = Colors.white);
+
+      // 3. Çizgi 1: Kapalı Göz Yayı (Saf Beyaz)
+      final eyePath = Path()
+        ..moveTo(234, 262)
+        ..cubicTo(258, 286, 298, 286, 322, 262);
+      final linePaint1 = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7.5
+        ..strokeCap = StrokeCap.round
+        ..color = Colors.white;
+      canvas.drawPath(eyePath, linePaint1);
+
+      // 4. Çizgi 2: Rüya Dalgası (Saf Beyaz)
+      final wavePath = Path()
+        ..moveTo(226, 332)
+        ..cubicTo(250, 316, 274, 346, 302, 332)
+        ..cubicTo(324, 320, 344, 336, 366, 326);
+      final linePaint2 = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7.0
+        ..strokeCap = StrokeCap.round
+        ..color = Colors.white;
+      canvas.drawPath(wavePath, linePaint2);
+
+      canvas.restore();
+      return;
+    }
 
     // 1. Kozmik Arka Plan & Hâle Işıması (Ambient Nebula Glow)
     final nebulaPaint = Paint()
@@ -369,6 +431,6 @@ class OneiroLogoPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant OneiroLogoPainter oldDelegate) {
-    return oldDelegate.glowFactor != glowFactor;
+    return oldDelegate.glowFactor != glowFactor || oldDelegate.monochrome != monochrome;
   }
 }

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Apple Squircle Clip Path -->
+    <clipPath id="squircleClip">
+      <rect x="0" y="0" width="512" height="512" rx="115" ry="115" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#squircleClip)">
+    <!-- 1. Pure Pitch Black OLED Background (#000000) -->
+    <rect width="512" height="512" fill="#000000" />
+
+    <!-- 2. The Crescent Moon (Hilal - Pure White) -->
+    <path d="
+      M 296 110
+      C 184 110 114 190 114 270
+      C 114 350 184 402 274 402
+      C 292 402 312 398 328 390
+      C 256 376 204 330 194 270
+      C 184 210 234 142 296 110
+      Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- 3. The Minimal 4-Point Star (Yıldız - Pure White) -->
+    <path d="
+      M 282 154
+      Q 282 176 262 176
+      Q 282 176 282 198
+      Q 282 176 302 176
+      Q 282 176 282 154
+      Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- 4. Line 1: Closed Sleeping Eyelid Arc (Kapalı Göz Çizgisi - Pure White) -->
+    <path d="M 234 262 C 258 286 298 286 322 262"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="7.5"
+          stroke-linecap="round"
+    />
+
+    <!-- 5. Line 2: Fluid Dream Frequency Wave (Rüya Dalgası Çizgisi - Pure White) -->
+    <path d="M 226 332 C 250 316 274 346 302 332 C 324 320 344 336 366 326"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="7"
+          stroke-linecap="round"
+    />
+  </g>
+</svg>
