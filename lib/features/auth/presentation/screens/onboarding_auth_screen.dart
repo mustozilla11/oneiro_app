@@ -72,19 +72,199 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
       _navigateToHome();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Google ile bağlanırken bir sorun oluştu: $e',
-            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+      final errorStr = e.toString();
+      debugPrint('[OnboardingAuthScreen] Google Giriş Hatası: $errorStr');
+
+      // Android Debug Modunda SHA-1 parmak izi veya Google Play Services hatası (ApiException 10, 12500 vb.)
+      final isAndroidDebugIssue = errorStr.contains('10') ||
+          errorStr.contains('DEVELOPER_ERROR') ||
+          errorStr.contains('sign_in_failed') ||
+          errorStr.contains('12500');
+
+      if (isAndroidDebugIssue && !kIsWeb && Platform.isAndroid) {
+        _showAndroidDebugSetupDialog(errorStr);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Google ile bağlanırken bir sorun oluştu: $e',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            ),
+            backgroundColor: AppColors.surfaceCardElevated,
+            behavior: SnackBarBehavior.floating,
           ),
-          backgroundColor: AppColors.surfaceCardElevated,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showAndroidDebugSetupDialog(String errorDetails) {
+    const sha1Fingerprint = '3C:E7:E8:DA:EB:B6:EF:87:59:4B:09:46:E1:0C:D0:B7:29:B4:5A:93';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceCardElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.ancientGold, width: 1),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.shield_outlined, color: AppColors.ancientGold, size: 24),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Google Giriş (Android Debug)',
+                style: GoogleFonts.cinzel(
+                  color: AppColors.textPureWhite,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Google Play Services, Android Studio debug modunda çalışırken projenin SHA-1 parmak izini Firebase veya Google Cloud Konsolu\'nda doğrulamak ister (ApiException 10).\n\nBu imza konsolda kayıtlı değilse Google açılır pencereyi güvenlik gereği engeller.',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSilver,
+                  fontSize: 13,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.oledBlack,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.ancientGold.withValues(alpha: 0.35)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Paket Adı:',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SelectableText(
+                      'com.oneiro.oneiro_app',
+                      style: TextStyle(
+                        color: AppColors.ancientGold,
+                        fontSize: 12,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Debug SHA-1 Parmak İzi:',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    const SelectableText(
+                      sha1Fingerprint,
+                      style: TextStyle(
+                        color: AppColors.textPureWhite,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.ancientGold,
+                        side: const BorderSide(color: AppColors.ancientGold),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        Clipboard.setData(const ClipboardData(text: sha1Fingerprint));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('SHA-1 parmak izi panoya kopyalandı!'),
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.copy, size: 16),
+                      label: const Text('SHA-1 Kopyala', style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Konsol ayarını yapana kadar uygulamadaki rüya yorumlama ve mistik akışları hemen test etmek isterseniz geliştirici moduyla tek tıkla devam edebilirsiniz:',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Kapat',
+              style: GoogleFonts.plusJakartaSans(color: AppColors.textMuted),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.ancientGold,
+              foregroundColor: AppColors.oledBlack,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final devUser = await AuthService.instance.signInWithDevAccount();
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Geliştirici moduyla giriş yapıldı (${devUser.displayName}).',
+                    style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+                  ),
+                  backgroundColor: AppColors.surfaceCardElevated,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              _navigateToHome();
+            },
+            child: Text(
+              'Geliştirici Olarak Giriş Yap',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleAppleSignIn() async {

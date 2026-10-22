@@ -292,6 +292,21 @@ class AuthService {
     return guestUser;
   }
 
+  /// Geliştirici / Test Modunda Oturum Açma (Debug modunda SHA-1 henüz bağlanmamışken)
+  Future<OneiroUser> signInWithDevAccount({String? name, String? email}) async {
+    final devUid = 'dev_${DateTime.now().millisecondsSinceEpoch}';
+    final devUser = OneiroUser(
+      uid: devUid,
+      displayName: name ?? 'Geliştirici Gezgin',
+      email: email ?? 'developer@oneiro.app',
+      isGuest: false,
+    );
+    _currentUser = devUser;
+    await _persistUser(devUser);
+    _authStateController.add(_currentUser);
+    return devUser;
+  }
+
   /// Oturumu Kapat
   Future<void> signOut() async {
     try {
