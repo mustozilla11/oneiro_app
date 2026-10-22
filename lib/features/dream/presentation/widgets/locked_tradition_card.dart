@@ -306,8 +306,8 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                       Text(
                         isUnlocked ? 'AÇILDI' : 'KİLİTLİ',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
                           color: isUnlocked ? AppColors.moonlight : AppColors.mistGrey,
                         ),

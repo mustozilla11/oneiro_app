@@ -111,8 +111,8 @@ class HowItWorksModal extends StatelessWidget {
                       Text(
                         'NASIL ÇALIŞIR?',
                         style: GoogleFonts.cormorantGaramond(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 1.5,
                           color: AppColors.moonlight,
                         ),
@@ -205,8 +205,8 @@ class HowItWorksModal extends StatelessWidget {
                                   Text(
                                     s['number'] as String,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
                                       color: AppColors.warmSand,
                                       letterSpacing: 1.0,
                                     ),
@@ -216,8 +216,8 @@ class HowItWorksModal extends StatelessWidget {
                                     child: Text(
                                       s['title'] as String,
                                       style: GoogleFonts.cormorantGaramond(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16.5,
+                                        fontWeight: FontWeight.w700,
                                         color: AppColors.moonlight,
                                       ),
                                     ),

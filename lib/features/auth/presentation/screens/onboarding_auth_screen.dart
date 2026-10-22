@@ -460,8 +460,8 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                             'RÜYALARIN KADİM ŞİFRESİ',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cinzel(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 2.8,
                               color: AppColors.ancientGold,
                             ),
@@ -672,7 +672,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
               Text(
                 '✦  KADİM REHBERLİK & TABİR  ✦',
                 style: GoogleFonts.cinzel(
-                  fontSize: 9.5,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.6,
                   color: AppColors.ancientGold,

@@ -142,7 +142,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                 'Bu gece hangi eşikten geçtiniz?',
                 style: GoogleFonts.cormorantGaramond(
                   fontSize: 30,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
                   color: AppColors.moonlight,
                   height: 1.25,
@@ -403,8 +403,8 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
             Text(
               'ÖNCELİKLİ KADİM BAKIŞ',
               style: GoogleFonts.cormorantGaramond(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
                 color: AppColors.moonlight,
               ),

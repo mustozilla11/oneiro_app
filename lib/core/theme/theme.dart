@@ -29,7 +29,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         titleTextStyle: GoogleFonts.cormorantGaramond(
           fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
           color: AppColors.moonlight,
         ),
@@ -39,19 +39,19 @@ class AppTheme {
         // Başlıklar için edebi Cormorant Garamond fontu
         displayLarge: GoogleFonts.cormorantGaramond(
           fontSize: 34,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.moonlight,
           letterSpacing: 1.2,
         ),
         displayMedium: GoogleFonts.cormorantGaramond(
           fontSize: 28,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
           letterSpacing: 1.0,
         ),
         titleLarge: GoogleFonts.cormorantGaramond(
           fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.moonlight,
           letterSpacing: 0.8,
         ),

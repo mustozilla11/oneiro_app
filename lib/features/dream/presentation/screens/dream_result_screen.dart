@@ -286,9 +286,8 @@ Oneiro ile rüyalarınızın ardındaki edebi anlamı keşfedin.
               child: Text(
                 '"${liveInterpretation.freeAnalysis.gununPusulasi}"',
                 style: GoogleFonts.cormorantGaramond(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 19.5,
+                  fontWeight: FontWeight.w600,
                   height: 1.6,
                   color: AppColors.warmSand,
                 ),
@@ -378,7 +377,7 @@ Oneiro ile rüyalarınızın ardındaki edebi anlamı keşfedin.
           title,
           style: GoogleFonts.cormorantGaramond(
             fontSize: 17,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
             color: AppColors.moonlight,
           ),

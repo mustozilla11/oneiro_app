@@ -287,8 +287,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Text(
                         'RÜYA PROFİLİ',
                         style: GoogleFonts.cormorantGaramond(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 1.5,
                           color: AppColors.moonlight,
                         ),
@@ -348,8 +348,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 Text(
                                   'NASIL ÇALIŞIR?',
                                   style: GoogleFonts.cormorantGaramond(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w700,
                                     letterSpacing: 1.2,
                                     color: AppColors.moonlight,
                                   ),
@@ -440,8 +440,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Text(
                           userName,
                           style: GoogleFonts.cormorantGaramond(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.moonlight,
                           ),
                         ),
@@ -603,8 +603,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               Text(
                                 sub.isPremium ? 'RÜYA GÜNLÜĞÜ PLUS' : 'RÜYA KONTÖRÜ',
                                 style: GoogleFonts.cormorantGaramond(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16.5,
+                                  fontWeight: FontWeight.w700,
                                   letterSpacing: 1.0,
                                   color: AppColors.moonlight,
                                 ),
@@ -659,8 +659,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Text(
                     'BİLİNÇALTI İSTATİSTİKLERİ',
                     style: GoogleFonts.cormorantGaramond(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
                       color: AppColors.moonlight,
                     ),
@@ -754,8 +754,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           Text(
                             'Gizlilik ve Mahremiyet',
                             style: GoogleFonts.cormorantGaramond(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                               color: AppColors.moonlight,
                             ),
@@ -800,8 +800,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Text(
             value,
             style: GoogleFonts.cormorantGaramond(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontSize: 21,
+              fontWeight: FontWeight.w700,
               color: AppColors.moonlight,
             ),
           ),

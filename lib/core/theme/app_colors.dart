@@ -10,9 +10,9 @@ class AppColors {
   static const Color charcoalElevated = Color(0xFF16181E); // Yükseltilmiş kart
   static const Color charcoalInput = Color(0xFF0F1014); // Girdi alanı zemini
 
-  // 2. Vurgular (Mat Ay Işığı / Sıcak Kum ve Sis Grisi)
-  static const Color moonlight = Color(0xFFE6DEC8); // Mat ay ışığı / kum tonu
-  static const Color warmSand = Color(0xFFF4E8C1); // Soluk parşömen kum
+  // 2. Vurgular (Daha Koyu, Belirgin ve Okunaklı Kadim Altın / Kehribar Sarısı)
+  static const Color moonlight = Color(0xFFE5A93C); // Tok, belirgin, derin kehribar-altın sarısı
+  static const Color warmSand = Color(0xFFE8B85C); // Sıcak, okunaklı bal-altın sarısı
   static const Color mistGrey = Color(0xFF9EA3AE); // Soluk sis grisi
   static const Color dimMist = Color(0xFF6B7280); // Çok soluk kılavuz grisi
 
@@ -25,7 +25,7 @@ class AppColors {
   // 4. İnce Çizgi ve Ayırıcılar (Sadece Colors.white.withValues(alpha: 0.06))
   static const Color borderSubtle = Color(0x0FFFFFFF); // 0.06 beyaz çizgi
   static const Color borderLight = Color(0x1AFFFFFF); // 0.10 hafif çizgi
-  static const Color borderMoonlight = Color(0x33E6DEC8); // %20 ay ışığı bordürü
+  static const Color borderMoonlight = Color(0x40E5A93C); // %25 belirgin altın bordürü
 
   // 5. Geriye Dönük Uyumluluk (Tüm neon/mor/cyan tonları mat ay ışığı ve kömüre dönüştürüldü)
   static const Color oledBlack = charcoalBlack;
@@ -76,8 +76,8 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFE6DEC8),
-      Color(0xFFD8CFB5),
+      Color(0xFFE5A93C),
+      Color(0xFFD4973B),
     ],
   );
 
@@ -85,8 +85,8 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFE6DEC8),
-      Color(0xFFF4E8C1),
+      Color(0xFFE5A93C),
+      Color(0xFFE8B85C),
     ],
   );
 

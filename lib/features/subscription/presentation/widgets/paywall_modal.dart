@@ -85,7 +85,7 @@ class PaywallModal extends ConsumerWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.cormorantGaramond(
                 fontSize: 24,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
                 color: AppColors.moonlight,
               ),
@@ -181,8 +181,8 @@ class PaywallModal extends ConsumerWidget {
                               Text(
                                 'Aylık Üyelik',
                                 style: GoogleFonts.cormorantGaramond(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18.5,
+                                  fontWeight: FontWeight.w700,
                                   color: AppColors.moonlight,
                                 ),
                               ),
@@ -198,7 +198,7 @@ class PaywallModal extends ConsumerWidget {
                                   'ÖNERİLEN',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 9,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     letterSpacing: 0.5,
                                     color: AppColors.warmSand,
                                   ),
@@ -218,7 +218,7 @@ class PaywallModal extends ConsumerWidget {
                       '39,99 ₺',
                       style: GoogleFonts.cormorantGaramond(
                         fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.moonlight,
                       ),
                     ),
@@ -293,8 +293,8 @@ class PaywallModal extends ConsumerWidget {
                           Text(
                             '10 Adet Rüya Kontörü',
                             style: GoogleFonts.cormorantGaramond(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.moonlight,
                             ),
                           ),
@@ -308,8 +308,8 @@ class PaywallModal extends ConsumerWidget {
                     Text(
                       '19,99 ₺',
                       style: GoogleFonts.cormorantGaramond(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.moonlight,
                       ),
                     ),

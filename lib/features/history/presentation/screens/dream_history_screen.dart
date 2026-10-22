@@ -41,8 +41,8 @@ class DreamHistoryScreen extends StatelessWidget {
                       Text(
                         'RÜYA ARŞİVİ',
                         style: GoogleFonts.cormorantGaramond(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 1.5,
                           color: AppColors.moonlight,
                         ),
@@ -172,8 +172,8 @@ class DreamHistoryScreen extends StatelessWidget {
           Text(
             'Henüz Mühürlenmiş Bir Rüya Yok',
             style: GoogleFonts.cormorantGaramond(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
               color: AppColors.moonlight,
             ),
           ),
@@ -308,8 +308,8 @@ class DreamHistoryScreen extends StatelessWidget {
             Text(
               title,
               style: GoogleFonts.cormorantGaramond(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontSize: 18.5,
+                fontWeight: FontWeight.w700,
                 color: AppColors.moonlight,
               ),
             ),
@@ -332,8 +332,9 @@ class DreamHistoryScreen extends StatelessWidget {
                   return Text(
                     '#$sym',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: AppColors.warmSand.withValues(alpha: 0.8),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.warmSand,
                     ),
                   );
                 }).toList(),
