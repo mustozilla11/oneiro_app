@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Apple Squircle Clip Path -->
+    <clipPath id="squircleClip">
+      <rect x="0" y="0" width="512" height="512" rx="115" ry="115" />
+    </clipPath>
+
+    <!-- Dark Luxury Canvas Background Gradient -->
+    <radialGradient id="canvasBg" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#1E1435" />
+      <stop offset="45%" stop-color="#100B20" />
+      <stop offset="85%" stop-color="#07050E" />
+      <stop offset="100%" stop-color="#030206" />
+    </radialGradient>
+
+    <!-- Ambient Apple-Style Core Glow -->
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.45" />
+      <stop offset="45%" stop-color="#2563EB" stop-opacity="0.25" />
+      <stop offset="80%" stop-color="#00F5FF" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- iOS Fluid Vivid Gradient for the Glyph -->
+    <linearGradient id="appleGlyphGrad" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="25%" stop-color="#818CF8" />
+      <stop offset="55%" stop-color="#A855F7" />
+      <stop offset="80%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Starlight Core Gradient -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="40%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Apple Glass Specular Border Highlight -->
+    <linearGradient id="specularRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.28" />
+      <stop offset="15%" stop-color="#FFFFFF" stop-opacity="0.08" />
+      <stop offset="85%" stop-color="#FFFFFF" stop-opacity="0.02" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.09" />
+    </linearGradient>
+
+    <!-- Ambient Neon Blur Filter -->
+    <filter id="appleBloom" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- SQUIRCLE CONTAINER WITH APPLE CORNERS -->
+  <g clip-path="url(#squircleClip)">
+    <!-- Base Background -->
+    <rect width="512" height="512" fill="url(#canvasBg)" />
+
+    <!-- Ambient Core Nebula -->
+    <circle cx="256" cy="256" r="210" fill="url(#innerGlow)" />
+
+    <!-- Apple-Style Minimalist Subtle Concentric Sleep Circles -->
+    <circle cx="256" cy="256" r="172" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.07" />
+    <circle cx="256" cy="256" r="124" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.05" />
+
+    <!-- MAIN MINIMALIST GLYPH: Apple-Style Geometric Dream Crescent & Eyelid Wave -->
+    <g filter="url(#appleBloom)">
+      <!-- 1. The Pure Geometric Crescent (Hilal) -->
+      <path d="
+        M 296 112
+        C 186 112 116 190 116 270
+        C 116 350 186 400 274 400
+        C 292 400 310 396 326 388
+        C 256 376 206 330 196 270
+        C 186 210 236 142 296 112
+        Z"
+        fill="url(#appleGlyphGrad)"
+      />
+
+      <!-- 2. Minimalist Closed Sleeping Eyelid Arc -->
+      <path d="M 238 266 C 260 286 296 286 318 266"
+            fill="none"
+            stroke="url(#appleGlyphGrad)"
+            stroke-width="5"
+            stroke-linecap="round"
+      />
+
+      <!-- 3. Fine Ethereal Sleep Lash -->
+      <line x1="278" y1="282" x2="278" y2="296"
+            stroke="url(#appleGlyphGrad)"
+            stroke-width="3.5"
+            stroke-linecap="round"
+      />
+
+      <!-- 4. Fluid Dream Frequency Wave -->
+      <path d="M 230 330 C 252 316 274 344 300 330 C 322 318 342 334 362 324"
+            fill="none"
+            stroke="url(#appleGlyphGrad)"
+            stroke-width="4.5"
+            stroke-linecap="round"
+      />
+
+      <!-- 5. Apple 4-Point Luminary Spark -->
+      <g transform="translate(282, 178)">
+        <!-- Ambient Diamond Star -->
+        <path d="
+          M 0 -18
+          Q 0 0 -16 0
+          Q 0 0 0 18
+          Q 0 0 16 0
+          Q 0 0 0 -18
+          Z"
+          fill="url(#starGrad)"
+        />
+        <!-- Crisp White Core -->
+        <circle cx="0" cy="0" r="2.8" fill="#FFFFFF" />
+      </g>
+    </g>
+
+    <!-- Top Gloss Highlight (Apple signature inner glass bevel reflection) -->
+    <rect x="0" y="0" width="512" height="512" rx="115" ry="115"
+          fill="none"
+          stroke="url(#specularRim)"
+          stroke-width="3"
+    />
+  </g>
+</svg>
