@@ -10,6 +10,7 @@ import '../../../../services/firestore_service.dart';
 import '../../../dream/presentation/providers/dream_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
+import '../widgets/how_it_works_modal.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -297,7 +298,111 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
+
+              // "Oneiro Nasıl Çalışır?" 6 Aşamalı Şema & Blok Diyagram Kutusu
+              GestureDetector(
+                onTap: () => HowItWorksModal.show(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF1E1035), // Derin Mistik Mor
+                        Color(0xFF0F1E36), // Gece Safiri
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF00E5FF).withValues(alpha: 0.5), // Elektrik Camgöbeği
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color(0xFF00E5FF).withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.schema_rounded,
+                          color: Color(0xFF00E5FF),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'ONEIRO NASIL ÇALIŞIR?',
+                                  style: GoogleFonts.cinzel(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                    color: AppColors.textPureWhite,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.ancientGold.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'ŞEMA',
+                                    style: GoogleFonts.cinzel(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.ancientGold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Rüya girişinden yapay zeka & kadim kitap taramasına kadar 6 aşamalı blok diyagramı inceleyin.',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                height: 1.35,
+                                color: AppColors.textSilver,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Color(0xFF00E5FF),
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
 
               // Profil Kartı & Kimlik Doğrulama
               StreamBuilder<OneiroUser?>(

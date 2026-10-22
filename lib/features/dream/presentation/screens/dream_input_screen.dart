@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../../subscription/presentation/widgets/paywall_modal.dart';
@@ -19,12 +20,33 @@ class DreamInputScreen extends ConsumerStatefulWidget {
 class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
   late final TextEditingController _textController;
   final FocusNode _focusNode = FocusNode();
+  String? _lastDraftDreamText;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController();
     _focusNode.addListener(_onFocusChange);
+    _loadDraftText();
+  }
+
+  Future<void> _loadDraftText() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString('last_analyzed_dream_draft');
+      if (saved != null && saved.isNotEmpty && mounted) {
+        setState(() {
+          _lastDraftDreamText = saved;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveDraftText(String text) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_analyzed_dream_draft', text);
+    } catch (_) {}
   }
 
   void _onFocusChange() {
@@ -70,6 +92,11 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
     }
 
     ref.read(dreamProvider.notifier).setDreamText(text);
+
+    // Rüya metnini hafızaya ve diske kaydet, yeni rüya girişi için alanı sıfırla
+    _lastDraftDreamText = text;
+    _saveDraftText(text);
+    _textController.clear();
 
     // Yükleme & Reklam koordinasyon ekranına geçiş
     Navigator.of(context).push(
@@ -253,14 +280,74 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: _textController,
                       builder: (context, value, _) {
-                        if (value.text.isEmpty) return const SizedBox.shrink();
+                        if (value.text.isEmpty) {
+                          if (_lastDraftDreamText != null && _lastDraftDreamText!.isNotEmpty) {
+                            return InkWell(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                _textController.text = _lastDraftDreamText!;
+                                _textController.selection = TextSelection.fromPosition(
+                                  TextPosition(offset: _textController.text.length),
+                                );
+                                setState(() {});
+                              },
+                              borderRadius: BorderRadius.circular(10),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.history_rounded, size: 13, color: AppColors.ancientGold),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Son Rüyayı Getir',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.ancientGold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        }
                         final words = value.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-                        return Text(
-                          '$words kelime',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: AppColors.textWarmMuted,
-                          ),
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '$words kelime',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                color: AppColors.textWarmMuted,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                _lastDraftDreamText = _textController.text.trim();
+                                _saveDraftText(_lastDraftDreamText!);
+                                _textController.clear();
+                                setState(() {});
+                              },
+                              borderRadius: BorderRadius.circular(6),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                child: Text(
+                                  'Temizle',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.electricLavender,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
