@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../services/firestore_service.dart';
+import '../../../../services/subscription_service.dart';
 import '../../data/repositories/dream_repository.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../../domain/models/dream_request.dart';
@@ -93,8 +94,9 @@ class DreamNotifier extends StateNotifier<DreamState> {
         interpretation: result,
       );
 
-      // Bulut veritabanına rüyayı mühürle (Oturum açılmışsa)
-      if (currentUid != null) {
+      // Gizlilik ve sıfır sunucu maliyeti politikası:
+      // Rüyalar yerel cihazda gizli tutulur. Yalnızca ücretli Kadim Gezgin Plus aboneleri için buluta yedeklenir.
+      if (currentUid != null && SubscriptionService.instance.isPremiumUser) {
         await FirestoreService.instance.saveDream(
           currentUid,
           dreamText: result.dreamText,

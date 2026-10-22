@@ -30,12 +30,14 @@ class SubscriptionService {
 
   bool _isConfigured = false;
   String? _currentUserId;
+  bool _isPremiumUser = false;
 
   // UI ve State için dinleyici geri çağırımı (Riverpod senkronizasyonu)
   Function(bool isPremium)? onPremiumStatusChanged;
   Function(int creditsAdded)? onCreditsPurchased;
 
   bool get isConfigured => _isConfigured;
+  bool get isPremiumUser => _isPremiumUser;
 
   /// RevenueCat SDK'sını başlatır ve kullanıcı UID'si ile eşleştirir
   Future<void> initialize({String? uid}) async {
@@ -78,6 +80,7 @@ class SubscriptionService {
   void _handleCustomerInfoUpdate(CustomerInfo customerInfo) {
     try {
       final isPremium = customerInfo.entitlements.all[entitlementPremium]?.isActive ?? false;
+      _isPremiumUser = isPremium;
       debugPrint('[SubscriptionService] Müşteri bilgisi güncellendi. Aktif Premium: $isPremium');
 
       if (onPremiumStatusChanged != null) {
@@ -109,6 +112,7 @@ class SubscriptionService {
   /// Kullanıcı çıkış yaptığında RevenueCat anonim oturumuna döner
   Future<void> logOut() async {
     _currentUserId = null;
+    _isPremiumUser = false;
     if (!_isConfigured) return;
 
     try {

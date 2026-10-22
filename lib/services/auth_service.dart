@@ -125,6 +125,12 @@ class AuthService {
           if (fbUser != null) {
             _currentUser = OneiroUser.fromFirebase(fbUser);
             _authStateController.add(_currentUser);
+          } else {
+            // Firebase çıkış yaptığında Oneiro oturumunu da tamamen sıfırla
+            if (_currentUser != null && !_currentUser!.isGuest) {
+              _currentUser = null;
+              _authStateController.add(null);
+            }
           }
         });
       }
@@ -320,15 +326,19 @@ class AuthService {
       if (isFirebaseAvailable) {
         await auth.signOut();
       }
-      await _googleSignIn.signOut();
+      try {
+        await _googleSignIn.signOut();
+        await _googleSignIn.disconnect();
+      } catch (_) {}
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_prefUserKey);
-      _currentUser = null;
-      _authStateController.add(null);
       await SubscriptionService.instance.logOut();
       debugPrint('[AuthService] Oturum güvenle kapatıldı.');
     } catch (e) {
-      debugPrint('[AuthService] Çıkış hatası: $e');
+      debugPrint('[AuthService] Çıkış işlemi istisnası: $e');
+    } finally {
+      _currentUser = null;
+      _authStateController.add(null);
     }
   }
 }

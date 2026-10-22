@@ -6,17 +6,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../services/auth_service.dart';
+import '../../../dream/presentation/providers/dream_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isLoading = false;
 
   Future<void> _handleGoogleSignIn() async {
@@ -148,7 +149,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleSignOut() async {
     HapticFeedback.mediumImpact();
-    await AuthService.instance.signOut();
+    setState(() => _isLoading = true);
+    try {
+      await AuthService.instance.signOut();
+      ref.read(dreamProvider.notifier).reset();
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -217,11 +226,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 stream: AuthService.instance.authStateChanges,
                 initialData: AuthService.instance.currentUser,
                 builder: (context, authSnap) {
-                  final user = authSnap.data ?? AuthService.instance.currentUser;
-                  final isSignedIn = user != null;
-                  final userName = user?.displayName ?? (isSignedIn ? 'Kadim Gezgin' : 'Misafir Seyyah');
-                  final userEmail = user?.email ?? (isSignedIn ? 'Bulut Senkronize' : 'Giriş yapılmadı');
-                  final avatarInitial = (userName.isNotEmpty ? userName[0].toUpperCase() : '𓂀');
+                  final user = authSnap.connectionState == ConnectionState.waiting
+                      ? AuthService.instance.currentUser
+                      : authSnap.data;
+                  final isSignedIn = user != null && !user.isGuest;
+                  final userName = isSignedIn ? (user.displayName ?? 'Kadim Gezgin') : 'Misafir Seyyah';
+                  final userEmail = isSignedIn ? (user.email ?? 'Giriş Yapıldı') : 'Giriş yapılmadı';
+                  final avatarInitial = (isSignedIn && userName.isNotEmpty ? userName[0].toUpperCase() : '𓂀');
 
                   return Container(
                     padding: const EdgeInsets.all(20),
@@ -465,14 +476,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
 
               // Bilinçaltı İstatistikleri
-              Text(
-                'BİLİNÇALTI İSTATİSTİKLERİ',
-                style: GoogleFonts.cinzel(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
-                  color: AppColors.electricLavender,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BİLİNÇALTI İSTATİSTİKLERİ',
+                    style: GoogleFonts.cinzel(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                      color: AppColors.electricLavender,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Rüya günlüğünüzdeki sembol, duygu ve arketiplerden türetilir',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: AppColors.textDim,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
 
@@ -502,18 +526,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 28),
 
-              // Gizlilik & Veri Bilgilendirmesi
+              // Gizlilik & Veri Güvencesi (Hafif sarı/altın dikkat çekici uyarı kartı)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceDark,
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF241C0A), // Sıcak sarı-kehribar koyu ton
+                      Color(0xFF191406),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderSubtle),
+                  border: Border.all(
+                    color: const Color(0xFFFFD166).withOpacity(0.65), // Dikkat çekici sarı-altın çerçeve
+                    width: 1.3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFD166).withOpacity(0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.shield_outlined, color: AppColors.ancientGold, size: 20),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFD166).withOpacity(0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFFFD166).withOpacity(0.35),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.shield_rounded,
+                        color: Color(0xFFFFD166),
+                        size: 20,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -524,16 +580,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: GoogleFonts.cinzel(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPureWhite,
+                              letterSpacing: 0.6,
+                              color: const Color(0xFFFFE082),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 5),
                           Text(
-                            'Rüyalarınız mahremdir. Google yalnızca kimliğinizi doğrular; rüya metinleriniz ve tabirleriniz Google ile paylaşılmaz.',
+                            'Rüyalarınız tamamen mahremdir ve sadece telefonunuzda saklanır. Google yalnızca kimliğinizi doğrular; rüya metinleriniz sunucularda depolanmaz veya üçüncü şahıslarla paylaşılmaz.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: AppColors.textDim,
-                              height: 1.4,
+                              color: AppColors.textPureWhite.withOpacity(0.9),
+                              height: 1.45,
                             ),
                           ),
                         ],

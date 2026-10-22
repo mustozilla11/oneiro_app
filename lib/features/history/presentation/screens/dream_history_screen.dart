@@ -48,9 +48,7 @@ class DreamHistoryScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        currentUser != null
-                            ? 'Bulutta mühürlenmiş rüyalarınız'
-                            : 'Geçmiş rüyalarınız ve bilge sohbetleri',
+                        'Cihazınızda gizli tutulan kadim rüya arşiviniz',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           color: AppColors.textDim,
@@ -157,7 +155,7 @@ class DreamHistoryScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Gördüğünüz rüyaları ana ekranda kaleme alın, kadim bilge tabirini buluta mühürlesin.',
+              'Gördüğünüz rüyaları ana ekranda kaleme alın, kadim bilge tabirini günlüğünüze mühürlesin.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,

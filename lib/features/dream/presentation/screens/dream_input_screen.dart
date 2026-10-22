@@ -290,18 +290,37 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
 
               const SizedBox(height: 26),
 
-              // Amazon Sıcak Kehribar "Tabiri Çöz" Butonu
+              // Parlayan Mistik "RÜYAYI TABİR ET" Butonu
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: AppColors.amazonButtonGradient,
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF8B5CF6), // Canlı Eflatun
+                        Color(0xFF6D28D9), // Derin Kraliyet Moru
+                        Color(0xFF9333EA), // Işıltılı Ametist
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: const Color(0xFFE9D5FF).withOpacity(0.7), // Parlayan lavanta çerçeve
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.amazonAmber.withValues(alpha: 0.38),
+                        color: const Color(0xFF8B5CF6).withOpacity(0.55),
                         blurRadius: 22,
-                        offset: const Offset(0, 6),
+                        spreadRadius: 1,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFFC084FC).withOpacity(0.35),
+                        blurRadius: 36,
+                        spreadRadius: 3,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
@@ -317,17 +336,23 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                           children: [
                             const Icon(
                               Icons.auto_awesome,
-                              color: AppColors.amazonDarkSlate,
+                              color: AppColors.textPureWhite,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'TABİRİ ÇÖZ',
+                              'RÜYAYI TABİR ET',
                               style: GoogleFonts.cinzel(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 2.0,
-                                color: AppColors.amazonDarkSlate,
+                                letterSpacing: 2.2,
+                                color: AppColors.textPureWhite,
+                                shadows: [
+                                  Shadow(
+                                    color: const Color(0xFFE9D5FF).withOpacity(0.8),
+                                    blurRadius: 12,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
