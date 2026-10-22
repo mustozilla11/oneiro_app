@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 class AntigravityDreamBox extends StatefulWidget {
   final Widget child;
   final bool isFocused;
+  final String traditionId;
   final EdgeInsetsGeometry padding;
   final BorderRadius borderRadius;
 
@@ -17,6 +18,7 @@ class AntigravityDreamBox extends StatefulWidget {
     super.key,
     required this.child,
     this.isFocused = false,
+    this.traditionId = 'islam_dogu',
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
@@ -76,10 +78,68 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
     super.dispose();
   }
 
+  List<Color> _getGradientColors(String traditionId) {
+    switch (traditionId) {
+      case 'antik_akdeniz':
+        return const [
+          AppColors.mediterraneanAzure,
+          AppColors.mediterraneanSky,
+          Color(0xFF67E8F9), // Canlı berrak turkuaz ışıltı
+          Color(0xFF0284C7),
+          AppColors.mediterraneanAzure,
+        ];
+      case 'psikoloji':
+        return const [
+          AppColors.subconsciousIndigo,
+          Color(0xFF818CF8),
+          AppColors.neonPurple,
+          Color(0xFF4338CA),
+          AppColors.subconsciousIndigo,
+        ];
+      case 'islam_dogu':
+      default:
+        // Başlangıçtaki ve varsayılan kehribar-altın gradyan
+        return const [
+          AppColors.amazonAmber,      // Amazon sıcak kehribarı
+          AppColors.amazonAmberLight, // Şafak altını
+          AppColors.dawnViolet,       // Mistik leylak
+          AppColors.dawnIndigo,       // Şafak indigosu
+          AppColors.amazonAmber,      // Döngü tamamlayıcı
+        ];
+    }
+  }
+
+  Color _getGlowColor(String traditionId) {
+    switch (traditionId) {
+      case 'antik_akdeniz':
+        return AppColors.mediterraneanSky;
+      case 'psikoloji':
+        return AppColors.subconsciousIndigo;
+      case 'islam_dogu':
+      default:
+        return AppColors.amazonAmber;
+    }
+  }
+
+  Color _getFillColor(String traditionId, bool isFocused) {
+    switch (traditionId) {
+      case 'antik_akdeniz':
+        return isFocused ? const Color(0xFF102236) : const Color(0xFF0B1726);
+      case 'psikoloji':
+        return isFocused ? const Color(0xFF1B142F) : const Color(0xFF110D20);
+      case 'islam_dogu':
+      default:
+        return isFocused ? AppColors.amazonBoxFocused : AppColors.amazonBoxFill;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isFocused = widget.isFocused;
     final borderWidth = isFocused ? 1.2 : 2.8;
+    final gradientColors = _getGradientColors(widget.traditionId);
+    final glowColor = _getGlowColor(widget.traditionId);
+    final fillColor = _getFillColor(widget.traditionId, isFocused);
 
     return AnimatedBuilder(
       animation: Listenable.merge([_floatingAnimation, _gradientRotateController]),
@@ -94,19 +154,19 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
             decoration: BoxDecoration(
               borderRadius: widget.borderRadius,
               boxShadow: [
-                // Tıklanmadığında ilgi çekici sıcak kehribar parıltısı, odaklanınca gözü yormayan yumuşak ton
+                // Seçilen ekole göre uyumlanan mistik ışıltı & parıltı
                 BoxShadow(
                   color: isFocused
-                      ? AppColors.amazonAmber.withValues(alpha: 0.20)
-                      : AppColors.amazonAmber.withValues(alpha: 0.32),
-                  blurRadius: isFocused ? 18 : 24,
-                  spreadRadius: isFocused ? 0.8 : 2.0,
+                      ? glowColor.withValues(alpha: 0.22)
+                      : glowColor.withValues(alpha: 0.35),
+                  blurRadius: isFocused ? 18 : 26,
+                  spreadRadius: isFocused ? 0.8 : 2.2,
                   offset: Offset(0, isFocused ? 4 : 6),
                 ),
               ],
             ),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutCubic,
               // Tıklanmadığında daha kalın (2.8px) dikkat çekici gradyan çerçeve; tıklanınca inceye (1.2px) döner
               padding: EdgeInsets.all(borderWidth),
@@ -115,24 +175,16 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
                 gradient: SweepGradient(
                   center: Alignment.center,
                   transform: GradientRotation(rotationAngle),
-                  colors: const [
-                    AppColors.amazonAmber,      // Amazon sıcak kehribarı
-                    AppColors.amazonAmberLight, // Şafak altını
-                    AppColors.dawnViolet,       // Mistik leylak
-                    AppColors.dawnIndigo,       // Şafak indigosu
-                    AppColors.amazonAmber,      // Döngü tamamlayıcı
-                  ],
+                  colors: gradientColors,
                   stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
                 ),
               ),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+                duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutCubic,
-                // Kutu İçi: Dış zeminden ayrışan, sabah gözünü dinlendiren mat gece safiri
+                // Kutu İçi: Seçili ekolün tonuyla hafifçe ahenk yakalayan dinlendirici mat zemin
                 decoration: BoxDecoration(
-                  color: isFocused
-                      ? AppColors.amazonBoxFocused
-                      : AppColors.amazonBoxFill,
+                  color: fillColor,
                   borderRadius: widget.borderRadius.subtract(
                     BorderRadius.all(Radius.circular(borderWidth)),
                   ),

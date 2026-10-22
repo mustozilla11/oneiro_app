@@ -83,6 +83,26 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
   Widget build(BuildContext context) {
     final hasFocus = _focusNode.hasFocus;
     final subState = ref.watch(userSubscriptionProvider);
+    final selectedTradition = ref.watch(dreamProvider).preferredTradition;
+
+    // Seçili geleneğe göre dinamik başlık rengi ve etiketi
+    final Color traditionAccentColor;
+    final String traditionLabel;
+    switch (selectedTradition) {
+      case 'antik_akdeniz':
+        traditionAccentColor = AppColors.mediterraneanSky;
+        traditionLabel = 'RÜYANIZI ANLATIN • ANTİK AKDENİZ';
+        break;
+      case 'psikoloji':
+        traditionAccentColor = AppColors.subconsciousIndigo;
+        traditionLabel = 'RÜYANIZI ANLATIN • DERİNLİK PSİKOLOJİSİ';
+        break;
+      case 'islam_dogu':
+      default:
+        traditionAccentColor = AppColors.amazonAmberLight;
+        traditionLabel = 'RÜYANIZI ANLATIN • DOĞU & İSLAM';
+        break;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.amazonDarkSlate,
@@ -222,12 +242,12 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'RÜYANIZI ANLATIN',
+                      traditionLabel,
                       style: GoogleFonts.cinzel(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 1.5,
-                        color: AppColors.amazonAmberLight,
+                        letterSpacing: 1.4,
+                        color: traditionAccentColor,
                       ),
                     ),
                     ValueListenableBuilder<TextEditingValue>(
@@ -249,9 +269,10 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Antigravity (Yerçekimsiz Süzülen, İçi ve Dışı Farklı, Değişen Kenarlıklı) Rüya Kutusu
+              // Antigravity (Yerçekimsiz Süzülen, İçi ve Dışı Farklı, Seçilen Ekole Göre Rengi Akan) Rüya Kutusu
               AntigravityDreamBox(
                 isFocused: hasFocus,
+                traditionId: selectedTradition,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: TextField(
                   controller: _textController,
