@@ -70,7 +70,10 @@ class AuthService {
   static const String _prefUserKey = 'oneiro_auth_user_json';
 
   FirebaseAuth? _auth;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+    serverClientId: '1051570592259-vnrq5tl43rrg9dmjus7qbsnjsg14vkqd.apps.googleusercontent.com',
+  );
 
   OneiroUser? _currentUser;
   final StreamController<OneiroUser?> _authStateController = StreamController<OneiroUser?>.broadcast();

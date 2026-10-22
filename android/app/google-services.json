@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1051570592259",
+    "project_id": "ruya-tabiri-25ebc",
+    "storage_bucket": "ruya-tabiri-25ebc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051570592259:android:fcd90c0021ce66a8354c36",
+        "android_client_info": {
+          "package_name": "com.oneiro.oneiro_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051570592259-lppafpntdkm45mmb1kp5s606c73ge251.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.oneiro.oneiro_app",
+            "certificate_hash": "3ce7e8daebb6ef87594b0946e10cd0b729b45a93"
+          }
+        },
+        {
+          "client_id": "1051570592259-vnrq5tl43rrg9dmjus7qbsnjsg14vkqd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnfXvDPt5QxNacUY83hLjNgngNBO93bBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051570592259-vnrq5tl43rrg9dmjus7qbsnjsg14vkqd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
