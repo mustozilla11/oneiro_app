@@ -543,47 +543,12 @@ def index_books():
     logger.info(f"✅ Toplam {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
 
 
-def _sync_http_ping(url: str, timeout: float = 10.0) -> bool:
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Oneiro-KeepAlive/2.2"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status == 200
-    except Exception:
-        return False
-
-
-async def render_keep_alive_task():
-    """
-    Render Free Tier 15 dakika hareketsiz kalırsa uyur (cold-start gecikmesi yaşanır).
-    Bu arka plan görevi her 10 dakikada (600 sn) bir sunucuya ping atarak Render'ı 7/24 uyanık tutar.
-    """
-    await asyncio.sleep(45)  # Sunucu başladıktan 45 saniye sonra ilk ping döngüsünü başlat
-    target_url = RENDER_EXTERNAL_URL.rstrip("/") + "/health"
-    logger.info(f"🔄 Render Keep-Alive arka plan görevi aktif (Hedef: {target_url}, Aralık: 10 dk)")
-
-    while True:
-        try:
-            await asyncio.sleep(600)  # 10 dakika bekle
-            is_ok = await asyncio.to_thread(_sync_http_ping, target_url, 10.0)
-            if is_ok:
-                logger.info("💓 [Render Keep-Alive] Ping başarılı: Render sunucusu aktif tutuldu.")
-            else:
-                logger.warning("⚠️ [Render Keep-Alive] Ping yanıt vermedi veya zaman aşımına uğradı.")
-        except asyncio.CancelledError:
-            logger.info("Render Keep-Alive görevi sonlandırıldı.")
-            break
-        except Exception as e:
-            logger.debug(f"[Render Keep-Alive] Ping uyarısı: {e}")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Oneiro RAG Backend başlatılıyor...")
     index_books()
-    # Render Keep-Alive arka plan ping görevini başlat
-    keep_alive_job = asyncio.create_task(render_keep_alive_task())
+    logger.info("✅ Oneiro RAG Motoru hazır (Dış ping / UptimeRobot ile 7/24 uyanık tutulur).")
     yield
-    keep_alive_job.cancel()
     logger.info("Oneiro RAG Backend kapatılıyor...")
 
 

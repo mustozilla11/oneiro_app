@@ -79,6 +79,7 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
   @override
   Widget build(BuildContext context) {
     final isFocused = widget.isFocused;
+    final borderWidth = isFocused ? 1.2 : 2.8;
 
     return AnimatedBuilder(
       animation: Listenable.merge([_floatingAnimation, _gradientRotateController]),
@@ -93,20 +94,22 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
             decoration: BoxDecoration(
               borderRadius: widget.borderRadius,
               boxShadow: [
-                // Sabah gözünü yormayan sıcak kehribar-indigo ışıltısı
+                // Tıklanmadığında ilgi çekici sıcak kehribar parıltısı, odaklanınca gözü yormayan yumuşak ton
                 BoxShadow(
                   color: isFocused
-                      ? AppColors.amazonAmber.withValues(alpha: 0.22)
-                      : AppColors.dawnIndigo.withValues(alpha: 0.12),
-                  blurRadius: isFocused ? 26 : 14,
-                  spreadRadius: isFocused ? 1.5 : 0.5,
+                      ? AppColors.amazonAmber.withValues(alpha: 0.20)
+                      : AppColors.amazonAmber.withValues(alpha: 0.32),
+                  blurRadius: isFocused ? 18 : 24,
+                  spreadRadius: isFocused ? 0.8 : 2.0,
                   offset: Offset(0, isFocused ? 4 : 6),
                 ),
               ],
             ),
-            child: Container(
-              // Dış Kenarlık Katmanı: Değişen renklerden oluşan gradyan sınır
-              padding: const EdgeInsets.all(1.6), // 1.6px pürüzsüz border kalınlığı
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              // Tıklanmadığında daha kalın (2.8px) dikkat çekici gradyan çerçeve; tıklanınca inceye (1.2px) döner
+              padding: EdgeInsets.all(borderWidth),
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 gradient: SweepGradient(
@@ -131,7 +134,7 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
                       ? AppColors.amazonBoxFocused
                       : AppColors.amazonBoxFill,
                   borderRadius: widget.borderRadius.subtract(
-                    const BorderRadius.all(Radius.circular(1.6)),
+                    BorderRadius.all(Radius.circular(borderWidth)),
                   ),
                 ),
                 padding: widget.padding,
