@@ -420,12 +420,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   return Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceCard,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSignedIn ? AppColors.ancientGold.withOpacity(0.4) : AppColors.borderSubtle,
-                        width: 1,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF191228),
+                          AppColors.surfaceCardElevated,
+                        ],
                       ),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: isSignedIn
+                            ? AppColors.ancientGold.withValues(alpha: 0.45)
+                            : AppColors.ancientGold.withValues(alpha: 0.22),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.neonPurple.withValues(alpha: 0.15),
+                          blurRadius: 18,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [

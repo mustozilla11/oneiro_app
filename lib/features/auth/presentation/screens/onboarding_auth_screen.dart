@@ -361,6 +361,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
   Future<void> _handleGuestSignIn() async {
     HapticFeedback.mediumImpact();
     await AuthService.instance.signInAsGuest();
+    await AuthService.instance.setOnboarded();
     _navigateToHome();
   }
 
@@ -376,19 +377,19 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
+                  padding: const EdgeInsets.fromLTRB(22, 4, 22, 14),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Üst Bölüm: Mistik Rozet, Logo ve Başlıklar (Yukarı taşındı)
+                      // Üst Bölüm: Mistik Rozet, Logo, Başlıklar ve Hoşgeldiniz Kutusu (Daha yukarı konumlandırıldı)
                       Column(
                         children: [
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
 
                           // 1. Astral Üst Rozet
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
                             decoration: BoxDecoration(
                               color: AppColors.ancientGold.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(30),
@@ -412,9 +413,9 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                                 Text(
                                   'KADİM BİLİNÇALTI ASTRALI',
                                   style: GoogleFonts.cinzel(
-                                    fontSize: 10.5,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    letterSpacing: 2.2,
+                                    letterSpacing: 2.0,
                                     color: AppColors.ancientGold,
                                   ),
                                 ),
@@ -424,17 +425,17 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 14),
 
-                          // 2. Mistik Logo & Çift Katmanlı Kozmik Çember
+                          // 2. Mistik Logo & Çift Katmanlı Kozmik Çember (Kompakt & Parlak)
                           Center(
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
                                 // Dış Mor-Mavi Kozmik Halka
                                 Container(
-                                  width: 110,
-                                  height: 110,
+                                  width: 96,
+                                  height: 96,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
@@ -448,8 +449,8 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                                 ),
                                 // İnce Altın Yörünge Çemberi
                                 Container(
-                                  width: 86,
-                                  height: 86,
+                                  width: 74,
+                                  height: 74,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
@@ -460,8 +461,8 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                                 ),
                                 // Ana Çekirdek & Horus Gözü
                                 Container(
-                                  width: 72,
-                                  height: 72,
+                                  width: 62,
+                                  height: 62,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: const LinearGradient(
@@ -485,7 +486,7 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                                     child: Text(
                                       '𓂀',
                                       style: TextStyle(
-                                        fontSize: 34,
+                                        fontSize: 28,
                                         color: AppColors.ancientGold,
                                       ),
                                     ),
@@ -495,58 +496,58 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // 3. Marka Başlığı
                           Text(
                             'ONEIRO',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cinzel(
-                              fontSize: 32,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 7.0,
+                              letterSpacing: 6.0,
                               color: AppColors.textPureWhite,
                               shadows: [
                                 Shadow(
                                   color: AppColors.neonPurple.withValues(alpha: 0.6),
-                                  blurRadius: 20,
+                                  blurRadius: 18,
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           Text(
                             'RÜYALARIN KADİM ŞİFRESİ',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cinzel(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: 3.2,
+                              letterSpacing: 2.8,
                               color: AppColors.ancientGold,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
                               'Gece zihninizin sembollerini çözün; Carl Jung analizi, Doğu İslam ve Antik Akdeniz bilgeliğiyle bilinçaltınızı aydınlatın.',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.5,
+                                fontSize: 12,
                                 color: AppColors.textSilver,
-                                height: 1.5,
+                                height: 1.45,
                               ),
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 14),
 
-                          // 4. Modern Özellik Kartları (3 Mini Vitrin)
+                          // 4. Modern Hoşgeldiniz & Özellik Kutusu (Glassmorphism & Lüks Altın Çerçeve)
                           _buildFeatureHighlights(),
                         ],
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Alt Bölüm: Giriş Butonları & Misafir Keşfi
                       Column(
@@ -660,57 +661,163 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
     );
   }
 
-  /// Modern 3'lü Özellik Vitrini
+  /// Modern & Lüks Cam Efektli Hoşgeldiniz Özellik Kutusu
   Widget _buildFeatureHighlights() {
     final features = [
-      {'icon': '🧠', 'title': 'Jung Analizi', 'subtitle': 'Bilinçaltı & Gölgeler'},
-      {'icon': '🏛️', 'title': '4 Kadim Ekol', 'subtitle': 'İslam, Akdeniz, Şamanik'},
-      {'icon': '📜', 'title': 'Mühürlü Günlük', 'subtitle': 'Kişisel Rüya Arşivi'},
+      {
+        'icon': Icons.psychology_rounded,
+        'iconColor': AppColors.electricLavender,
+        'title': 'Jung Analizi',
+        'subtitle': 'Bilinçaltı & Gölge',
+      },
+      {
+        'icon': Icons.auto_stories_rounded,
+        'iconColor': AppColors.ancientGold,
+        'title': '4 Kadim Ekol',
+        'subtitle': 'İslam & Akdeniz',
+      },
+      {
+        'icon': Icons.lock_clock_rounded,
+        'iconColor': const Color(0xFF00E5FF),
+        'title': 'Mühürlü Arşiv',
+        'subtitle': 'Kişisel Günlük',
+      },
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
-        color: const Color(0xFF110E1C).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.ancientGold.withValues(alpha: 0.2),
-          width: 1,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1D1433),
+            Color(0xFF0E0B19),
+            Color(0xFF131A2E),
+          ],
         ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.ancientGold.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.neonPurple.withValues(alpha: 0.22),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.ancientGold.withValues(alpha: 0.1),
+            blurRadius: 14,
+            spreadRadius: -2,
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: features.map((f) {
-          return Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(f['icon']!, style: const TextStyle(fontSize: 20)),
-                const SizedBox(height: 5),
-                Text(
-                  f['title']!,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPureWhite,
-                  ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Üst Mistik İndikatör / Hoşgeldiniz Şeridi
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 20,
+                height: 1,
+                color: AppColors.ancientGold.withValues(alpha: 0.35),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '✦  KADİM REHBERLİK & TABİR  ✦',
+                style: GoogleFonts.cinzel(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.6,
+                  color: AppColors.ancientGold,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  f['subtitle']!,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9.5,
-                    color: AppColors.textMuted,
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 20,
+                height: 1,
+                color: AppColors.ancientGold.withValues(alpha: 0.35),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          // 3 Sütunlu Özellikler
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < features.length; i++) ...[
+                if (i > 0)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 1,
+                    height: 52,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: (features[i]['iconColor'] as Color).withValues(alpha: 0.12),
+                          border: Border.all(
+                            color: (features[i]['iconColor'] as Color).withValues(alpha: 0.45),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (features[i]['iconColor'] as Color).withValues(alpha: 0.22),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          features[i]['icon'] as IconData,
+                          size: 17,
+                          color: features[i]['iconColor'] as Color,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        features[i]['title'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                          color: AppColors.textPureWhite,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        features[i]['subtitle'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSilver.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-          );
-        }).toList(),
+            ],
+          ),
+        ],
       ),
     );
   }

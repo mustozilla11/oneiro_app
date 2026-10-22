@@ -68,6 +68,7 @@ class AuthService {
   static final AuthService instance = AuthService._internal();
 
   static const String _prefUserKey = 'oneiro_auth_user_json';
+  static const String _prefOnboardingKey = 'oneiro_has_onboarded_bool';
 
   FirebaseAuth? _auth;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -76,6 +77,7 @@ class AuthService {
   );
 
   OneiroUser? _currentUser;
+  bool _hasOnboarded = false;
   final StreamController<OneiroUser?> _authStateController = StreamController<OneiroUser?>.broadcast();
 
   bool get isFirebaseAvailable {
@@ -92,6 +94,7 @@ class AuthService {
   }
 
   OneiroUser? get currentUser => _currentUser;
+  bool get hasOnboarded => _hasOnboarded;
 
   Stream<OneiroUser?> get authStateChanges => _authStateController.stream;
 
@@ -100,8 +103,10 @@ class AuthService {
   /// Servisi başlatır ve hafızadaki veya arka plandaki oturumu yükler
   Future<void> initialize() async {
     try {
-      // 1. SharedPreferences'tan kayıtlı oturumu yükle
       final prefs = await SharedPreferences.getInstance();
+      _hasOnboarded = prefs.getBool(_prefOnboardingKey) ?? false;
+
+      // 1. SharedPreferences'tan kayıtlı oturumu yükle
       final userJsonStr = prefs.getString(_prefUserKey);
       if (userJsonStr != null && userJsonStr.isNotEmpty) {
         try {
@@ -114,28 +119,43 @@ class AuthService {
         }
       }
 
-      // 2. Firebase yapılandırılmışsa Firebase auth listener ekle
+      // 2. Kullanıcı daha önce uygulamaya girmişse ancak oturum düşmüşse,
+      // asla tekrar giriş yapma ekranına fırlatma; oturumu yerel gezgin olarak kurtar
+      if (_currentUser == null && _hasOnboarded) {
+        final guestUid = 'guest_${DateTime.now().millisecondsSinceEpoch}';
+        _currentUser = OneiroUser(
+          uid: guestUid,
+          displayName: 'Kadim Gezgin',
+          email: null,
+          isGuest: true,
+        );
+        await prefs.setString(_prefUserKey, jsonEncode(_currentUser!.toJson()));
+        _authStateController.add(_currentUser);
+        debugPrint('[AuthService] Onboarded kullanıcı için yerel oturum otomatik kurtarıldı.');
+      }
+
+      // 3. Firebase yapılandırılmışsa Firebase auth listener ekle
       if (isFirebaseAvailable) {
         final fbUser = auth.currentUser;
         if (fbUser != null) {
           _currentUser = OneiroUser.fromFirebase(fbUser);
-          _persistUser(_currentUser!);
+          await _persistUser(_currentUser!);
           _authStateController.add(_currentUser);
         }
-        auth.authStateChanges().listen((fbUser) {
+        auth.authStateChanges().listen((fbUser) async {
           if (fbUser != null) {
             _currentUser = OneiroUser.fromFirebase(fbUser);
-            _persistUser(_currentUser!);
+            await _persistUser(_currentUser!);
             _authStateController.add(_currentUser);
           }
         });
       }
 
-      // 3. Google sessiz oturum açma (arka planda yenileme)
-      _googleSignIn.signInSilently().then((googleAccount) {
+      // 4. Google sessiz oturum açma (arka planda tazeleme)
+      _googleSignIn.signInSilently().then((googleAccount) async {
         if (googleAccount != null) {
           _currentUser = OneiroUser.fromGoogle(googleAccount);
-          _persistUser(_currentUser!);
+          await _persistUser(_currentUser!);
           _authStateController.add(_currentUser);
           debugPrint('[AuthService] Google sessiz oturumu tazelendi: ${googleAccount.email}');
         }
@@ -151,10 +171,20 @@ class AuthService {
     }
   }
 
+  Future<void> setOnboarded() async {
+    _hasOnboarded = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefOnboardingKey, true);
+    } catch (_) {}
+  }
+
   Future<void> _persistUser(OneiroUser user) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefUserKey, jsonEncode(user.toJson()));
+      await prefs.setBool(_prefOnboardingKey, true);
+      _hasOnboarded = true;
     } catch (e) {
       debugPrint('[AuthService] Kullanıcı kaydetme hatası: $e');
     }

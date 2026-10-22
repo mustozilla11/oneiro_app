@@ -89,12 +89,12 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         final user = snapshot.data ?? AuthService.instance.currentUser;
 
-        // Giriş yapmış kullanıcı -> Doğrudan Ana Sayfaya
-        if (user != null) {
+        // Giriş yapmış veya daha önce uygulamaya girmiş kullanıcı -> Doğrudan Ana Sayfaya
+        if (user != null || AuthService.instance.hasOnboarded) {
           return const MainPagerScreen();
         }
 
-        // Giriş yapmamış kullanıcı -> Onboarding & Giriş Ekranı
+        // Yalnızca ilk kez açan kullanıcı -> Onboarding & Giriş Ekranı
         return const OnboardingAuthScreen();
       },
     );
