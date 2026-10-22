@@ -406,10 +406,41 @@ def extract_keywords(text: str) -> List[str]:
     return combined if combined else words
 
 
+def clean_turkish_symbol_root(word: str) -> str:
+    """Türkçe rüya metinlerindeki çekim eklerini ('okuldaydım' -> 'Okul') ayıklayarak yalın kökü bulur."""
+    w = word.lower().strip()
+    patterns = [
+        r"(?:ler|lar)?(?:da|de|ta|te)yd(?:ım|im|ik|ük|un|ün|ı|i)$", # okuldaydım, evdeydik
+        r"(?:ler|lar)?(?:da|de|ta|te)ym(?:ışım|işim|ışız|işiz|ış|iş)$",
+        r"(?:ler|lar)?(?:da|de|ta|te)y(?:ım|im|ız|iz)$", # okuldayım, evdeyim
+        r"(?:ler|lar)?(?:da|de|ta|te)k(?:i)$", # okuldaki, evdeki
+        r"(?:ler|lar)?(?:dan|den|tan|ten)$", # okuldan, evden
+        r"(?:ler|lar)?(?:da|de|ta|te)$", # okulda, evde
+        r"(?:ım|im|um|üm|m)(?:da|de|ta|te)yd(?:ım|im)$", # odamdaydım
+        r"(?:ım|im|um|üm|m)(?:da|de|ta|te)$", # odamda, evimde
+        r"(?:umuz|ümüz|unuz|ünüz|ları|leri)$", # evimiz, okulları
+        r"(?:yı|yi|yu|yü|ı|i|u|ü)$", # okulu, evi
+        r"(?:ya|ye|a|e)$", # okula, eve
+        r"(?:ler|lar)$", # okullar -> okul
+    ]
+    for p in patterns:
+        subbed = re.sub(p, "", w)
+        if len(subbed) >= 2 and subbed != w:
+            w = subbed
+            break
+    return w.capitalize()
+
+
 def extract_user_symbols(text: str, lang: str = "tr") -> List[str]:
     """Kullanıcının kendi dilinde arayüzde gösterilecek 3-4 anahtar sembolü ayıklar."""
     words = re.findall(r"\b[^\W\d_]{3,}\b", text.lower(), flags=re.UNICODE)
-    meaningful = [w.capitalize() for w in words if w not in MULTILINGUAL_STOPWORDS]
+    meaningful = []
+    for w in words:
+        if w in MULTILINGUAL_STOPWORDS:
+            continue
+        cleaned = clean_turkish_symbol_root(w) if lang == "tr" else w.capitalize()
+        if cleaned.lower() not in MULTILINGUAL_STOPWORDS and len(cleaned) >= 2:
+            meaningful.append(cleaned)
 
     # Varsa en belirgin kelimeleri seç
     if meaningful:
@@ -1281,11 +1312,15 @@ async def interpret_dream(request: DreamInterpretRequest):
         gunun_pusulasi=parsed_json.get("gunun_pusulasi", default_payload["gunun_pusulasi"])
     )
 
+    raw_prim = parsed_json.get("primary_interpretation", default_payload["primary_interpretation"])
+    clean_prim = re.sub(r"^\s*#+\s*.*(?:\n+|$)", "", raw_prim).strip()
+    clean_prim = re.sub(r"^\s*(?:rüyanın tabiri|rüya tabiri|tabir)\s*[:\-]?\s*", "", clean_prim, flags=re.IGNORECASE).strip()
+
     primary_trad_item = TraditionAnalysisItem(
         tradition_id=preferred_trad,
         title=primary_meta["title"],
         scholar=primary_meta["scholar"],
-        interpretation=parsed_json.get("primary_interpretation", default_payload["primary_interpretation"]),
+        interpretation=clean_prim,
         is_unlocked=True
     )
 
@@ -1371,6 +1406,7 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         f"🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
         f"- Kullanıcının rüyayı yazdığı dili otomatik tespit et ve yorumunu KESİNLİKLE kullanıcının dilinde üret.\n"
         f"- Kullanıcının rüyasını YALNIZCA '{trad_meta['title']}' ({trad_meta['scholar']}) geleneği ışığında yorumla.\n"
+        f"- KESİNLİKLE hiçbir başlık ('# Rüyanın Tabiri', '## ...', 'Tabir:' vb.) ekleme! Doğrudan tabirin ilk edebi cümlesiyle başla.\n"
         f"- Aşağıdaki kaynak pasajından beslenerek, en az 2-3 derinlikli, edebi, akıcı ve sürükleyici paragraflık (yaklaşık 180-250 kelime) tatmin edici bir tabir sun. Asla sözünü yarım bırakma, son cümleyi tam bir bilgelik mesajıyla bitir.\n\n"
         f"KAYNAK PASAJI:\n{chunk_text_content}"
     )
@@ -1388,6 +1424,10 @@ async def unlock_tradition(request: UnlockTraditionRequest):
     full_text = await generate_unlock_interpretation(system_prompt, request.dream_text)
     if not full_text or not full_text.strip():
         full_text = unlock_offline_fallbacks.get(lang, unlock_offline_fallbacks["tr"])
+
+    # Başlık veya '#' işaretlerini kesin olarak temizle
+    full_text = re.sub(r"^\s*#+\s*.*(?:\n+|$)", "", full_text).strip()
+    full_text = re.sub(r"^\s*(?:rüyanın tabiri|rüya tabiri|tabir)\s*[:\-]?\s*", "", full_text, flags=re.IGNORECASE).strip()
 
     return UnlockTraditionResponse(
         tradition_id=tradition_id,

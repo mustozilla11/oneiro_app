@@ -61,65 +61,91 @@ class DreamHistoryScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Canlı Firestore Verisi veya Fallback Liste
+              // Canlı Firestore Verisi ve Yerel Telefon Arşivinin Kusursuz Birleşimi
               Expanded(
-                child: currentUser == null
-                    ? _buildSampleList(context)
-                    : StreamBuilder<List<Map<String, dynamic>>>(
-                        stream: FirestoreService.instance.getDreamHistoryStream(currentUser.uid),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: currentUser != null
+                      ? FirestoreService.instance.getDreamHistoryStream(currentUser.uid)
+                      : const Stream.empty(),
+                  builder: (context, snapshot) {
+                    final firestoreDreams = snapshot.data ?? [];
+
+                    return FutureBuilder<List<Map<String, dynamic>>>(
+                      future: FirestoreService.instance.getLocalDreams(),
+                      builder: (context, localSnap) {
+                        final localDreams = localSnap.data ?? [];
+
+                        // Tekrarsız birleşim (Önce bulut, ardından yerel cihaz)
+                        final allDreams = <Map<String, dynamic>>[];
+                        final seenTexts = <String>{};
+
+                        for (final d in firestoreDreams) {
+                          final txt = (d['dreamText'] as String? ?? '').trim();
+                          if (txt.isNotEmpty && !seenTexts.contains(txt)) {
+                            seenTexts.add(txt);
+                            allDreams.add(d);
+                          }
+                        }
+                        for (final d in localDreams) {
+                          final txt = (d['dreamText'] as String? ?? '').trim();
+                          if (txt.isNotEmpty && !seenTexts.contains(txt)) {
+                            seenTexts.add(txt);
+                            allDreams.add(d);
+                          }
+                        }
+
+                        if (allDreams.isEmpty) {
+                          if (snapshot.connectionState == ConnectionState.waiting && currentUser != null) {
                             return const Center(
                               child: CircularProgressIndicator(color: AppColors.ancientGold, strokeWidth: 2),
                             );
                           }
+                          return currentUser == null ? _buildSampleList(context) : _buildEmptyState(context);
+                        }
 
-                          final dreams = snapshot.data ?? [];
-                          if (dreams.isEmpty) {
-                            return _buildEmptyState(context);
-                          }
+                        return ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: allDreams.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 14),
+                          itemBuilder: (context, index) {
+                            final item = allDreams[index];
+                            final dreamText = item['dreamText'] as String? ?? '';
+                            final subconscious = item['subconsciousAnalysis'] as String? ?? '';
+                            final dateStr = item['dateString'] as String? ?? 'Yakınlarda';
+                            final symbols = (item['symbols'] as List<dynamic>?)?.map((s) => s.toString()).toList() ?? [];
 
-                          return ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: dreams.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 14),
-                            itemBuilder: (context, index) {
-                              final item = dreams[index];
-                              final dreamText = item['dreamText'] as String? ?? '';
-                              final subconscious = item['subconsciousAnalysis'] as String? ?? '';
-                              final dateStr = item['dateString'] as String? ?? 'Yakınlarda';
-                              final symbols = (item['symbols'] as List<dynamic>?)?.map((s) => s.toString()).toList() ?? [];
-
-                              return _buildDreamCard(
-                                context,
-                                date: dateStr,
-                                emotion: (item['emotion'] as String? ?? '').trim(),
-                                title: symbols.isNotEmpty ? symbols.take(2).join(' & ') : 'Kadim Tabir',
-                                preview: dreamText,
-                                symbols: symbols,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  final baseMock = DreamInterpretation.mockFromRequest(
-                                    dreamText: dreamText,
-                                    emotion: 'Mistik',
-                                  );
-                                  final interpretation = baseMock.copyWith(
-                                    freeAnalysis: FreeAnalysis(
-                                      bilincaltiAynasi: subconscious.isNotEmpty ? subconscious : baseMock.freeAnalysis.bilincaltiAynasi,
-                                      gununPusulasi: baseMock.freeAnalysis.gununPusulasi,
-                                    ),
-                                  );
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => DreamResultScreen(interpretation: interpretation),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
+                            return _buildDreamCard(
+                              context,
+                              date: dateStr,
+                              emotion: (item['emotion'] as String? ?? '').trim(),
+                              title: symbols.isNotEmpty ? symbols.take(2).join(' & ') : 'Kadim Tabir',
+                              preview: dreamText,
+                              symbols: symbols,
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                final baseMock = DreamInterpretation.mockFromRequest(
+                                  dreamText: dreamText,
+                                  emotion: 'Mistik',
+                                );
+                                final interpretation = baseMock.copyWith(
+                                  freeAnalysis: FreeAnalysis(
+                                    bilincaltiAynasi: subconscious.isNotEmpty ? subconscious : baseMock.freeAnalysis.bilincaltiAynasi,
+                                    gununPusulasi: baseMock.freeAnalysis.gununPusulasi,
+                                  ),
+                                );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => DreamResultScreen(interpretation: interpretation),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),

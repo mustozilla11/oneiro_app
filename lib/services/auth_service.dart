@@ -119,25 +119,21 @@ class AuthService {
         final fbUser = auth.currentUser;
         if (fbUser != null) {
           _currentUser = OneiroUser.fromFirebase(fbUser);
+          _persistUser(_currentUser!);
           _authStateController.add(_currentUser);
         }
         auth.authStateChanges().listen((fbUser) {
           if (fbUser != null) {
             _currentUser = OneiroUser.fromFirebase(fbUser);
+            _persistUser(_currentUser!);
             _authStateController.add(_currentUser);
-          } else {
-            // Firebase çıkış yaptığında Oneiro oturumunu da tamamen sıfırla
-            if (_currentUser != null && !_currentUser!.isGuest) {
-              _currentUser = null;
-              _authStateController.add(null);
-            }
           }
         });
       }
 
       // 3. Google sessiz oturum açma (arka planda yenileme)
       _googleSignIn.signInSilently().then((googleAccount) {
-        if (googleAccount != null && (_currentUser == null || _currentUser!.isGuest)) {
+        if (googleAccount != null) {
           _currentUser = OneiroUser.fromGoogle(googleAccount);
           _persistUser(_currentUser!);
           _authStateController.add(_currentUser);

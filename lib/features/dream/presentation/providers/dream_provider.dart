@@ -94,20 +94,17 @@ class DreamNotifier extends StateNotifier<DreamState> {
         interpretation: result,
       );
 
-      // Gizlilik ve sıfır sunucu maliyeti politikası:
-      // Rüyalar yerel cihazda gizli tutulur. Yalnızca ücretli Kadim Gezgin Plus aboneleri için buluta yedeklenir.
-      if (currentUid != null && SubscriptionService.instance.isPremiumUser) {
-        await FirestoreService.instance.saveDream(
-          currentUid,
-          dreamText: result.dreamText,
-          interpretation: result.interpretation,
-          subconsciousAnalysis: result.subconsciousAnalysis,
-          warningOfDay: result.warningOfDay,
-          primaryTradition: result.primaryTradition.title,
-          lockedTraditions: result.lockedTraditions.map((t) => t.title).toList(),
-          symbols: result.symbols,
-        );
-      }
+      // Rüyayı her zaman telefon hafızasına kaydet (çevrimdışı ve ücretsiz dahil); oturum açıksa buluta da mühürle
+      await FirestoreService.instance.saveDream(
+        currentUid ?? 'local_user',
+        dreamText: result.dreamText,
+        interpretation: result.interpretation,
+        subconsciousAnalysis: result.subconsciousAnalysis,
+        warningOfDay: result.warningOfDay,
+        primaryTradition: result.primaryTradition.title,
+        lockedTraditions: result.lockedTraditions.map((t) => t.title).toList(),
+        symbols: result.symbols,
+      );
 
       return result;
     } catch (e) {

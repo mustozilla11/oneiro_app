@@ -24,6 +24,13 @@ class LockedTraditionCard extends ConsumerStatefulWidget {
 class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
   bool _isLoading = false;
 
+  String _cleanInterpretation(String raw) {
+    return raw
+        .replaceAll(RegExp(r'^\s*#+\s*.*(?:\n+|$)', caseSensitive: false), '')
+        .replaceAll(RegExp(r'^\s*(?:rüyanın tabiri|rüya tabiri|tabir)\s*[:\-]?\s*', caseSensitive: false), '')
+        .trim();
+  }
+
   Future<void> _handleUnlock() async {
     HapticFeedback.mediumImpact();
 
@@ -122,21 +129,84 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
         HapticFeedback.heavyImpact();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.lock_open, color: AppColors.ancientGold),
-                const SizedBox(width: 12),
-                Text(
-                  '${widget.tradition.title} analizi mühürlendi.',
-                  style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.surfaceCardElevated,
+            duration: const Duration(seconds: 4),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: AppColors.ancientGold),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            content: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF261C0A), // Sıcak kadim altın-kehribar
+                    Color(0xFF140F24), // Mistik gece tonu
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppColors.ancientGold.withValues(alpha: 0.85),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.ancientGold.withValues(alpha: 0.3),
+                    blurRadius: 22,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.ancientGold.withValues(alpha: 0.18),
+                      border: Border.all(
+                        color: AppColors.ancientGold.withValues(alpha: 0.5),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.lock_open_rounded,
+                      color: AppColors.ancientGold,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'KİLİT BAŞARIYLA AÇILDI ✦',
+                          style: GoogleFonts.cinzel(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.4,
+                            color: AppColors.ancientGold,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${widget.tradition.title} analizi günlüğünüze mühürlendi.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPureWhite,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -300,7 +370,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
             Padding(
               padding: const EdgeInsets.all(18),
               child: Text(
-                trad.interpretation!,
+                _cleanInterpretation(trad.interpretation!),
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   height: 1.7,

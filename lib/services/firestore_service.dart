@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirestoreService {
   FirestoreService._internal();
@@ -158,7 +160,9 @@ class FirestoreService {
     }
   }
 
-  /// Yorumlanan rüyayı `users/{uid}/dreams` alt koleksiyonuna mühürler
+  static const String _prefLocalDreamsKey = 'oneiro_local_dream_history_v1';
+
+  /// Yorumlanan rüyayı önce telefonun yerel hafızasına, ardından Firestore'a mühürler
   Future<void> saveDream(
     String uid, {
     required String dreamText,
@@ -169,34 +173,63 @@ class FirestoreService {
     List<String>? lockedTraditions,
     List<String>? symbols,
   }) async {
-    if (!isFirebaseAvailable) {
-      debugPrint('[FirestoreService] Firebase aktif değil, rüya yerel bellekte tutuluyor.');
-      return;
-    }
+    final dreamData = <String, dynamic>{
+      'dreamText': dreamText,
+      'interpretation': interpretation,
+      'subconsciousAnalysis': subconsciousAnalysis,
+      'warningOfDay': warningOfDay,
+      'primaryTradition': primaryTradition,
+      'lockedTraditions': lockedTraditions ?? <String>[],
+      'symbols': symbols ?? <String>[],
+      'dateString': _getTodayDateString(),
+    };
 
+    // 1. Her zaman yerel telefona (SharedPreferences) kaydet
     try {
-      final dreamData = <String, dynamic>{
-        'dreamText': dreamText,
-        'interpretation': interpretation,
-        'subconsciousAnalysis': subconsciousAnalysis,
-        'warningOfDay': warningOfDay,
-        'primaryTradition': primaryTradition,
-        'lockedTraditions': lockedTraditions ?? <String>[],
-        'symbols': symbols ?? <String>[],
-        'createdAt': FieldValue.serverTimestamp(),
-        'dateString': _getTodayDateString(),
-      };
-
-      await firestore
-          .collection('users')
-          .doc(uid)
-          .collection('dreams')
-          .add(dreamData);
-
-      debugPrint('[FirestoreService] Rüya başarıyla buluta mühürlendi (users/$uid/dreams).');
+      final prefs = await SharedPreferences.getInstance();
+      final localListStr = prefs.getString(_prefLocalDreamsKey);
+      List<dynamic> localList = [];
+      if (localListStr != null && localListStr.isNotEmpty) {
+        localList = jsonDecode(localListStr) as List<dynamic>;
+      }
+      localList.insert(0, dreamData);
+      if (localList.length > 50) localList = localList.sublist(0, 50);
+      await prefs.setString(_prefLocalDreamsKey, jsonEncode(localList));
+      debugPrint('[FirestoreService] Rüya yerel telefona mühürlendi (Toplam: ${localList.length}).');
     } catch (e) {
-      debugPrint('[FirestoreService] saveDream hatası: $e');
+      debugPrint('[FirestoreService] Yerel rüya kaydetme uyarısı: $e');
     }
+
+    // 2. Firebase hazırsa ve geçerli bir UID varsa buluta da mühürle
+    if (isFirebaseAvailable && uid.isNotEmpty && uid != 'local_user') {
+      try {
+        final firestoreData = Map<String, dynamic>.from(dreamData);
+        firestoreData['createdAt'] = FieldValue.serverTimestamp();
+        await firestore
+            .collection('users')
+            .doc(uid)
+            .collection('dreams')
+            .add(firestoreData);
+        debugPrint('[FirestoreService] Rüya başarıyla buluta mühürlendi (users/$uid/dreams).');
+      } catch (e) {
+        debugPrint('[FirestoreService] saveDream Firestore hatası: $e');
+      }
+    }
+  }
+
+  /// Yerel hafızadaki kayıtlı rüyaları getirir
+  Future<List<Map<String, dynamic>>> getLocalDreams() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final localListStr = prefs.getString(_prefLocalDreamsKey);
+      if (localListStr != null && localListStr.isNotEmpty) {
+        final decoded = jsonDecode(localListStr) as List<dynamic>;
+        return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    } catch (e) {
+      debugPrint('[FirestoreService] getLocalDreams hatası: $e');
+    }
+    return [];
   }
 
   /// Kullanıcının geçmiş rüyalarını canlı yayınlayan Stream
