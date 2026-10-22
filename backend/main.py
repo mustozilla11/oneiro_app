@@ -850,7 +850,10 @@ def retrieve_top_k(dream_text: str, top_k: int = 3, tradition_id: Optional[str] 
 # -----------------------------------------------------------------------------
 # 6.5. ÇİFT MOTORLU YAPAY ZEKA STRATEJİSİ (GOOGLE GEMINI FLASH + DEEPSEEK YEDEK)
 # -----------------------------------------------------------------------------
-def _sync_gemini_post(url: str, payload: dict, timeout: float = 5.0) -> Optional[dict]:
+GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-latest"]
+GEMINI_DEFAULT_TIMEOUT = 10.0  # Kullanıcı talebi: Google'a esneklik sağlandı (Ücretsiz birincil motor)
+
+def _sync_gemini_post(url: str, payload: dict, timeout: float = 10.0) -> Optional[dict]:
     try:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -864,15 +867,15 @@ def _sync_gemini_post(url: str, payload: dict, timeout: float = 5.0) -> Optional
                 body = resp.read().decode("utf-8")
                 return json.loads(body)
     except Exception as e:
-        logger.warning(f"Google Gemini isteği uyarısı: {e}")
+        logger.warning(f"Google Gemini isteği uyarısı ({url.split('models/')[1].split(':')[0]}): {e}")
     return None
 
 
-async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 5.0) -> Optional[Dict[str, Any]]:
-    """Google Gemini API'yi (gemini-flash-latest) 5 saniye zaman aşımı ile çağırır ve JSON çıktısını döner."""
+async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 10.0) -> Optional[Dict[str, Any]]:
+    """Google Gemini API'yi thinkingBudget=0 ve çoklu model yedeğiyle çağırıp JSON çıktısı döner."""
     if not GEMINI_API_KEY:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+
     payload = {
         "contents": [
             {
@@ -884,24 +887,35 @@ async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float 
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.7,
-            "maxOutputTokens": 1500
+            "maxOutputTokens": 1500,
+            "thinkingConfig": {
+                "thinkingBudget": 0
+            }
         }
     }
-    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
-    if data:
-        candidates = data.get("candidates", [])
-        if candidates:
-            raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-            if raw_text:
-                return json.loads(raw_text)
+
+    for model_name in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+        data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+        if data:
+            candidates = data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if parts:
+                    raw_text = parts[0].get("text", "")
+                    if raw_text:
+                        try:
+                            return json.loads(raw_text)
+                        except Exception as e:
+                            logger.warning(f"Gemini ({model_name}) JSON parse hatası: {e}")
     return None
 
 
-async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 5.0) -> Optional[str]:
-    """Google Gemini API'yi (gemini-flash-latest) 5 saniye zaman aşımı ile çağırır ve metin döner."""
+async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 10.0) -> Optional[str]:
+    """Google Gemini API'yi thinkingBudget=0 ile çağırıp metin döner."""
     if not GEMINI_API_KEY:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+
     payload = {
         "contents": [
             {
@@ -912,64 +926,78 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
         ],
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1200
+            "maxOutputTokens": 1200,
+            "thinkingConfig": {
+                "thinkingBudget": 0
+            }
         }
     }
-    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
-    if data:
-        candidates = data.get("candidates", [])
-        if candidates:
-            text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-            if text:
-                return text.strip()
+
+    for model_name in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+        data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+        if data:
+            candidates = data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if parts:
+                    text = parts[0].get("text", "")
+                    if text and text.strip():
+                        return text.strip()
     return None
 
 
-async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 5.0) -> Optional[str]:
-    """Google Gemini API ile sohbet yanıtı üretir (5 saniye limitli)."""
+async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 10.0) -> Optional[str]:
+    """Google Gemini API ile sohbet yanıtı üretir (thinkingBudget=0 ile anlık dönüş)."""
     if not GEMINI_API_KEY:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+
     payload = {
         "contents": contents,
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1200
+            "maxOutputTokens": 1200,
+            "thinkingConfig": {
+                "thinkingBudget": 0
+            }
         }
     }
-    data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
-    if data:
-        candidates = data.get("candidates", [])
-        if candidates:
-            parts = candidates[0].get("content", {}).get("parts", [])
-            if parts:
-                text = parts[0].get("text", "")
-                if text:
-                    return text.strip()
+
+    for model_name in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+        data = await asyncio.to_thread(_sync_gemini_post, url, payload, timeout)
+        if data:
+            candidates = data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                if parts:
+                    text = parts[0].get("text", "")
+                    if text and text.strip():
+                        return text.strip()
     return None
 
 
 async def generate_dream_interpretation(system_prompt: str, user_prompt: str) -> Dict[str, Any]:
     """
     Hibrit Çift Motor Stratejisi:
-    1. Öncelikli olarak Google Gemini (Ücretsiz) çağrılır (maksimum 5.0 saniye beklenir).
-    2. 5 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
+    1. Öncelikli olarak Google Gemini (Ücretsiz, thinkingBudget=0) çağrılır (maksimum 10.0 saniye beklenir).
+    2. 10 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
     """
-    # 1. Motor: Google Gemini (Ücretsiz, 5 saniye limitli) -> Kaynak 1
+    # 1. Motor: Google Gemini (Ücretsiz, 10 saniye limitli) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2] Google Gemini Flash API çağrılıyor (Zaman aşımı: 5.0s)...")
+            logger.info("⚡ [1/2] Google Gemini API çağrılıyor (Zaman aşımı: 10.0s)...")
             gemini_res = await asyncio.wait_for(
-                call_gemini_json(system_prompt, user_prompt, timeout=5.0),
-                timeout=5.2
+                call_gemini_json(system_prompt, user_prompt, timeout=GEMINI_DEFAULT_TIMEOUT),
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_res and isinstance(gemini_res, dict):
-                logger.info("✅ Google Gemini 5 saniye içinde başarıyla yanıt üretti (Kaynak 1).")
+                logger.info("✅ Google Gemini başarıyla yanıt üretti (Kaynak 1).")
                 if "primary_interpretation" in gemini_res and gemini_res["primary_interpretation"]:
                     gemini_res["primary_interpretation"] = gemini_res["primary_interpretation"].strip() + "\n\n(Kaynak 1)"
                 return gemini_res
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini 5 saniye sınırını aştı! DeepSeek yedek motoruna geçiliyor...")
+            logger.warning("⏱️ Google Gemini zaman sınırını aştı! DeepSeek yedek motoruna geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini çağrısında hata ({e}), DeepSeek yedek motoruna geçiliyor...")
 
@@ -1000,20 +1028,20 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
 
 
 async def generate_unlock_interpretation(system_prompt: str, dream_text: str) -> Optional[str]:
-    """Tekil gelenek kilit açma için 5s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
-    # 1. Motor: Google Gemini (5s) -> Kaynak 1
+    """Tekil gelenek kilit açma için 10s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
+    # 1. Motor: Google Gemini (10s) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 5.0s)...")
+            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 10.0s)...")
             gemini_text = await asyncio.wait_for(
-                call_gemini_text(system_prompt, f'RÜYA: "{dream_text}"', timeout=5.0),
-                timeout=5.2
+                call_gemini_text(system_prompt, f'RÜYA: "{dream_text}"', timeout=GEMINI_DEFAULT_TIMEOUT),
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_text and gemini_text.strip():
                 logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü (Kaynak 1).")
                 return gemini_text.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini unlock 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini unlock zaman sınırını aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini unlock hatası ({e}), DeepSeek'e geçiliyor...")
 
@@ -1041,7 +1069,7 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
 
 
 async def generate_chat_reply(message: str, system_context: Optional[str] = None, history: Optional[List[Dict[str, Any]]] = None) -> str:
-    """Tabirci sohbeti için çift motor (Gemini 5s -> DeepSeek fallback)."""
+    """Tabirci sohbeti için çift motor (Gemini 10s -> DeepSeek fallback)."""
     # 1. Gemini İçin Formatlama
     gemini_contents = []
     if system_context:
@@ -1064,16 +1092,16 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
 
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Chat] Google Gemini Flash çağrılıyor (Zaman aşımı: 5.0s)...")
+            logger.info("⚡ [1/2 Chat] Google Gemini çağrılıyor (Zaman aşımı: 10.0s)...")
             gemini_res = await asyncio.wait_for(
-                call_gemini_chat(gemini_contents, timeout=5.0),
-                timeout=5.2
+                call_gemini_chat(gemini_contents, timeout=GEMINI_DEFAULT_TIMEOUT),
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
             )
             if gemini_res and gemini_res.strip():
                 logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü (Kaynak 1).")
                 return gemini_res.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini chat 5 saniyeyi aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini chat zaman sınırını aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini chat hatası ({e}), DeepSeek'e geçiliyor...")
 
@@ -1125,11 +1153,13 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
     )
 
 
-
 # -----------------------------------------------------------------------------
 # 7. ENDPOINT'LER
 # -----------------------------------------------------------------------------
+@app.get("/", summary="Kök Uç Noktası (UptimeRobot / Health)")
+@app.head("/", summary="HEAD Sağlık Kontrolü")
 @app.get("/health", summary="Sunucu Durum ve Sağlık Kontrolü")
+@app.head("/health", summary="HEAD Sağlık Kontrolü")
 async def health_check():
     """Render.com uyanıklık ve anlık sistem durumu (0 ms)."""
     global CHUNKS_DB
@@ -1137,11 +1167,11 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Oneiro RAG Backend",
-        "version": "2.2.0",
+        "version": "2.3.0",
         "total_chunks": len(CHUNKS_DB),
         "books_loaded": sources,
         "dual_ai_strategy": {
-            "primary": "Google Gemini (gemini-flash-latest) [5s zaman aşımı]",
+            "primary": "Google Gemini (gemini-3.5-flash) [10s zaman aşımı, thinkingBudget=0]",
             "fallback": "DeepSeek (deepseek-chat)",
             "gemini_configured": bool(GEMINI_API_KEY),
             "deepseek_configured": bool(DEEPSEEK_API_KEY)
