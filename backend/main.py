@@ -848,10 +848,10 @@ def retrieve_top_k(dream_text: str, top_k: int = 3, tradition_id: Optional[str] 
 # -----------------------------------------------------------------------------
 # 6.5. ÇİFT MOTORLU YAPAY ZEKA STRATEJİSİ (GOOGLE GEMINI FLASH + DEEPSEEK YEDEK)
 # -----------------------------------------------------------------------------
-GEMINI_MODELS = ["gemini-3.5-flash", "gemini-flash-latest"]
-GEMINI_DEFAULT_TIMEOUT = 10.0  # Kullanıcı talebi: Google'a esneklik sağlandı (Ücretsiz birincil motor)
+GEMINI_MODELS = ["gemini-3.5-flash"]
+GEMINI_DEFAULT_TIMEOUT = 4.0  # Hızlı ve takılmayan yanıt için 4 saniye zaman aşımı (gecikirse derhal DeepSeek'e geçer)
 
-def _sync_gemini_post(url: str, payload: dict, timeout: float = 10.0) -> Optional[dict]:
+def _sync_gemini_post(url: str, payload: dict, timeout: float = 4.0) -> Optional[dict]:
     try:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -864,13 +864,15 @@ def _sync_gemini_post(url: str, payload: dict, timeout: float = 10.0) -> Optiona
             if resp.status == 200:
                 body = resp.read().decode("utf-8")
                 return json.loads(body)
+    except urllib.error.HTTPError as he:
+        logger.warning(f"Google Gemini HTTP {he.code} hatası ({url.split('models/')[1].split(':')[0]}): {he.reason}")
     except Exception as e:
         logger.warning(f"Google Gemini isteği uyarısı ({url.split('models/')[1].split(':')[0]}): {e}")
     return None
 
 
-async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 10.0) -> Optional[Dict[str, Any]]:
-    """Google Gemini API'yi thinkingBudget=0 ve çoklu model yedeğiyle çağırıp JSON çıktısı döner."""
+async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float = 4.0) -> Optional[Dict[str, Any]]:
+    """Google Gemini API'yi 4096 token ve düşünme payı ile çağırıp JSON çıktısı döner."""
     if not GEMINI_API_KEY:
         return None
 
@@ -885,7 +887,7 @@ async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float 
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.7,
-            "maxOutputTokens": 1500,
+            "maxOutputTokens": 4096,
             "thinkingConfig": {
                 "thinkingBudget": 0
             }
@@ -909,8 +911,8 @@ async def call_gemini_json(system_prompt: str, user_prompt: str, timeout: float 
     return None
 
 
-async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 10.0) -> Optional[str]:
-    """Google Gemini API'yi thinkingBudget=0 ile çağırıp metin döner."""
+async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float = 4.0) -> Optional[str]:
+    """Google Gemini API'yi 4096 token ile çağırıp metin döner."""
     if not GEMINI_API_KEY:
         return None
 
@@ -924,7 +926,7 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
         ],
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1200,
+            "maxOutputTokens": 4096,
             "thinkingConfig": {
                 "thinkingBudget": 0
             }
@@ -945,8 +947,8 @@ async def call_gemini_text(system_prompt: str, user_prompt: str, timeout: float 
     return None
 
 
-async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 10.0) -> Optional[str]:
-    """Google Gemini API ile sohbet yanıtı üretir (thinkingBudget=0 ile anlık dönüş)."""
+async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 4.0) -> Optional[str]:
+    """Google Gemini API ile sohbet yanıtı üretir (4096 token)."""
     if not GEMINI_API_KEY:
         return None
 
@@ -954,7 +956,7 @@ async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 10.0
         "contents": contents,
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1200,
+            "maxOutputTokens": 4096,
             "thinkingConfig": {
                 "thinkingBudget": 0
             }
@@ -978,16 +980,16 @@ async def call_gemini_chat(contents: List[Dict[str, Any]], timeout: float = 10.0
 async def generate_dream_interpretation(system_prompt: str, user_prompt: str) -> Dict[str, Any]:
     """
     Hibrit Çift Motor Stratejisi:
-    1. Öncelikli olarak Google Gemini (Ücretsiz, thinkingBudget=0) çağrılır (maksimum 10.0 saniye beklenir).
-    2. 10 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
+    1. Öncelikli olarak Google Gemini (Ücretsiz, 4096 token) çağrılır (maksimum 4.0 saniye beklenir).
+    2. 4 saniyeyi aşarsa veya hata verirse otomatik olarak DeepSeek API devreye girer.
     """
-    # 1. Motor: Google Gemini (Ücretsiz, 10 saniye limitli) -> Kaynak 1
+    # 1. Motor: Google Gemini (Ücretsiz, 4 saniye limitli) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2] Google Gemini API çağrılıyor (Zaman aşımı: 10.0s)...")
+            logger.info("⚡ [1/2] Google Gemini API çağrılıyor (Zaman aşımı: 4.0s)...")
             gemini_res = await asyncio.wait_for(
                 call_gemini_json(system_prompt, user_prompt, timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
             )
             if gemini_res and isinstance(gemini_res, dict):
                 logger.info("✅ Google Gemini başarıyla yanıt üretti (Kaynak 1).")
@@ -995,14 +997,14 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
                     gemini_res["primary_interpretation"] = gemini_res["primary_interpretation"].strip() + "\n\n(Kaynak 1)"
                 return gemini_res
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini zaman sınırını aştı! DeepSeek yedek motoruna geçiliyor...")
+            logger.warning("⏱️ Google Gemini zaman sınırını aştı (4s)! DeepSeek yedek motoruna anında geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini çağrısında hata ({e}), DeepSeek yedek motoruna geçiliyor...")
 
     # 2. Motor: DeepSeek (Yedek & Garantili Güçlü Motor) -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor (Kaynak 2)...")
+            logger.info("🛡️ [2/2] DeepSeek API devreye giriyor (Kaynak 2, 3500 token)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -1010,7 +1012,7 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.7,
-                max_tokens=1500,
+                max_tokens=3500,
                 response_format={"type": "json_object"}
             )
             raw_text = completion.choices[0].message.content or "{}"
@@ -1026,27 +1028,27 @@ async def generate_dream_interpretation(system_prompt: str, user_prompt: str) ->
 
 
 async def generate_unlock_interpretation(system_prompt: str, dream_text: str) -> Optional[str]:
-    """Tekil gelenek kilit açma için 10s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
-    # 1. Motor: Google Gemini (10s) -> Kaynak 1
+    """Tekil gelenek kilit açma için 4s Gemini (Kaynak 1) + DeepSeek fallback (Kaynak 2) motoru."""
+    # 1. Motor: Google Gemini (4s) -> Kaynak 1
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 10.0s)...")
+            logger.info("⚡ [1/2 Unlock] Google Gemini çağrılıyor (Zaman aşımı: 4.0s)...")
             gemini_text = await asyncio.wait_for(
                 call_gemini_text(system_prompt, f'RÜYA: "{dream_text}"', timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
             )
             if gemini_text and gemini_text.strip():
                 logger.info("✅ Google Gemini unlock yanıtı başarıyla döndü (Kaynak 1).")
                 return gemini_text.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini unlock zaman sınırını aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini unlock 4 saniyeyi aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini unlock hatası ({e}), DeepSeek'e geçiliyor...")
 
     # 2. Motor: DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor (Kaynak 2)...")
+            logger.info("🛡️ [2/2 Unlock] DeepSeek API devreye giriyor (Kaynak 2, 3000 token)...")
             completion = await deepseek_client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -1054,7 +1056,7 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
                     {"role": "user", "content": f'RÜYA: "{dream_text}"'}
                 ],
                 temperature=0.7,
-                max_tokens=1200
+                max_tokens=3000
             )
             res = completion.choices[0].message.content
             if res and res.strip():
@@ -1067,13 +1069,13 @@ async def generate_unlock_interpretation(system_prompt: str, dream_text: str) ->
 
 
 async def generate_chat_reply(message: str, system_context: Optional[str] = None, history: Optional[List[Dict[str, Any]]] = None) -> str:
-    """Tabirci sohbeti için çift motor (Gemini 10s -> DeepSeek fallback)."""
+    """Tabirci sohbeti için çift motor (Gemini 4s -> DeepSeek fallback)."""
     # 1. Gemini İçin Formatlama
     gemini_contents = []
     if system_context:
         gemini_contents.append({
             "role": "user",
-            "parts": [{"text": f"SİSTEM TALİMATI VE RÜYA BAĞLAMI:\n{system_context}\n\nLütfen bu rüyanın derinlikli bilge rehberi ol."}]
+            "parts": [{"text": f"SİSTEM TALİMATI VE RÜYA BAĞLAMI:\n{system_context}\n\nLütfen bu rüyanın derinlikli bilge rehberi ol. Yanıtındaki cümleleri ASLA yarıda bırakma; tam noktalanmış ve eksiksiz cümlelerle bitir."}]
         })
         gemini_contents.append({
             "role": "model",
@@ -1090,29 +1092,30 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
 
     if GEMINI_API_KEY:
         try:
-            logger.info("⚡ [1/2 Chat] Google Gemini çağrılıyor (Zaman aşımı: 10.0s)...")
+            logger.info("⚡ [1/2 Chat] Google Gemini çağrılıyor (Zaman aşımı: 4.0s)...")
             gemini_res = await asyncio.wait_for(
                 call_gemini_chat(gemini_contents, timeout=GEMINI_DEFAULT_TIMEOUT),
-                timeout=GEMINI_DEFAULT_TIMEOUT + 0.5
+                timeout=GEMINI_DEFAULT_TIMEOUT + 0.3
             )
             if gemini_res and gemini_res.strip():
                 logger.info("✅ Google Gemini sohbet yanıtı başarıyla döndü (Kaynak 1).")
                 return gemini_res.strip() + "\n\n(Kaynak 1)"
         except asyncio.TimeoutError:
-            logger.warning("⏱️ Google Gemini chat zaman sınırını aştı, DeepSeek'e geçiliyor...")
+            logger.warning("⏱️ Google Gemini chat 4 saniyeyi aştı, DeepSeek'e geçiliyor...")
         except Exception as e:
             logger.warning(f"⚠️ Google Gemini chat hatası ({e}), DeepSeek'e geçiliyor...")
 
     # 2. DeepSeek Fallback -> Kaynak 2
     if deepseek_client:
         try:
-            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor (Kaynak 2)...")
+            logger.info("🛡️ [2/2 Chat] DeepSeek API devreye giriyor (Kaynak 2, 3000 token)...")
             deepseek_messages = []
             sys_prompt = (
                 "Sen Kadim Oneiro Rüyabilimci ve Derin Bilinçaltı Rehberisin.\n"
                 "Kullanıcının gördüğü rüya ve tabir detayları sana verildiğinde, kullanıcının sorularını "
                 "bu rüya deneyiminin doğal bir devamı olarak, derinlikli, bilgece, şefkatli, edebi ve doğrudan rüyadaki sembollere atıfta bulunarak cevapla.\n"
-                "Asla yüzeysel veya basmakalıp hazır cevaplar verme. Cevaplarını samimi, doyurucu ve edebi tut."
+                "Asla yüzeysel veya basmakalıp hazır cevaplar verme. Cevaplarını samimi, doyurucu ve edebi tut.\n"
+                "⚠️ KESİN KURAL: Yanıtındaki cümleleri ASLA yarıda bırakma; her cümleni ve paragrafını tam noktalanmış ve eksiksiz olarak tamamla."
             )
             if system_context:
                 sys_prompt += f"\n\nRÜYA VE TABİR BAĞLAMI:\n{system_context}"
@@ -1132,7 +1135,7 @@ async def generate_chat_reply(message: str, system_context: Optional[str] = None
                 model="deepseek-chat",
                 messages=deepseek_messages,
                 temperature=0.7,
-                max_tokens=1200
+                max_tokens=3000
             )
             reply = completion.choices[0].message.content
             if reply and reply.strip():
@@ -1165,12 +1168,12 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Oneiro RAG Backend",
-        "version": "2.3.0",
+        "version": "2.4.0",
         "total_chunks": len(CHUNKS_DB),
         "books_loaded": sources,
         "dual_ai_strategy": {
-            "primary": "Google Gemini (gemini-3.5-flash) [10s zaman aşımı, thinkingBudget=0]",
-            "fallback": "DeepSeek (deepseek-chat)",
+            "primary": "Google Gemini (gemini-3.5-flash) [4s zaman aşımı, 4096 token]",
+            "fallback": "DeepSeek (deepseek-chat) [3500 token, tamamlama garantili]",
             "gemini_configured": bool(GEMINI_API_KEY),
             "deepseek_configured": bool(DEEPSEEK_API_KEY)
         },
@@ -1243,7 +1246,7 @@ async def interpret_dream(request: DreamInterpretRequest):
     # Sembol çıkarımı (Kullanıcının dilindeki özgün semboller)
     symbols = extract_user_symbols(dream_text, lang)
 
-    # DeepSeek Hızlı JSON Promptu (~350-400 token, Çok Dilli)
+    # Hızlı ve Zengin JSON Promptu (Çok Dilli, Tamamlanmış Cümle Garantili)
     system_prompt = (
         "Sen 'Oneiro', kadim rüya sembollerinin, arketiplerin ve insan bilinçdışının çok dilli bilge tercümanısın.\n\n"
         "🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
@@ -1251,12 +1254,15 @@ async def interpret_dream(request: DreamInterpretRequest):
         "- JSON çıktısındaki 'bilincalti_aynasi', 'gunun_pusulasi', 'primary_interpretation' ve 'teasers' alanlarını KESİNLİKLE VE İSTİSNASIZ kullanıcının yazdığı dilde üret!\n"
         "- Kaynak metinler Türkçe olsa dahi, kitaptaki kadim bilgeliği ve sembol mesajlarını kullanıcının diline akıcı, derinlikli, edebi ve mistik bir üslupla aktar.\n"
         "- Dil asla kullanıcının rüya metninden farklı olmamalıdır.\n\n"
+        "⚠️ KESİN TAMAMLAMA VE BÜTÜNLÜK KURALI (ASLA YARIDA BIRAKMA):\n"
+        "- Hiçbir cümleyi veya paragrafı ASLA yarıda bırakma! Her düşünceyi ve cümleyi tam, eksiksiz ve sonu noktalanmış olarak bitir.\n"
+        "- JSON nesnesini ve tüm parantezleri eksiksiz ve hatasız biçimde sonlandır.\n\n"
         "İstenen JSON şeması:\n"
         "{\n"
         '  "symbols": ["Rüyadaki en belirgin 3-4 anahtar sembol/nesne/kavram YALIN ve EKSİZ haliyle (örneğin: \\"Okul\\", \\"Deniz\\", \\"Kapı\\", \\"Yılan\\")"],\n'
-        '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle (kullanıcı dilinde).",\n'
+        '  "bilincalti_aynasi": "Rüyanın taşıdığı temel hissi ve arketipsel atmosferi özetleyen 2-3 edebi cümle (kullanıcı dilinde, eksiksiz noktalanmış).",\n'
         '  "gunun_pusulasi": "Rüya sahibinin gün boyu hatırlayacağı tek ve vurucu bilgelik aforizması (kullanıcı dilinde).",\n'
-        f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın en az 2-3 doyurucu, akıcı, edebi ve derinlikli paragraflık kapsamlı ve yarım kalmayan tam tabiri (kullanıcı dilinde, yaklaşık 180-260 kelime).",\n'
+        f'  "primary_interpretation": "{primary_meta["title"]} ({primary_meta["scholar"]}) geleneğine göre rüyanın en az 2-3 doyurucu, akıcı, edebi ve derinlikli paragraflık kapsamlı ve yarım kalmayan tam tabiri (kullanıcı dilinde, son cümlesi mutlaka tam bir nokta ile biten eksiksiz metin).",\n'
         '  "teasers": {\n'
         f'    "{other_trads[0]}": "{other_meta_0["title"]} açısından rüyayı merak ettiren, 1 cümlelik şoke edici veya düşündürücü teaser (kullanıcı dilinde)",\n'
         f'    "{other_trads[1]}": "{other_meta_1["title"]} açısından rüyayı merak ettiren, 1 cümlelik çarpıcı teaser (kullanıcı dilinde)."\n'
@@ -1447,8 +1453,8 @@ async def unlock_tradition(request: UnlockTraditionRequest):
         f"🎯 KULLANICI DİLİ AYNASI (LANGUAGE MIRRORING - ÇOK ÖNEMLİ KURAL):\n"
         f"- Kullanıcının rüyayı yazdığı dili otomatik tespit et ve yorumunu KESİNLİKLE kullanıcının dilinde üret.\n"
         f"- Kullanıcının rüyasını YALNIZCA '{trad_meta['title']}' ({trad_meta['scholar']}) geleneği ışığında yorumla.\n"
-        f"- KESİNLİKLE hiçbir başlık ('# Rüyanın Tabiri', '## ...', 'Tabir:' vb.) ekleme! Doğrudan tabirin ilk edebi cümlesiyle başla.\n"
-        f"- Aşağıdaki kaynak pasajından beslenerek, en az 2-3 derinlikli, edebi, akıcı ve sürükleyici paragraflık (yaklaşık 180-250 kelime) tatmin edici bir tabir sun. Asla sözünü yarım bırakma, son cümleyi tam bir bilgelik mesajıyla bitir.\n\n"
+        f"- Aşağıdaki kaynak pasajından beslenerek, 2-3 derinlikli, edebi, akıcı ve sürükleyici paragraflık tatmin edici bir tabir sun.\n"
+        f"- ⚠️ KESİN BÜTÜNLÜK KURALI: Cümlelerini ve tabirini ASLA yarıda bırakma! Her paragrafı ve son cümleni mutlaka eksiksiz, noktalanmış ve tamamlanmış bir bilgelik mesajıyla bitir.\n\n"
         f"KAYNAK PASAJI:\n{chunk_text_content}"
     )
 
