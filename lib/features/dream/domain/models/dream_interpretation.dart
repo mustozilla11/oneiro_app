@@ -232,6 +232,7 @@ class DreamInterpretation {
   factory DreamInterpretation.mockFromRequest({
     required String dreamText,
     String? emotion,
+    String? preferredTradition,
   }) {
     final words = dreamText
         .split(RegExp(r'[\s,.;!?]+'))

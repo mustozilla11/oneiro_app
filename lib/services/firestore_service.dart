@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +10,9 @@ class FirestoreService {
   static final FirestoreService instance = FirestoreService._internal();
 
   FirebaseFirestore? _firestore;
+
+  /// Yerel rüya arşivi her güncellendiğinde dinleyicileri (Arşiv & Profil) anında yeniler
+  final ValueNotifier<int> localDreamsRevision = ValueNotifier<int>(0);
 
   bool get isFirebaseAvailable {
     try {
@@ -34,14 +38,11 @@ class FirestoreService {
     String? email,
     String? displayName,
   }) async {
-    if (!isFirebaseAvailable) {
-      debugPrint('[FirestoreService] Firebase aktif değil, kullanıcı yerel modda devam ediyor.');
-      return null;
-    }
+    if (!isFirebaseAvailable) return null;
 
     try {
       final userDocRef = firestore.collection('users').doc(uid);
-      final docSnap = await userDocRef.get();
+      final docSnap = await userDocRef.get().timeout(const Duration(seconds: 3));
 
       if (!docSnap.exists) {
         final initialData = <String, dynamic>{
@@ -49,22 +50,21 @@ class FirestoreService {
           'email': email ?? '',
           'displayName': displayName ?? 'Kadim Gezgin',
           'dailyFreeDreamDate': _getTodayDateString(),
-          'dreamCredits': 3, // İlk kayıtta 3 kadim hediye jeton
+          'dreamCredits': 3,
           'isPremium': false,
           'createdAt': FieldValue.serverTimestamp(),
           'lastLoginAt': FieldValue.serverTimestamp(),
         };
-        await userDocRef.set(initialData);
-        debugPrint('[FirestoreService] Yeni kullanıcı dokümanı oluşturuldu: $uid');
+        await userDocRef.set(initialData).timeout(const Duration(seconds: 3));
         return initialData;
       } else {
         await userDocRef.update({
           'lastLoginAt': FieldValue.serverTimestamp(),
-        });
+        }).timeout(const Duration(seconds: 3));
         return docSnap.data();
       }
     } catch (e) {
-      debugPrint('[FirestoreService] syncUserRecord hatası: $e');
+      debugPrint('[FirestoreService] syncUserRecord uyarısı (yerel mod aktif): $e');
       return null;
     }
   }
@@ -73,10 +73,14 @@ class FirestoreService {
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     if (!isFirebaseAvailable) return null;
     try {
-      final docSnap = await firestore.collection('users').doc(uid).get();
+      final docSnap = await firestore
+          .collection('users')
+          .doc(uid)
+          .get()
+          .timeout(const Duration(seconds: 3));
       return docSnap.data();
     } catch (e) {
-      debugPrint('[FirestoreService] getUserData hatası: $e');
+      debugPrint('[FirestoreService] getUserData uyarısı: $e');
       return null;
     }
   }
@@ -89,9 +93,8 @@ class FirestoreService {
     try {
       return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
         return snapshot.data();
-      });
+      }).handleError((_) => null);
     } catch (e) {
-      debugPrint('[FirestoreService] streamUserData hatası: $e');
       return Stream.value(null);
     }
   }
@@ -102,10 +105,9 @@ class FirestoreService {
     try {
       await firestore.collection('users').doc(uid).update({
         'isPremium': isPremium,
-      });
-      debugPrint('[FirestoreService] Kullanıcı $uid premium durumu güncellendi: $isPremium');
+      }).timeout(const Duration(seconds: 3));
     } catch (e) {
-      debugPrint('[FirestoreService] updatePremiumStatus hatası: $e');
+      debugPrint('[FirestoreService] updatePremiumStatus uyarısı: $e');
     }
   }
 
@@ -115,19 +117,18 @@ class FirestoreService {
     try {
       await firestore.collection('users').doc(uid).update({
         'dreamCredits': FieldValue.increment(count),
-      });
-      debugPrint('[FirestoreService] Kullanıcı $uid jetonları $count artırıldı.');
+      }).timeout(const Duration(seconds: 3));
     } catch (e) {
-      debugPrint('[FirestoreService] incrementCredits hatası: $e');
+      debugPrint('[FirestoreService] incrementCredits uyarısı: $e');
     }
   }
 
-  /// Rüya yorumlama hakkını Firestore üzerinde tüketir
+  /// Rüya yorumlama hakkını Firestore üzerinde tüketir (Zaman aşımlı, asla bloklamaz)
   Future<bool> deductCreditOrUseDaily(String uid) async {
     if (!isFirebaseAvailable) return true;
     try {
       final userDocRef = firestore.collection('users').doc(uid);
-      final docSnap = await userDocRef.get();
+      final docSnap = await userDocRef.get().timeout(const Duration(seconds: 3));
       if (!docSnap.exists) return true;
 
       final data = docSnap.data()!;
@@ -138,10 +139,9 @@ class FirestoreService {
       final today = _getTodayDateString();
 
       if (lastDate != today) {
-        // Bugünün ücretsiz hakkını kullandır
         await userDocRef.update({
           'dailyFreeDreamDate': today,
-        });
+        }).timeout(const Duration(seconds: 3));
         return true;
       }
 
@@ -149,20 +149,21 @@ class FirestoreService {
       if (credits > 0) {
         await userDocRef.update({
           'dreamCredits': FieldValue.increment(-1),
-        });
+        }).timeout(const Duration(seconds: 3));
         return true;
       }
 
       return false;
     } catch (e) {
-      debugPrint('[FirestoreService] deductCreditOrUseDaily hatası: $e');
-      return true; // Kullanıcıyı engellememek için fallback true
+      debugPrint('[FirestoreService] deductCreditOrUseDaily uyarısı: $e');
+      return true;
     }
   }
 
   static const String _prefLocalDreamsKey = 'oneiro_local_dream_history_v1';
 
-  /// Yorumlanan rüyayı önce telefonun yerel hafızasına, ardından Firestore'a mühürler
+  /// Yorumlanan rüyayı ÖNCE telefonun yerel hafızasına anında kaydeder,
+  /// ardından bloklamadan arka planda Firestore'a mühürler.
   Future<void> saveDream(
     String uid, {
     required String dreamText,
@@ -170,8 +171,12 @@ class FirestoreService {
     required String subconsciousAnalysis,
     required String warningOfDay,
     required String primaryTradition,
+    String? primaryTraditionId,
+    String? primaryTraditionScholar,
     List<String>? lockedTraditions,
+    List<Map<String, dynamic>>? lockedTraditionsData,
     List<String>? symbols,
+    String? emotion,
   }) async {
     final dreamData = <String, dynamic>{
       'dreamText': dreamText,
@@ -179,41 +184,88 @@ class FirestoreService {
       'subconsciousAnalysis': subconsciousAnalysis,
       'warningOfDay': warningOfDay,
       'primaryTradition': primaryTradition,
+      'primaryTraditionId': primaryTraditionId ?? 'islam_dogu',
+      'primaryTraditionScholar': primaryTraditionScholar ?? 'İbn-i Sîrîn',
       'lockedTraditions': lockedTraditions ?? <String>[],
+      'lockedTraditionsData': lockedTraditionsData ?? <Map<String, dynamic>>[],
       'symbols': symbols ?? <String>[],
+      'emotion': emotion ?? '',
       'dateString': _getTodayDateString(),
     };
 
-    // 1. Her zaman yerel telefona (SharedPreferences) kaydet
+    // 1. HER ZAMAN ÖNCE YEREL TELEFONA (SharedPreferences) ANINDA KAYDET
     try {
       final prefs = await SharedPreferences.getInstance();
       final localListStr = prefs.getString(_prefLocalDreamsKey);
       List<dynamic> localList = [];
       if (localListStr != null && localListStr.isNotEmpty) {
-        localList = jsonDecode(localListStr) as List<dynamic>;
+        try {
+          localList = jsonDecode(localListStr) as List<dynamic>;
+        } catch (_) {
+          localList = [];
+        }
       }
+      // Aynı rüya metni varsa güncelle, yoksa en başa ekle
+      localList.removeWhere((item) =>
+          item is Map && (item['dreamText'] as String? ?? '').trim() == dreamText.trim());
       localList.insert(0, dreamData);
-      if (localList.length > 50) localList = localList.sublist(0, 50);
+      if (localList.length > 100) localList = localList.sublist(0, 100);
       await prefs.setString(_prefLocalDreamsKey, jsonEncode(localList));
+      localDreamsRevision.value++;
       debugPrint('[FirestoreService] Rüya yerel telefona mühürlendi (Toplam: ${localList.length}).');
     } catch (e) {
       debugPrint('[FirestoreService] Yerel rüya kaydetme uyarısı: $e');
     }
 
-    // 2. Firebase hazırsa ve geçerli bir UID varsa buluta da mühürle
+    // 2. Firebase hazırsa ARKA PLANDA (bloklamadan) buluta mühürle
     if (isFirebaseAvailable && uid.isNotEmpty && uid != 'local_user') {
-      try {
-        final firestoreData = Map<String, dynamic>.from(dreamData);
-        firestoreData['createdAt'] = FieldValue.serverTimestamp();
-        await firestore
-            .collection('users')
-            .doc(uid)
-            .collection('dreams')
-            .add(firestoreData);
-        debugPrint('[FirestoreService] Rüya başarıyla buluta mühürlendi (users/$uid/dreams).');
-      } catch (e) {
-        debugPrint('[FirestoreService] saveDream Firestore hatası: $e');
+      unawaited(
+        Future(() async {
+          try {
+            final firestoreData = Map<String, dynamic>.from(dreamData);
+            firestoreData['createdAt'] = FieldValue.serverTimestamp();
+            await firestore
+                .collection('users')
+                .doc(uid)
+                .collection('dreams')
+                .add(firestoreData)
+                .timeout(const Duration(seconds: 4));
+            debugPrint('[FirestoreService] Rüya buluta mühürlendi (users/$uid/dreams).');
+          } catch (e) {
+            debugPrint('[FirestoreService] saveDream bulut senkronizasyon notu: $e');
+          }
+        }),
+      );
+    }
+  }
+
+  /// Kilitli bir gelenek açıldığında yerel arşivdeki rüya kaydını günceller
+  Future<void> updateLocalDreamLockedTraditions(
+    String dreamText,
+    List<Map<String, dynamic>> updatedLockedTraditionsData,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final localListStr = prefs.getString(_prefLocalDreamsKey);
+      if (localListStr == null || localListStr.isEmpty) return;
+
+      final localList = jsonDecode(localListStr) as List<dynamic>;
+      bool changed = false;
+      for (int i = 0; i < localList.length; i++) {
+        final item = Map<String, dynamic>.from(localList[i] as Map);
+        if ((item['dreamText'] as String? ?? '').trim() == dreamText.trim()) {
+          item['lockedTraditionsData'] = updatedLockedTraditionsData;
+          localList[i] = item;
+          changed = true;
+          break;
+        }
       }
+      if (changed) {
+        await prefs.setString(_prefLocalDreamsKey, jsonEncode(localList));
+        localDreamsRevision.value++;
+      }
+    } catch (e) {
+      debugPrint('[FirestoreService] updateLocalDreamLockedTraditions uyarısı: $e');
     }
   }
 
@@ -234,7 +286,7 @@ class FirestoreService {
 
   /// Kullanıcının geçmiş rüyalarını canlı yayınlayan Stream
   Stream<List<Map<String, dynamic>>> getDreamHistoryStream(String uid) {
-    if (!isFirebaseAvailable) {
+    if (!isFirebaseAvailable || uid.isEmpty || uid.startsWith('guest_') || uid.startsWith('dev_')) {
       return Stream.value(<Map<String, dynamic>>[]);
     }
 
@@ -251,9 +303,8 @@ class FirestoreService {
           data['id'] = doc.id;
           return data;
         }).toList();
-      });
+      }).handleError((_) => <Map<String, dynamic>>[]);
     } catch (e) {
-      debugPrint('[FirestoreService] getDreamHistoryStream hatası: $e');
       return Stream.value(<Map<String, dynamic>>[]);
     }
   }

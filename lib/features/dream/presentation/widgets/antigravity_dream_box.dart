@@ -81,30 +81,29 @@ class _AntigravityDreamBoxState extends State<AntigravityDreamBox>
   List<Color> _getGradientColors(String traditionId) {
     switch (traditionId) {
       case 'antik_akdeniz':
-        return const [
+        return [
           AppColors.mediterraneanAzure,
           AppColors.mediterraneanSky,
-          Color(0xFF67E8F9), // Canlı berrak turkuaz ışıltı
-          Color(0xFF0284C7),
+          const Color(0xFF67E8F9),
+          const Color(0xFF0284C7),
           AppColors.mediterraneanAzure,
         ];
       case 'psikoloji':
-        return const [
+        return [
           AppColors.subconsciousIndigo,
-          Color(0xFF818CF8),
+          const Color(0xFF818CF8),
           AppColors.neonPurple,
-          Color(0xFF4338CA),
+          const Color(0xFF4338CA),
           AppColors.subconsciousIndigo,
         ];
       case 'islam_dogu':
       default:
-        // Başlangıçtaki ve varsayılan kehribar-altın gradyan
-        return const [
-          AppColors.amazonAmber,      // Amazon sıcak kehribarı
-          AppColors.amazonAmberLight, // Şafak altını
-          AppColors.dawnViolet,       // Mistik leylak
-          AppColors.dawnIndigo,       // Şafak indigosu
-          AppColors.amazonAmber,      // Döngü tamamlayıcı
+        return [
+          AppColors.amazonAmber,
+          AppColors.amazonAmberLight,
+          AppColors.dawnViolet,
+          AppColors.dawnIndigo,
+          AppColors.amazonAmber,
         ];
     }
   }

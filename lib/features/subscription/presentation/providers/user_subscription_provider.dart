@@ -33,7 +33,7 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
   void _listenAuthAndFirestore() {
     AuthService.instance.authStateChanges.listen((user) {
       _firestoreSub?.cancel();
-      if (user != null) {
+      if (user != null && !user.isGuest) {
         _firestoreSub = FirestoreService.instance.streamUserData(user.uid).listen((data) {
           if (data != null) {
             syncWithFirestore(data);
@@ -68,7 +68,7 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
     }
   }
 
-  void syncWithFirestore(Map<String, dynamic> data) {
+  Future<void> syncWithFirestore(Map<String, dynamic> data) async {
     final isPrem = data['isPremium'] as bool? ?? state.isPremium;
     final credits = data['dreamCredits'] as int? ?? state.dreamCredits;
     final lastDate = data['dailyFreeDreamDate'] as String? ?? state.lastFreeDreamDate;
@@ -78,6 +78,13 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
       dreamCredits: credits,
       lastFreeDreamDate: lastDate,
     );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyIsPremium, isPrem);
+      await prefs.setInt(_keyCredits, credits);
+      await prefs.setString(_keyLastDate, lastDate);
+    } catch (_) {}
   }
 
   Future<void> setPremium(bool isPrem) async {
@@ -88,7 +95,7 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
 
       final user = AuthService.instance.currentUser;
       if (user != null) {
-        await FirestoreService.instance.updatePremiumStatus(user.uid, isPrem);
+        unawaited(FirestoreService.instance.updatePremiumStatus(user.uid, isPrem));
       }
     } catch (_) {}
   }
@@ -102,12 +109,12 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
 
       final user = AuthService.instance.currentUser;
       if (user != null) {
-        await FirestoreService.instance.incrementCredits(user.uid, count);
+        unawaited(FirestoreService.instance.incrementCredits(user.uid, count));
       }
     } catch (_) {}
   }
 
-  /// Rüya yorumlama hakkı tüketildiğinde çağrılır
+  /// Rüya yorumlama hakkı tüketildiğinde çağrılır (Önce yerel hafızaya yazar, asla bloklamaz)
   Future<bool> consumeDreamAttempt() async {
     if (state.isPremium) return true;
 
@@ -115,10 +122,10 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
     final user = AuthService.instance.currentUser;
 
     if (user != null) {
-      await FirestoreService.instance.deductCreditOrUseDaily(user.uid);
+      unawaited(FirestoreService.instance.deductCreditOrUseDaily(user.uid));
     }
 
-    // Eğer bugün henüz ücretsiz hakkını kullanmadıysa, ücretsiz hakkı tüket
+    // 1. Eğer bugün henüz ücretsiz hakkını kullanmadıysa, ücretsiz hakkı tüket
     if (state.lastFreeDreamDate != today || state.dailyFreeDreamsUsed < 1) {
       state = state.copyWith(
         dailyFreeDreamsUsed: 1,
@@ -132,7 +139,7 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
       return true;
     }
 
-    // Ücretsiz hak bitmişse jetondan düş
+    // 2. Ücretsiz hak bitmişse jetondan düş
     if (state.dreamCredits > 0) {
       final updated = state.dreamCredits - 1;
       state = state.copyWith(dreamCredits: updated);
@@ -158,7 +165,7 @@ class UserSubscriptionNotifier extends StateNotifier<UserSubscriptionState> {
 
         final user = AuthService.instance.currentUser;
         if (user != null) {
-          await FirestoreService.instance.incrementCredits(user.uid, -1);
+          unawaited(FirestoreService.instance.incrementCredits(user.uid, -1));
         }
       } catch (_) {}
       return true;

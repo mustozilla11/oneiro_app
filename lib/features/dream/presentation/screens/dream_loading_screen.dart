@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/oneiro_logo.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../domain/models/dream_interpretation.dart';
@@ -55,7 +57,6 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     _startProgressiveSteps();
     _executeAnalysis();
 
-    // 45 Saniyelik Emniyet Zaman Aşımı (Render Cold Start için)
     _safetyTimeoutTimer = Timer(const Duration(seconds: 45), () {
       debugPrint('[DreamLoadingScreen] Emniyet süresi doldu. Güvenli geçiş yapılıyor.');
       _navigateToResult();
@@ -80,15 +81,12 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
   }
 
   Future<void> _executeAnalysis() async {
-    // Kullanıcının günlük hakkını veya jetonunu tüket
-    ref.read(userSubscriptionProvider.notifier).consumeDreamAttempt();
+    unawaited(ref.read(userSubscriptionProvider.notifier).consumeDreamAttempt());
 
-    // DeepSeek + RAG Analizini Başlat
     try {
       final result = await ref.read(dreamProvider.notifier).analyzeDream();
       if (result != null && mounted) {
-        // En az 2.5 saniye mistik animasyon keyfi yaşatmak için kısa pay
-        await Future.delayed(const Duration(milliseconds: 1200));
+        await Future.delayed(const Duration(milliseconds: 900));
         _navigateToResult(result);
       } else {
         _navigateToResult();
@@ -110,11 +108,12 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
         state.interpretation ??
         DreamInterpretation.mockFromRequest(
           dreamText: state.dreamText.isNotEmpty ? state.dreamText : 'Bilinmeyen Gizemli Rüya',
+          preferredTradition: state.preferredTradition,
         );
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
+        transitionDuration: const Duration(milliseconds: 500),
         pageBuilder: (_, animation, secondaryAnimation) =>
             DreamResultScreen(interpretation: result),
         transitionsBuilder: (_, animation, secondaryAnimation, child) {
@@ -126,124 +125,128 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTheme = ref.watch(themeProvider);
+    final selectedTrad = ref.watch(dreamProvider).preferredTradition;
+    final tradColor = AppColors.traditionColor(selectedTrad);
     final currentStep = _progressiveSteps[_currentStepIndex];
 
     return Scaffold(
       backgroundColor: AppColors.charcoalBlack,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Minimalist Monochrome Oneiro Amblemi ve İnce Çember
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Dönen Dış İnce Çember
-                  SizedBox(
-                    width: 110,
-                    height: 110,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.moonlight),
-                      backgroundColor: Colors.white.withValues(alpha: 0.05),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: AppColors.traditionAmbientGradient(selectedTrad),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 110,
+                      height: 110,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(tradColor),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
-                  ),
-
-                  // Merkez Minimalist Oneiro Logosu (Monokrom Mod)
-                  const OneiroLogo(size: 72, animate: true, monochrome: true),
-                ],
-              ),
-
-              const SizedBox(height: 36),
-
-              // Adım Rozeti (Editorial Meta Rozet)
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                child: Container(
-                  key: ValueKey<String>(currentStep['category']!),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.charcoalSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppColors.borderSubtle,
-                      width: 1,
+                    OneiroLogo(
+                      size: 72,
+                      animate: true,
+                      monochrome: activeTheme != OneiroThemeMode.ancientMystic,
                     ),
-                  ),
-                  child: Text(
-                    currentStep['category']!,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                      color: AppColors.moonlight,
-                    ),
-                  ),
+                  ],
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 36),
 
-              // Dinamik Başlık (Edebi Serif)
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Text(
-                  currentStep['title']!,
-                  key: ValueKey<String>(currentStep['title']!),
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.6,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // Alt Başlık / Net Açıklama
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Text(
-                  currentStep['subtitle']!,
-                  key: ValueKey<String>(currentStep['subtitle']!),
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: AppColors.mistGrey,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Minimalist 4 Aşamalı Nokta İlerleme Çubuğu
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_progressiveSteps.length, (idx) {
-                  final isActive = idx == _currentStepIndex;
-                  final isDone = idx < _currentStepIndex;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: isActive ? 22 : 6,
-                    height: 3,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  child: Container(
+                    key: ValueKey<String>(currentStep['category']!),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? AppColors.moonlight
-                          : isDone
-                              ? AppColors.mistGrey
-                              : Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(3),
+                      color: AppColors.charcoalSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: tradColor.withValues(alpha: 0.35),
+                        width: 1,
+                      ),
                     ),
-                  );
-                }),
-              ),
-            ],
+                    child: Text(
+                      currentStep['category']!,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                        color: tradColor,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: Text(
+                    currentStep['title']!,
+                    key: ValueKey<String>(currentStep['title']!),
+                    textAlign: TextAlign.center,
+                    style: AppTheme.headingStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: Text(
+                    currentStep['subtitle']!,
+                    key: ValueKey<String>(currentStep['subtitle']!),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      color: AppColors.mistGrey,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(_progressiveSteps.length, (idx) {
+                    final isActive = idx == _currentStepIndex;
+                    final isDone = idx < _currentStepIndex;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: isActive ? 22 : 6,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? tradColor
+                            : isDone
+                                ? AppColors.mistGrey
+                                : Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
           ),
         ),
       ),

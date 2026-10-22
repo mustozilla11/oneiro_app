@@ -101,7 +101,7 @@ class HowItWorksModal extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppColors.borderSubtle),
                   ),
-                  child: const Icon(Icons.architecture_outlined, color: AppColors.moonlight, size: 20),
+                  child: Icon(Icons.architecture_outlined, color: AppColors.moonlight, size: 20),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -129,14 +129,14 @@ class HowItWorksModal extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.mistGrey, size: 20),
+                  icon: Icon(Icons.close_rounded, color: AppColors.mistGrey, size: 20),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
           ),
 
-          const Divider(color: AppColors.borderSubtle, height: 1),
+          Divider(color: AppColors.borderSubtle, height: 1),
 
           // Akış Şeması / Blok Diyagram
           Expanded(

@@ -116,7 +116,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
       ),
       body: Column(
         children: [
-          const Divider(color: AppColors.borderSubtle, height: 1),
+          Divider(color: AppColors.borderSubtle, height: 1),
 
           // Edebi Diyalog Listesi (Baloncuksuz, Açık Metin)
           Expanded(
@@ -236,7 +236,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
         children: [
-          const SizedBox(
+          SizedBox(
             width: 12,
             height: 12,
             child: CircularProgressIndicator(
@@ -305,7 +305,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
   Widget _buildInputBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).viewPadding.bottom + 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.charcoalBlack,
         border: Border(
           top: BorderSide(color: AppColors.borderSubtle, width: 1),
@@ -345,12 +345,12 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
           ),
           const SizedBox(width: 10),
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.moonlight,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_upward_rounded,
                 color: AppColors.charcoalBlack,
                 size: 20,

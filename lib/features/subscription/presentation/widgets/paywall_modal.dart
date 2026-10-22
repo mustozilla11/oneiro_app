@@ -24,9 +24,9 @@ class PaywallModal extends ConsumerWidget {
     final subState = ref.watch(userSubscriptionProvider);
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.charcoalBlack,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
           top: BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
@@ -63,7 +63,7 @@ class PaywallModal extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.auto_stories_outlined, color: AppColors.moonlight, size: 13),
+                    Icon(Icons.auto_stories_outlined, color: AppColors.moonlight, size: 13),
                     const SizedBox(width: 6),
                     Text(
                       'RÜYA GÜNLÜĞÜ PLUS',
@@ -147,7 +147,7 @@ class PaywallModal extends ConsumerWidget {
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.borderSubtle),
+                        side: BorderSide(color: AppColors.borderSubtle),
                       ),
                     ),
                   );
@@ -169,7 +169,7 @@ class PaywallModal extends ConsumerWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.borderSubtle),
                       ),
-                      child: const Icon(Icons.bookmark_border_rounded, color: AppColors.moonlight, size: 20),
+                      child: Icon(Icons.bookmark_border_rounded, color: AppColors.moonlight, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -261,7 +261,7 @@ class PaywallModal extends ConsumerWidget {
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: AppColors.borderSubtle),
+                        side: BorderSide(color: AppColors.borderSubtle),
                       ),
                     ),
                   );
@@ -283,7 +283,7 @@ class PaywallModal extends ConsumerWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.borderSubtle),
                       ),
-                      child: const Icon(Icons.toll_outlined, color: AppColors.moonlight, size: 18),
+                      child: Icon(Icons.toll_outlined, color: AppColors.moonlight, size: 18),
                     ),
                     const SizedBox(width: 14),
                     Expanded(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/ads/ad_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../../domain/models/dream_interpretation.dart';
@@ -11,10 +12,12 @@ import '../providers/dream_provider.dart';
 
 class LockedTraditionCard extends ConsumerStatefulWidget {
   final TraditionAnalysisItem tradition;
+  final DreamInterpretation? parentInterpretation;
 
   const LockedTraditionCard({
     super.key,
     required this.tradition,
+    this.parentInterpretation,
   });
 
   @override
@@ -37,6 +40,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     final subState = ref.read(userSubscriptionProvider);
     final isPremium = subState.isPremium;
     final hasCredits = subState.dreamCredits > 0;
+    final tradColor = AppColors.traditionColor(widget.tradition.traditionId);
 
     // 1. Durum: Kullanıcı Premium ise doğrudan aç
     if (isPremium) {
@@ -52,12 +56,12 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
           backgroundColor: AppColors.surfaceCardElevated,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: AppColors.ancientGold, width: 1),
+            side: BorderSide(color: tradColor, width: 1),
           ),
           title: Text(
             'Kilit Açma Yöntemi',
             style: GoogleFonts.cinzel(
-              color: AppColors.ancientGold,
+              color: tradColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -67,16 +71,16 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false), // Reklam izle
+              onPressed: () => Navigator.pop(ctx, false),
               child: Text(
                 'Reklam İzle',
-                style: GoogleFonts.plusJakartaSans(color: AppColors.electricLavender),
+                style: GoogleFonts.plusJakartaSans(color: AppColors.mistGrey),
               ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true), // Jeton harca
+              onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.ancientGold,
+                backgroundColor: tradColor,
                 foregroundColor: Colors.black,
               ),
               child: const Text('1 Jeton Harca'),
@@ -99,7 +103,6 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     await AdService.instance.showRewardedAd(
       onUserEarnedReward: () {
         rewardEarned = true;
-        debugPrint('[LockedTraditionCard] Ödül kazanıldı, gelenek kilidi açılıyor: ${widget.tradition.traditionId}');
         _executeUnlockOnBackend();
       },
       onAdClosed: () {
@@ -117,10 +120,12 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
 
   Future<void> _executeUnlockOnBackend() async {
     setState(() => _isLoading = true);
+    final tradColor = AppColors.traditionColor(widget.tradition.traditionId);
 
-    final success = await ref
-        .read(dreamProvider.notifier)
-        .unlockTradition(widget.tradition.traditionId);
+    final success = await ref.read(dreamProvider.notifier).unlockTradition(
+          widget.tradition.traditionId,
+          targetInterpretation: widget.parentInterpretation,
+        );
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -137,24 +142,16 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
             content: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF261C0A), // Sıcak kadim altın-kehribar
-                    Color(0xFF140F24), // Mistik gece tonu
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.charcoalElevated,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppColors.ancientGold.withValues(alpha: 0.85),
+                  color: tradColor.withValues(alpha: 0.85),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.ancientGold.withValues(alpha: 0.3),
-                    blurRadius: 22,
-                    spreadRadius: 2,
+                    color: tradColor.withValues(alpha: 0.25),
+                    blurRadius: 18,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -165,15 +162,15 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.ancientGold.withValues(alpha: 0.18),
+                      color: tradColor.withValues(alpha: 0.16),
                       border: Border.all(
-                        color: AppColors.ancientGold.withValues(alpha: 0.5),
+                        color: tradColor.withValues(alpha: 0.5),
                         width: 1.2,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_open_rounded,
-                      color: AppColors.ancientGold,
+                      color: tradColor,
                       size: 22,
                     ),
                   ),
@@ -189,7 +186,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                             fontSize: 12.5,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.4,
-                            color: AppColors.ancientGold,
+                            color: tradColor,
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -230,9 +227,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     final trad = widget.tradition;
     final subState = ref.watch(userSubscriptionProvider);
     final isUnlocked = trad.isUnlocked;
+    final tradColor = AppColors.traditionColor(trad.traditionId.isNotEmpty ? trad.traditionId : trad.title);
+    final tradSecondaryColor = AppColors.traditionSecondaryColor(trad.traditionId.isNotEmpty ? trad.traditionId : trad.title);
 
     IconData iconData = Icons.auto_stories_outlined;
-
     if (trad.traditionId == 'antik_akdeniz') {
       iconData = Icons.account_balance_outlined;
     } else if (trad.traditionId == 'psikoloji') {
@@ -244,22 +242,33 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: AppColors.charcoalSurface,
+        color: Color.alphaBlend(
+          tradColor.withValues(alpha: 0.04),
+          AppColors.charcoalSurface,
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.borderSubtle,
-          width: 1.0,
+          color: tradColor.withValues(alpha: isUnlocked ? 0.45 : 0.25),
+          width: 1.1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Kart Başlığı (Editorial Header)
+          // Kart Başlığı (Ekol Rengi Vurgulu)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
             child: Row(
               children: [
-                Icon(iconData, color: AppColors.moonlight, size: 18),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: tradColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: tradColor.withValues(alpha: 0.35)),
+                  ),
+                  child: Icon(iconData, color: tradColor, size: 18),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -267,9 +276,9 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                     children: [
                       Text(
                         trad.title.toUpperCase(),
-                        style: GoogleFonts.cormorantGaramond(
+                        style: AppTheme.headingStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
                           color: AppColors.textPrimary,
                         ),
@@ -279,7 +288,8 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                         trad.scholar,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11.5,
-                          color: AppColors.mistGrey,
+                          fontWeight: FontWeight.w600,
+                          color: tradColor,
                         ),
                       ),
                     ],
@@ -288,10 +298,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
+                    color: tradColor.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.borderSubtle,
+                      color: tradColor.withValues(alpha: 0.35),
                     ),
                   ),
                   child: Row(
@@ -300,7 +310,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                       Icon(
                         isUnlocked ? Icons.lock_open_outlined : Icons.lock_outline,
                         size: 11,
-                        color: isUnlocked ? AppColors.moonlight : AppColors.mistGrey,
+                        color: tradColor,
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -309,7 +319,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
-                          color: isUnlocked ? AppColors.moonlight : AppColors.mistGrey,
+                          color: tradColor,
                         ),
                       ),
                     ],
@@ -319,11 +329,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
             ),
           ),
 
-          const Divider(color: AppColors.borderSubtle, height: 1),
+          Divider(color: tradColor.withValues(alpha: 0.15), height: 1),
 
           // İçerik Alanı
           if (isUnlocked && trad.interpretation != null) ...[
-            // Tam Yorum Metni (Editorial Typography)
             Padding(
               padding: const EdgeInsets.all(20),
               child: AnimatedOpacity(
@@ -340,7 +349,6 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
               ),
             ),
           ] else ...[
-            // Kilitli Teaser (Fısıltı Alıntısı)
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -351,8 +359,8 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: AppColors.moonlight.withValues(alpha: 0.4),
-                          width: 2,
+                          color: tradColor.withValues(alpha: 0.65),
+                          width: 2.5,
                         ),
                       ),
                     ),
@@ -370,11 +378,20 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
 
                   const SizedBox(height: 20),
 
-                  // Mat Ay Işığı Kilit Açma Butonu
+                  // Ekol Renginde Kilit Açma Butonu
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.moonlight,
+                      gradient: LinearGradient(
+                        colors: [tradColor, tradSecondaryColor],
+                      ),
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: tradColor.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Material(
                       color: Colors.transparent,
@@ -395,7 +412,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                     height: 18,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.charcoalBlack),
+                                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF090A0D)),
                                     ),
                                   ),
                                 )
@@ -406,7 +423,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                       subState.isPremium
                                           ? Icons.lock_open_outlined
                                           : Icons.play_arrow_outlined,
-                                      color: AppColors.charcoalBlack,
+                                      color: const Color(0xFF090A0D),
                                       size: 18,
                                     ),
                                     const SizedBox(width: 8),
@@ -420,9 +437,9 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w700,
                                           letterSpacing: 0.5,
-                                          color: AppColors.charcoalBlack,
+                                          color: const Color(0xFF090A0D),
                                         ),
                                       ),
                                     ),
@@ -433,7 +450,6 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                     ),
                   ),
 
-                  // Plus Satın Alım Hatırlatıcısı
                   if (!subState.isPremium) ...[
                     const SizedBox(height: 10),
                     Center(

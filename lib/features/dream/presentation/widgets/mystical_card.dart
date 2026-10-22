@@ -7,7 +7,7 @@ class MysticalCard extends StatelessWidget {
   final String title;
   final IconData? icon;
   final Widget content;
-  final Color accentColor;
+  final Color? accentColor;
   final Widget? trailing;
   final bool borderless;
 
@@ -16,7 +16,7 @@ class MysticalCard extends StatelessWidget {
     required this.title,
     this.icon,
     required this.content,
-    this.accentColor = AppColors.moonlight,
+    this.accentColor,
     this.trailing,
     this.borderless = false,
   });

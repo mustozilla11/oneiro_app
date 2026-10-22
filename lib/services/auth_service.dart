@@ -75,6 +75,9 @@ class AuthService {
     scopes: ['email'],
     serverClientId: '1051570592259-vnrq5tl43rrg9dmjus7qbsnjsg14vkqd.apps.googleusercontent.com',
   );
+  final GoogleSignIn _googleSignInFallback = GoogleSignIn(
+    scopes: ['email'],
+  );
 
   OneiroUser? _currentUser;
   bool _hasOnboarded = false;
@@ -100,18 +103,20 @@ class AuthService {
 
   bool get isSignedIn => _currentUser != null && !_currentUser!.isGuest;
 
-  /// Servisi başlatır ve hafızadaki veya arka plandaki oturumu yükler
+  /// Servisi başlatır ve hafızadaki oturumu anında yükler
   Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _hasOnboarded = prefs.getBool(_prefOnboardingKey) ?? false;
 
-      // 1. SharedPreferences'tan kayıtlı oturumu yükle
+      // 1. SharedPreferences'tan kayıtlı oturumu ANINDA yükle
       final userJsonStr = prefs.getString(_prefUserKey);
       if (userJsonStr != null && userJsonStr.isNotEmpty) {
         try {
           final map = jsonDecode(userJsonStr) as Map<String, dynamic>;
           _currentUser = OneiroUser.fromJson(map);
+          _hasOnboarded = true;
+          await prefs.setBool(_prefOnboardingKey, true);
           _authStateController.add(_currentUser);
           debugPrint('[AuthService] Yerel oturum yüklendi: ${_currentUser?.displayName} (${_currentUser?.email})');
         } catch (e) {
@@ -119,8 +124,8 @@ class AuthService {
         }
       }
 
-      // 2. Kullanıcı daha önce uygulamaya girmişse ancak oturum düşmüşse,
-      // asla tekrar giriş yapma ekranına fırlatma; oturumu yerel gezgin olarak kurtar
+      // 2. Kullanıcı daha önce uygulamaya girmişse ancak oturum kaydı yoksa,
+      // asla tekrar giriş ekranına atma; yerel oturumu koru
       if (_currentUser == null && _hasOnboarded) {
         final guestUid = 'guest_${DateTime.now().millisecondsSinceEpoch}';
         _currentUser = OneiroUser(
@@ -131,28 +136,31 @@ class AuthService {
         );
         await prefs.setString(_prefUserKey, jsonEncode(_currentUser!.toJson()));
         _authStateController.add(_currentUser);
-        debugPrint('[AuthService] Onboarded kullanıcı için yerel oturum otomatik kurtarıldı.');
       }
 
-      // 3. Firebase yapılandırılmışsa Firebase auth listener ekle
+      // 3. Firebase yapılandırılmışsa Firebase auth listener ekle (Ancak yerel tam oturumu asla ezme!)
       if (isFirebaseAvailable) {
-        final fbUser = auth.currentUser;
-        if (fbUser != null) {
-          _currentUser = OneiroUser.fromFirebase(fbUser);
-          await _persistUser(_currentUser!);
-          _authStateController.add(_currentUser);
-        }
-        auth.authStateChanges().listen((fbUser) async {
-          if (fbUser != null) {
+        try {
+          final fbUser = auth.currentUser;
+          if (fbUser != null && (_currentUser == null || _currentUser!.isGuest)) {
             _currentUser = OneiroUser.fromFirebase(fbUser);
             await _persistUser(_currentUser!);
             _authStateController.add(_currentUser);
           }
-        });
+          auth.authStateChanges().listen((fbUser) async {
+            if (fbUser != null && (_currentUser == null || _currentUser!.isGuest)) {
+              _currentUser = OneiroUser.fromFirebase(fbUser);
+              await _persistUser(_currentUser!);
+              _authStateController.add(_currentUser);
+            }
+          });
+        } catch (e) {
+          debugPrint('[AuthService] Firebase Auth kontrol uyarısı: $e');
+        }
       }
 
-      // 4. Google sessiz oturum açma (arka planda tazeleme)
-      _googleSignIn.signInSilently().then((googleAccount) async {
+      // 4. Google sessiz oturum açma (arka planda bloklamadan tazele)
+      _googleSignIn.signInSilently().timeout(const Duration(seconds: 3)).then((googleAccount) async {
         if (googleAccount != null) {
           _currentUser = OneiroUser.fromGoogle(googleAccount);
           await _persistUser(_currentUser!);
@@ -163,7 +171,6 @@ class AuthService {
         debugPrint('[AuthService] Google sessiz giriş notu: $e');
       });
 
-      // İlk durum tespitini yayınla (null olsa dahi)
       _authStateController.add(_currentUser);
     } catch (e) {
       debugPrint('[AuthService] Başlatma hatası: $e');
@@ -180,21 +187,30 @@ class AuthService {
   }
 
   Future<void> _persistUser(OneiroUser user) async {
+    _currentUser = user;
+    _hasOnboarded = true;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefUserKey, jsonEncode(user.toJson()));
       await prefs.setBool(_prefOnboardingKey, true);
-      _hasOnboarded = true;
     } catch (e) {
       debugPrint('[AuthService] Kullanıcı kaydetme hatası: $e');
     }
   }
 
-  /// Google Hesabı ile Giriş (Gerçek Google Dialog Penceresi Tetiklenir)
+  /// Google Hesabı ile Giriş
+  /// Önce oturumu telefona kaydeder; bulut senkronizasyonu asla girişi bloklamaz.
   Future<OneiroUser?> signInWithGoogle() async {
     try {
-      debugPrint('[AuthService] Gerçek Google Giriş arayüzü başlatılıyor...');
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      debugPrint('[AuthService] Google Giriş arayüzü başlatılıyor...');
+      GoogleSignInAccount? googleUser;
+      try {
+        googleUser = await _googleSignIn.signIn();
+      } catch (firstErr) {
+        debugPrint('[AuthService] Birincil GoogleSignIn uyarısı ($firstErr), yedek istemci deneniyor...');
+        googleUser = await _googleSignInFallback.signIn();
+      }
+
       if (googleUser == null) {
         debugPrint('[AuthService] Google Giriş kullanıcı tarafından iptal edildi.');
         return null;
@@ -202,45 +218,46 @@ class AuthService {
 
       OneiroUser signedInUser = OneiroUser.fromGoogle(googleUser);
 
-      // Firebase hazırsa credential ile doğrula
+      // 1. ÖNCE YEREL HAFIZAYA ANINDA KAYDET (Böylece uygulama kapatılsa bile oturum asla kaybolmaz!)
+      await _persistUser(signedInUser);
+      _authStateController.add(_currentUser);
+
+      // 2. Firebase hazırsa arka planda zaman aşımlı doğrula
       if (isFirebaseAvailable) {
         try {
-          final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication.timeout(const Duration(seconds: 3));
           final AuthCredential credential = GoogleAuthProvider.credential(
             accessToken: googleAuth.accessToken,
             idToken: googleAuth.idToken,
           );
-          final UserCredential userCredential = await auth.signInWithCredential(credential);
+          final UserCredential userCredential =
+              await auth.signInWithCredential(credential).timeout(const Duration(seconds: 3));
           if (userCredential.user != null) {
             signedInUser = OneiroUser.fromFirebase(userCredential.user!);
+            await _persistUser(signedInUser);
+            _authStateController.add(_currentUser);
           }
         } catch (e) {
-          debugPrint('[AuthService] Firebase credential aktarım uyarısı: $e');
+          debugPrint('[AuthService] Firebase credential aktarım uyarısı (yerel Google oturumu korundu): $e');
         }
       }
 
-      // Firestore ve RevenueCat eşleştirmesi
-      try {
-        await FirestoreService.instance.syncUserRecord(
-          uid: signedInUser.uid,
-          email: signedInUser.email,
-          displayName: signedInUser.displayName,
-        );
-      } catch (e) {
-        debugPrint('[AuthService] Firestore sync uyarısı: $e');
-      }
+      // 3. Firestore ve RevenueCat eşleştirmesini ARKA PLANDA (bloklamadan) çalıştır
+      unawaited(
+        FirestoreService.instance
+            .syncUserRecord(
+              uid: signedInUser.uid,
+              email: signedInUser.email,
+              displayName: signedInUser.displayName,
+            )
+            .catchError((_) => null),
+      );
+      unawaited(
+        SubscriptionService.instance.logIn(signedInUser.uid).catchError((_) {}),
+      );
 
-      try {
-        await SubscriptionService.instance.logIn(signedInUser.uid);
-      } catch (e) {
-        debugPrint('[AuthService] RevenueCat login uyarısı: $e');
-      }
-
-      _currentUser = signedInUser;
-      await _persistUser(signedInUser);
-      _authStateController.add(_currentUser);
-
-      debugPrint('[AuthService] Google ile giriş başarılı: ${signedInUser.displayName} (${signedInUser.email})');
+      debugPrint('[AuthService] Google ile giriş başarılı ve kalıcı olarak mühürlendi: ${signedInUser.displayName}');
       return signedInUser;
     } catch (e) {
       debugPrint('[AuthService] Google Giriş hatası: $e');
@@ -250,7 +267,6 @@ class AuthService {
 
   /// Apple ID ile Giriş (iOS ve macOS)
   Future<OneiroUser?> signInWithApple() async {
-    // Apple platform kontrolü
     if (kIsWeb || (!Platform.isIOS && !Platform.isMacOS)) {
       throw UnsupportedError(
         'Apple ile Giriş yalnızca iOS (iPhone / iPad) cihazlarda kullanılabilir.',
@@ -258,7 +274,6 @@ class AuthService {
     }
 
     try {
-      debugPrint('[AuthService] Apple Giriş akışı başlatılıyor...');
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -268,7 +283,7 @@ class AuthService {
 
       final displayName = (appleCredential.givenName != null || appleCredential.familyName != null)
           ? '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim()
-          : null;
+          : 'Rüya Gezgini';
 
       OneiroUser signedInUser = OneiroUser(
         uid: appleCredential.userIdentifier ?? 'apple_${DateTime.now().millisecondsSinceEpoch}',
@@ -277,6 +292,11 @@ class AuthService {
         isGuest: false,
       );
 
+      // 1. ÖNCE YEREL HAFIZAYA ANINDA KAYDET
+      await _persistUser(signedInUser);
+      _authStateController.add(_currentUser);
+
+      // 2. Firebase & Bulut senkronizasyonu (bloklamadan)
       if (isFirebaseAvailable) {
         try {
           final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
@@ -284,31 +304,31 @@ class AuthService {
             idToken: appleCredential.identityToken,
             accessToken: appleCredential.authorizationCode,
           );
-          final UserCredential userCredential = await auth.signInWithCredential(credential);
+          final UserCredential userCredential =
+              await auth.signInWithCredential(credential).timeout(const Duration(seconds: 3));
           if (userCredential.user != null) {
             signedInUser = OneiroUser.fromFirebase(userCredential.user!);
+            await _persistUser(signedInUser);
+            _authStateController.add(_currentUser);
           }
         } catch (e) {
           debugPrint('[AuthService] Firebase Apple credential uyarısı: $e');
         }
       }
 
-      try {
-        await FirestoreService.instance.syncUserRecord(
-          uid: signedInUser.uid,
-          email: signedInUser.email,
-          displayName: displayName ?? signedInUser.displayName,
-        );
-        await SubscriptionService.instance.logIn(signedInUser.uid);
-      } catch (e) {
-        debugPrint('[AuthService] Sync uyarısı: $e');
-      }
+      unawaited(
+        FirestoreService.instance
+            .syncUserRecord(
+              uid: signedInUser.uid,
+              email: signedInUser.email,
+              displayName: displayName,
+            )
+            .catchError((_) => null),
+      );
+      unawaited(
+        SubscriptionService.instance.logIn(signedInUser.uid).catchError((_) {}),
+      );
 
-      _currentUser = signedInUser;
-      await _persistUser(signedInUser);
-      _authStateController.add(_currentUser);
-
-      debugPrint('[AuthService] Apple ile giriş başarılı: ${signedInUser.uid}');
       return signedInUser;
     } catch (e) {
       debugPrint('[AuthService] Apple Giriş hatası: $e');
@@ -316,55 +336,58 @@ class AuthService {
     }
   }
 
-  /// Misafir Olarak Giriş
+  /// Misafir Olarak Giriş (Kalıcı olarak cihazda tutulur)
   Future<OneiroUser> signInAsGuest() async {
-    final guestUid = 'guest_${DateTime.now().millisecondsSinceEpoch}';
+    final guestUid = _currentUser?.uid ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
     final guestUser = OneiroUser(
       uid: guestUid,
       displayName: 'Misafir Seyyah',
       email: null,
       isGuest: true,
     );
-    _currentUser = guestUser;
     await _persistUser(guestUser);
     _authStateController.add(_currentUser);
     return guestUser;
   }
 
-  /// Geliştirici / Test Modunda Oturum Açma (Debug modunda SHA-1 henüz bağlanmamışken)
+  /// Cihaz / Geliştirici Hesabıyla Kalıcı Oturum Açma
   Future<OneiroUser> signInWithDevAccount({String? name, String? email}) async {
-    final devUid = 'dev_${DateTime.now().millisecondsSinceEpoch}';
+    final devUid = _currentUser != null && !_currentUser!.isGuest
+        ? _currentUser!.uid
+        : 'oneiro_user_${DateTime.now().millisecondsSinceEpoch}';
     final devUser = OneiroUser(
       uid: devUid,
-      displayName: name ?? 'Geliştirici Gezgin',
-      email: email ?? 'developer@oneiro.app',
+      displayName: name ?? 'Kadim Gezgin',
+      email: email ?? 'gezgin@oneiro.app',
       isGuest: false,
     );
-    _currentUser = devUser;
     await _persistUser(devUser);
     _authStateController.add(_currentUser);
     return devUser;
   }
 
-  /// Oturumu Kapat
+  /// Oturumu Kapat (Rüya geçmişi verilerini silmez, yalnızca misafir moduna geçirir)
   Future<void> signOut() async {
     try {
       if (isFirebaseAvailable) {
-        await auth.signOut();
+        unawaited(auth.signOut().catchError((_) {}));
       }
       try {
-        await _googleSignIn.signOut();
-        await _googleSignIn.disconnect();
+        unawaited(_googleSignIn.signOut().catchError((_) => null));
       } catch (_) {}
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_prefUserKey);
-      await SubscriptionService.instance.logOut();
-      debugPrint('[AuthService] Oturum güvenle kapatıldı.');
+      final guestUser = OneiroUser(
+        uid: 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        displayName: 'Misafir Okuyucu',
+        email: null,
+        isGuest: true,
+      );
+      await _persistUser(guestUser);
+      unawaited(SubscriptionService.instance.logOut().catchError((_) {}));
+      debugPrint('[AuthService] Oturum misafir moduna geçirildi.');
     } catch (e) {
       debugPrint('[AuthService] Çıkış işlemi istisnası: $e');
     } finally {
-      _currentUser = null;
-      _authStateController.add(null);
+      _authStateController.add(_currentUser);
     }
   }
 }

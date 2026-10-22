@@ -3,7 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 
 class GlowContainer extends StatelessWidget {
   final Widget child;
-  final Color glowColor;
+  final Color? glowColor;
   final double blurRadius;
   final double spreadRadius;
   final BorderRadius? borderRadius;
@@ -13,7 +13,7 @@ class GlowContainer extends StatelessWidget {
   const GlowContainer({
     super.key,
     required this.child,
-    this.glowColor = AppColors.neonPurple,
+    this.glowColor,
     this.blurRadius = 16.0,
     this.spreadRadius = 1.0,
     this.borderRadius,
@@ -24,6 +24,7 @@ class GlowContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveRadius = borderRadius ?? BorderRadius.circular(16);
+    final effectiveGlow = glowColor ?? AppColors.neonPurple;
 
     return Container(
       padding: padding,
@@ -31,12 +32,12 @@ class GlowContainer extends StatelessWidget {
         color: backgroundColor ?? AppColors.surfaceInput,
         borderRadius: effectiveRadius,
         border: Border.all(
-          color: glowColor.withValues(alpha: 0.4),
+          color: effectiveGlow.withValues(alpha: 0.4),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: glowColor.withValues(alpha: 0.18),
+            color: effectiveGlow.withValues(alpha: 0.18),
             blurRadius: blurRadius,
             spreadRadius: spreadRadius,
           ),

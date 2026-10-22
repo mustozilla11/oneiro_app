@@ -1,130 +1,318 @@
 import 'package:flutter/material.dart';
+import 'theme_provider.dart';
 
-/// Oneiro - Minimalist Edebi Rüya Günlüğü (Editorial Journal) Renk Paleti
+/// Oneiro Çoklu Tema & Ekol Renk Sistemi
+/// 1. Edebi Günlük (Gemini Editorial Journal)
+/// 2. Kadim Mistik (Orijinal Astral Gece & Mor-Altın)
+/// 3. Safir Minimal (Antigravity Gece Safiri & Gümüş Zen)
 class AppColors {
   AppColors._();
 
-  // 1. Zemin ve Yüzeyler (Derin Kömür Siyahı)
-  static const Color charcoalBlack = Color(0xFF0A0A0C); // Ana derin kömür zemin
-  static const Color charcoalSurface = Color(0xFF111216); // Kart ve yüzey zemini
-  static const Color charcoalElevated = Color(0xFF16181E); // Yükseltilmiş kart
-  static const Color charcoalInput = Color(0xFF0F1014); // Girdi alanı zemini
+  static OneiroThemeMode _currentMode = OneiroThemeMode.editorialJournal;
+  static OneiroThemeMode get currentThemeMode => _currentMode;
 
-  // 2. Vurgular (Daha Koyu, Belirgin ve Okunaklı Kadim Altın / Kehribar Sarısı)
-  static const Color moonlight = Color(0xFFE5A93C); // Tok, belirgin, derin kehribar-altın sarısı
-  static const Color warmSand = Color(0xFFE8B85C); // Sıcak, okunaklı bal-altın sarısı
-  static const Color mistGrey = Color(0xFF9EA3AE); // Soluk sis grisi
-  static const Color dimMist = Color(0xFF6B7280); // Çok soluk kılavuz grisi
+  static void setThemeMode(OneiroThemeMode mode) {
+    _currentMode = mode;
+  }
 
-  // 3. Tipografi ve Metin Renkleri
-  static const Color textPrimary = Color(0xFFF5F3EF); // Edebi kemik beyazı
-  static const Color textSecondary = Color(0xFFD6D1C7); // Yumuşak kağıt okuma metni
-  static const Color textMuted = Color(0xFF9EA3AE); // Sis grisi ikincil metin
-  static const Color textDim = Color(0xFF6B7280); // Pasif meta veriler
+  // ===========================================================================
+  // EKOL (GELENEK) ÖZEL RENKLERİ (Doğu & İslam: Altın, Akdeniz: Mavi, Psikoloji: Mor)
+  // ===========================================================================
+  static const Color islamGold = Color(0xFFE5A93C);
+  static const Color islamAmber = Color(0xFFF59E0B);
 
-  // 4. İnce Çizgi ve Ayırıcılar (Sadece Colors.white.withValues(alpha: 0.06))
-  static const Color borderSubtle = Color(0x0FFFFFFF); // 0.06 beyaz çizgi
-  static const Color borderLight = Color(0x1AFFFFFF); // 0.10 hafif çizgi
-  static const Color borderMoonlight = Color(0x40E5A93C); // %25 belirgin altın bordürü
+  static const Color mediterraneanBlue = Color(0xFF38BDF8);
+  static const Color mediterraneanDeepBlue = Color(0xFF0EA5E9);
 
-  // 5. Geriye Dönük Uyumluluk (Tüm neon/mor/cyan tonları mat ay ışığı ve kömüre dönüştürüldü)
-  static const Color oledBlack = charcoalBlack;
-  static const Color surfaceDark = charcoalBlack;
-  static const Color surfaceCard = charcoalSurface;
-  static const Color surfaceCardElevated = charcoalElevated;
-  static const Color surfaceInput = charcoalInput;
+  static const Color psychologyPurple = Color(0xFFA855F7);
+  static const Color psychologyDeepPurple = Color(0xFF9D4EDD);
 
-  static const Color ancientGold = moonlight;
-  static const Color mysticalAmber = warmSand;
-  static const Color antiqueBronze = moonlight;
+  /// Seçilen ekole (traditionId) göre ana vurgu rengini döndürür
+  static Color traditionColor(String? traditionId) {
+    final id = (traditionId ?? '').toLowerCase();
+    if (id.contains('akdeniz') || id.contains('artemidorus')) {
+      return mediterraneanBlue;
+    }
+    if (id.contains('psikoloji') || id.contains('jung') || id.contains('bilinç')) {
+      return psychologyPurple;
+    }
+    if (id.contains('islam') || id.contains('doğu') || id.contains('dogu') || id.contains('sirin')) {
+      return islamGold;
+    }
+    return moonlight;
+  }
 
-  static const Color neonPurple = moonlight;
-  static const Color deepViolet = charcoalElevated;
-  static const Color lightLilac = moonlight;
-  static const Color electricLavender = warmSand;
+  /// Seçilen ekole göre ikincil (daha derin) vurgu rengini döndürür
+  static Color traditionSecondaryColor(String? traditionId) {
+    final id = (traditionId ?? '').toLowerCase();
+    if (id.contains('akdeniz') || id.contains('artemidorus')) {
+      return mediterraneanDeepBlue;
+    }
+    if (id.contains('psikoloji') || id.contains('jung') || id.contains('bilinç')) {
+      return psychologyDeepPurple;
+    }
+    return islamAmber;
+  }
 
-  static const Color mediterraneanAzure = mistGrey;
-  static const Color mediterraneanSky = moonlight;
-  static const Color mediterraneanDeep = charcoalElevated;
+  /// Seçilen ekole göre sayfa arka planına yayılan hafif ambiyans gradyanı
+  static LinearGradient traditionAmbientGradient(String? traditionId) {
+    final primary = traditionColor(traditionId);
+    final bg = charcoalBlack;
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      stops: const [0.0, 0.38, 1.0],
+      colors: [
+        Color.alphaBlend(primary.withValues(alpha: 0.16), bg),
+        Color.alphaBlend(primary.withValues(alpha: 0.05), bg),
+        bg,
+      ],
+    );
+  }
 
-  static const Color subconsciousIndigo = mistGrey;
-  static const Color subconsciousViolet = moonlight;
-  static const Color subconsciousDark = charcoalElevated;
+  // ===========================================================================
+  // 1. ZEMİN VE YÜZEYLER (Aktif Temaya Göre Dinamik)
+  // ===========================================================================
+  static Color get charcoalBlack {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF0A0A0C); // Derin kömür siyahı
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFF090612); // Obsidyen astral gece moru
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF070B12); // Saf gece safiri / arduvaz
+    }
+  }
 
-  static const Color islamicGold = moonlight;
-  static const Color islamicAmber = warmSand;
+  static Color get charcoalSurface {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF111216);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFF140E24);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF0E1522);
+    }
+  }
 
-  static const Color textPureWhite = textPrimary;
-  static const Color textSilver = textSecondary;
-  static const Color textCreamWhite = textPrimary;
-  static const Color textWarmMuted = textMuted;
+  static Color get charcoalElevated {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF16181E);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFF1E1535);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF151F30);
+    }
+  }
 
-  static const Color borderGlow = borderSubtle;
-  static const Color borderGold = borderMoonlight;
+  static Color get charcoalInput {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF0F1014);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFF110C1F);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF0B111C);
+    }
+  }
 
-  static const Color amazonDarkSlate = charcoalBlack;
-  static const Color amazonBoxFill = charcoalSurface;
-  static const Color amazonBoxFocused = charcoalElevated;
-  static const Color amazonAmber = moonlight;
-  static const Color amazonAmberLight = warmSand;
-  static const Color amazonAmberGlow = Color(0x1AE6DEC8);
-  static const Color dawnIndigo = charcoalElevated;
-  static const Color dawnViolet = charcoalSurface;
+  // ===========================================================================
+  // 2. VURGULAR (Aktif Temaya Göre Dinamik, Okunaklı ve Belirgin)
+  // ===========================================================================
+  static Color get moonlight {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFFE5A93C); // Tok, belirgin kehribar-altın sarısı
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFFEDB545); // Parlak kadim altın
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF7DD3FC); // Kuzey safir buz mavisi
+    }
+  }
 
-  // Minimalist, Mat Edebi Gradyanlar (Parlak neon içermez)
-  static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFE5A93C),
-      Color(0xFFD4973B),
-    ],
-  );
+  static Color get warmSand {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFFE8B85C); // Sıcak bal-altın sarısı
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFFC77DFF); // Astral lavanta-mor ışıltı
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFFE5C17B); // Şampanya altın tonu
+    }
+  }
 
-  static const LinearGradient goldGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFE5A93C),
-      Color(0xFFE8B85C),
-    ],
-  );
+  static Color get mistGrey {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF9EA3AE);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFFB8AED2);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF94A3B8);
+    }
+  }
 
-  static const LinearGradient mysticalSurfaceGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF111216),
-      Color(0xFF0A0A0C),
-    ],
-  );
+  static Color get dimMist {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFF6B7280);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFF7E729B);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFF64748B);
+    }
+  }
 
-  static const LinearGradient glowCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF131418),
-      Color(0xFF0F1014),
-    ],
-  );
+  // ===========================================================================
+  // 3. TİPOGRAFİ VE METİN RENKLERİ
+  // ===========================================================================
+  static Color get textPrimary {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFFF5F3EF);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFFFDFBF7);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFFF8FAFC);
+    }
+  }
 
-  static const LinearGradient antigravityBorderGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0x33E6DEC8),
-      Color(0x0FFFFFFF),
-      Color(0x0FFFFFFF),
-      Color(0x33E6DEC8),
-    ],
-  );
+  static Color get textSecondary {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0xFFD6D1C7);
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0xFFE2DCF0);
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0xFFCBD5E1);
+    }
+  }
 
-  static const LinearGradient amazonButtonGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFE6DEC8),
-      Color(0xFFDDD4BD),
-    ],
-  );
+  static Color get textMuted => mistGrey;
+  static Color get textDim => dimMist;
+
+  // ===========================================================================
+  // 4. ÇİZGİ VE AYIRICILAR
+  // ===========================================================================
+  static Color get borderSubtle {
+    switch (_currentMode) {
+      case OneiroThemeMode.editorialJournal:
+        return const Color(0x14FFFFFF); // İnce beyaz çizgi
+      case OneiroThemeMode.ancientMystic:
+        return const Color(0x2E9D4EDD); // Mistik mor ışıltılı sınır
+      case OneiroThemeMode.minimalistChic:
+        return const Color(0x1F7DD3FC); // İnce kristal safir sınır
+    }
+  }
+
+  static Color get borderLight => const Color(0x22FFFFFF);
+
+  static Color get borderMoonlight => moonlight.withValues(alpha: 0.35);
+
+  // ===========================================================================
+  // 5. GERİYE DÖNÜK UYUMLULUK & EKOL ALIAS'LARI
+  // ===========================================================================
+  static Color get oledBlack => charcoalBlack;
+  static Color get surfaceDark => charcoalBlack;
+  static Color get surfaceCard => charcoalSurface;
+  static Color get surfaceCardElevated => charcoalElevated;
+  static Color get surfaceInput => charcoalInput;
+
+  static Color get ancientGold =>
+      _currentMode == OneiroThemeMode.minimalistChic ? const Color(0xFFE5A93C) : moonlight;
+  static Color get mysticalAmber => warmSand;
+  static Color get antiqueBronze => moonlight;
+
+  static Color get neonPurple =>
+      _currentMode == OneiroThemeMode.ancientMystic ? const Color(0xFF9D4EDD) : psychologyPurple;
+  static Color get deepViolet => charcoalElevated;
+  static Color get lightLilac => psychologyPurple;
+  static Color get electricLavender =>
+      _currentMode == OneiroThemeMode.ancientMystic ? const Color(0xFFC77DFF) : warmSand;
+
+  static Color get mediterraneanAzure => mediterraneanDeepBlue;
+  static Color get mediterraneanSky => mediterraneanBlue;
+  static Color get mediterraneanDeep => charcoalElevated;
+
+  static Color get subconsciousIndigo => psychologyDeepPurple;
+  static Color get subconsciousViolet => psychologyPurple;
+  static Color get subconsciousDark => charcoalElevated;
+
+  static Color get islamicGold => islamGold;
+  static Color get islamicAmber => islamAmber;
+
+  static Color get textPureWhite => textPrimary;
+  static Color get textSilver => textSecondary;
+  static Color get textCreamWhite => textPrimary;
+  static Color get textWarmMuted => textMuted;
+
+  static Color get borderGlow => borderSubtle;
+  static Color get borderGold => borderMoonlight;
+
+  static Color get amazonDarkSlate => charcoalBlack;
+  static Color get amazonBoxFill => charcoalSurface;
+  static Color get amazonBoxFocused => charcoalElevated;
+  static Color get amazonAmber => moonlight;
+  static Color get amazonAmberLight => warmSand;
+  static Color get amazonAmberGlow => moonlight.withValues(alpha: 0.12);
+  static Color get dawnIndigo => charcoalElevated;
+  static Color get dawnViolet => charcoalSurface;
+
+  // Dinamik Gradyanlar
+  static LinearGradient get primaryGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          moonlight,
+          warmSand,
+        ],
+      );
+
+  static LinearGradient get goldGradient => const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFFE5A93C),
+          Color(0xFFE8B85C),
+        ],
+      );
+
+  static LinearGradient get mysticalSurfaceGradient => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          charcoalSurface,
+          charcoalBlack,
+        ],
+      );
+
+  static LinearGradient get glowCardGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          charcoalElevated,
+          charcoalSurface,
+        ],
+      );
+
+  static LinearGradient get antigravityBorderGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          moonlight.withValues(alpha: 0.25),
+          borderSubtle,
+          borderSubtle,
+          moonlight.withValues(alpha: 0.25),
+        ],
+      );
+
+  static LinearGradient get amazonButtonGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          moonlight,
+          warmSand,
+        ],
+      );
 }

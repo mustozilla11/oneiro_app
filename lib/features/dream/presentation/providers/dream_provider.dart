@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../services/firestore_service.dart';
 import '../../data/repositories/dream_repository.dart';
@@ -51,15 +52,32 @@ class DreamState {
 
 class DreamNotifier extends StateNotifier<DreamState> {
   final IDreamRepository _repository;
+  static const String _prefTraditionKey = 'oneiro_preferred_tradition_v1';
 
-  DreamNotifier(this._repository) : super(const DreamState());
+  DreamNotifier(this._repository) : super(const DreamState()) {
+    _loadSavedTradition();
+  }
+
+  Future<void> _loadSavedTradition() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedTrad = prefs.getString(_prefTraditionKey);
+      if (savedTrad != null && savedTrad.isNotEmpty) {
+        state = state.copyWith(preferredTradition: savedTrad);
+      }
+    } catch (_) {}
+  }
 
   void setEmotion(String emotion) {
     state = state.copyWith(selectedEmotion: emotion);
   }
 
-  void setPreferredTradition(String traditionId) {
+  Future<void> setPreferredTradition(String traditionId) async {
     state = state.copyWith(preferredTradition: traditionId);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefTraditionKey, traditionId);
+    } catch (_) {}
   }
 
   void setDreamText(String text) {
@@ -67,7 +85,7 @@ class DreamNotifier extends StateNotifier<DreamState> {
   }
 
   void reset() {
-    state = const DreamState();
+    state = DreamState(preferredTradition: state.preferredTradition);
   }
 
   Future<DreamInterpretation?> analyzeDream() async {
@@ -93,7 +111,18 @@ class DreamNotifier extends StateNotifier<DreamState> {
         interpretation: result,
       );
 
-      // Rüyayı her zaman telefon hafızasına kaydet (çevrimdışı ve ücretsiz dahil); oturum açıksa buluta da mühürle
+      final lockedDataList = result.lockedTraditions
+          .map((t) => <String, dynamic>{
+                'tradition_id': t.traditionId,
+                'title': t.title,
+                'scholar': t.scholar,
+                'teaser': t.teaser,
+                'interpretation': t.interpretation,
+                'is_unlocked': t.isUnlocked,
+              })
+          .toList();
+
+      // Rüyayı her zaman telefon hafızasına tam detaylarıyla kaydet; oturum açıksa arka planda buluta da mühürle
       await FirestoreService.instance.saveDream(
         currentUid ?? 'local_user',
         dreamText: result.dreamText,
@@ -101,8 +130,12 @@ class DreamNotifier extends StateNotifier<DreamState> {
         subconsciousAnalysis: result.subconsciousAnalysis,
         warningOfDay: result.warningOfDay,
         primaryTradition: result.primaryTradition.title,
+        primaryTraditionId: result.primaryTradition.traditionId,
+        primaryTraditionScholar: result.primaryTradition.scholar,
         lockedTraditions: result.lockedTraditions.map((t) => t.title).toList(),
+        lockedTraditionsData: lockedDataList,
         symbols: result.symbols,
+        emotion: state.selectedEmotion,
       );
 
       return result;
@@ -115,28 +148,30 @@ class DreamNotifier extends StateNotifier<DreamState> {
     }
   }
 
-  /// Kilitli geleneğin tam tabirini açar ve state'teki kartı günceller
-  Future<bool> unlockTradition(String traditionId) async {
-    if (state.interpretation == null) return false;
+  /// Kilitli geleneğin tam tabirini açar, state'i ve yerel arşivi günceller
+  Future<bool> unlockTradition(String traditionId, {DreamInterpretation? targetInterpretation}) async {
+    final activeInterp = targetInterpretation ?? state.interpretation;
+    if (activeInterp == null) return false;
 
     state = state.copyWith(isUnlocking: true);
 
     try {
       final currentUid = AuthService.instance.currentUser?.uid;
+      final dreamTxt = activeInterp.dreamText.isNotEmpty ? activeInterp.dreamText : state.dreamText;
       final unlockedItem = await _repository.unlockTradition(
-        state.dreamText.isNotEmpty ? state.dreamText : state.interpretation!.dreamText,
+        dreamTxt,
         traditionId,
         userId: currentUid,
       );
 
-      final updatedLocked = state.interpretation!.lockedTraditions.map((trad) {
+      final updatedLocked = activeInterp.lockedTraditions.map((trad) {
         if (trad.traditionId == traditionId) {
           return unlockedItem;
         }
         return trad;
       }).toList();
 
-      final updatedInterpretation = state.interpretation!.copyWith(
+      final updatedInterpretation = activeInterp.copyWith(
         lockedTraditions: updatedLocked,
       );
 
@@ -144,6 +179,20 @@ class DreamNotifier extends StateNotifier<DreamState> {
         isUnlocking: false,
         interpretation: updatedInterpretation,
       );
+
+      // Yerel arşivdeki kaydı da güncelle ki Arşivden tekrar açıldığında kilit açık kalsın
+      final lockedDataList = updatedLocked
+          .map((t) => <String, dynamic>{
+                'tradition_id': t.traditionId,
+                'title': t.title,
+                'scholar': t.scholar,
+                'teaser': t.teaser,
+                'interpretation': t.interpretation,
+                'is_unlocked': t.isUnlocked,
+              })
+          .toList();
+      await FirestoreService.instance.updateLocalDreamLockedTraditions(dreamTxt, lockedDataList);
+
       return true;
     } catch (e) {
       state = state.copyWith(isUnlocking: false);

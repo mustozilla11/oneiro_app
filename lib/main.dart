@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
 import 'core/theme/theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
 import 'features/home/presentation/screens/main_pager_screen.dart';
 import 'services/auth_service.dart';
@@ -13,7 +14,7 @@ import 'services/subscription_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Tam OLED Black için sistem çubukları ve durum çubuğu şeffaflığı
+  // Sistem çubukları ve durum çubuğu şeffaflığı
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -23,35 +24,38 @@ void main() async {
     ),
   );
 
-  // 1. Firebase Başlatma (Defansif: google-services.json yoksa çökmez, simülasyon modu devrede kalır)
+  // 0. Kayıtlı Temayı Yükle (Edebi Günlük, Kadim Mistik veya Safir Minimal)
+  await ThemeNotifier.loadInitialTheme();
+
+  // 1. Firebase Başlatma
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp().timeout(const Duration(seconds: 4));
     debugPrint('[Firebase] Başarıyla başlatıldı.');
   } catch (e) {
     debugPrint('[Firebase] Yapılandırma dosyası bekleniyor (Geliştirme/Çevrimdışı Mod): $e');
   }
 
-  // 2. AuthService Başlatma (Kayıtlı oturumu veya Google sessiz girişini yükle)
+  // 2. AuthService Başlatma (Kayıtlı oturumu anında yükle)
   await AuthService.instance.initialize();
 
   // 3. RevenueCat Satın Alma ve Abonelik Servisini Başlat
   try {
     final currentUid = AuthService.instance.currentUser?.uid;
-    await SubscriptionService.instance.initialize(uid: currentUid);
+    await SubscriptionService.instance.initialize(uid: currentUid).timeout(const Duration(seconds: 3));
   } catch (e) {
     debugPrint('[RevenueCat] Başlatma uyarısı: $e');
   }
 
   // 4. AdMob Reklam Servisini Başlat
   try {
-    await AdService.instance.initialize();
+    await AdService.instance.initialize().timeout(const Duration(seconds: 3));
   } catch (e) {
     debugPrint('[AdService] Başlatma uyarısı: $e');
   }
 
   // 5. Yerel Sabah Rüya Hatırlatıcı Bildirimlerini Başlat & Sırala
   try {
-    await NotificationService.instance.initialize();
+    await NotificationService.instance.initialize().timeout(const Duration(seconds: 3));
   } catch (e) {
     debugPrint('[NotificationService] Başlatma uyarısı: $e');
   }
@@ -63,26 +67,30 @@ void main() async {
   );
 }
 
-class OneiroApp extends StatelessWidget {
+class OneiroApp extends ConsumerWidget {
   const OneiroApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentThemeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'Oneiro / Rüya Tabiri',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      // Oturum durumunu dinleyen AuthGate
-      home: const AuthGate(),
+      theme: AppTheme.getTheme(currentThemeMode),
+      home: AuthGate(key: ValueKey(currentThemeMode)),
     );
   }
 }
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Tema değişikliğini tüm alt ekranlara anında yansıt
+    ref.watch(themeProvider);
+
     return StreamBuilder<OneiroUser?>(
       stream: AuthService.instance.authStateChanges,
       initialData: AuthService.instance.currentUser,
