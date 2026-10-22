@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../services/auth_service.dart';
+import '../../../../services/firestore_service.dart';
 import '../../../dream/presentation/providers/dream_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/providers/user_subscription_provider.dart';
 import 'package:oneiro_app/features/subscription/presentation/widgets/paywall_modal.dart';
@@ -169,6 +170,83 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  /// Kullanıcının kayıtlı gerçek rüyalarından dinamik bilinçaltı istatistikleri üretir
+  Future<Map<String, String>> _calculateSubconsciousStats() async {
+    final dreams = await FirestoreService.instance.getLocalDreams();
+    if (dreams.isEmpty) {
+      return {
+        'count': '0',
+        'topSymbol': 'Henüz Yok',
+        'archetype': 'Keşfediliyor',
+        'frequency': '%0',
+      };
+    }
+
+    // 1. Gerçek Çözülen Rüya Sayısı
+    final count = '${dreams.length}';
+
+    // 2. En Çok Tekrar Eden Sembol
+    final symbolCounts = <String, int>{};
+    for (final d in dreams) {
+      final symbols = (d['symbols'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      for (final s in symbols) {
+        final clean = s.trim();
+        if (clean.isNotEmpty) {
+          symbolCounts[clean] = (symbolCounts[clean] ?? 0) + 1;
+        }
+      }
+    }
+
+    String topSymbol = 'Keşfediliyor';
+    if (symbolCounts.isNotEmpty) {
+      final sorted = symbolCounts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      topSymbol = sorted.first.key;
+    }
+
+    // 3. Arketip Analizi (Rüyaların içeriğine göre Jungian arketip)
+    int shadow = 0;
+    int anima = 0;
+    int hero = 0;
+    int self = 0;
+
+    for (final d in dreams) {
+      final text = '${d['dreamText'] ?? ''} ${d['subconsciousAnalysis'] ?? ''} ${d['interpretation'] ?? ''}'.toLowerCase();
+      if (text.contains('gölge') || text.contains('karanlık') || text.contains('korku') || text.contains('kaç') || text.contains('yılan') || text.contains('düş')) {
+        shadow++;
+      }
+      if (text.contains('su') || text.contains('deniz') || text.contains('ay') || text.contains('kadın') || text.contains('aşk') || text.contains('sev')) {
+        anima++;
+      }
+      if (text.contains('uç') || text.contains('yol') || text.contains('dağ') || text.contains('aslan') || text.contains('savaş') || text.contains('kapı')) {
+        hero++;
+      }
+      if (text.contains('altın') || text.contains('ışık') || text.contains('güneş') || text.contains('mabet') || text.contains('ayna') || text.contains('bilge')) {
+        self++;
+      }
+    }
+
+    final scores = {
+      'Gölge': shadow,
+      'Anima': anima,
+      'Kahraman': hero,
+      'Öz-Benlik': self,
+    };
+    final topArchetype = scores.entries.reduce((a, b) => a.value >= b.value ? a : b);
+    final archetype = topArchetype.value > 0 ? topArchetype.key : 'Bilinçdışı';
+
+    // 4. Hatırlama / Bilinçaltı Frekansı
+    final freqNum = (20 + (dreams.length * 15)).clamp(20, 98);
+    final frequency = '%$freqNum';
+
+    return {
+      'count': count,
+      'topSymbol': topSymbol,
+      'archetype': archetype,
+      'frequency': frequency,
+    };
   }
 
   @override
@@ -500,28 +578,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatTile('12', 'Çözülen Rüya', Icons.auto_awesome),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatTile('Su 🌊', 'Baskın Sembol', Icons.water_drop_outlined),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatTile('Gölge', 'Jungian Arketip', Icons.psychology_outlined),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatTile('%85', 'Lucid Frekans', Icons.insights_rounded),
-                  ),
-                ],
+              FutureBuilder<Map<String, String>>(
+                future: _calculateSubconsciousStats(),
+                builder: (context, snapshot) {
+                  final stats = snapshot.data ?? {
+                    'count': '—',
+                    'topSymbol': '—',
+                    'archetype': '—',
+                    'frequency': '—',
+                  };
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatTile(stats['count']!, 'Çözülen Rüya', Icons.auto_awesome),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatTile(stats['topSymbol']!, 'Baskın Sembol', Icons.water_drop_outlined),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatTile(stats['archetype']!, 'Jungian Arketip', Icons.psychology_outlined),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatTile(stats['frequency']!, 'Lucid Frekans', Icons.insights_rounded),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 28),
