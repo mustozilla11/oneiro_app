@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/oneiro_logo.dart';
 import '../../../../services/auth_service.dart';
 import '../../../home/presentation/screens/main_pager_screen.dart';
 
@@ -427,72 +428,11 @@ class _OnboardingAuthScreenState extends State<OnboardingAuthScreen> {
 
                           const SizedBox(height: 14),
 
-                          // 2. Mistik Logo & Çift Katmanlı Kozmik Çember (Kompakt & Parlak)
-                          Center(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Dış Mor-Mavi Kozmik Halka
-                                Container(
-                                  width: 96,
-                                  height: 96,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        AppColors.neonPurple.withValues(alpha: 0.4),
-                                        AppColors.mediterraneanSky.withValues(alpha: 0.15),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                // İnce Altın Yörünge Çemberi
-                                Container(
-                                  width: 74,
-                                  height: 74,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: AppColors.ancientGold.withValues(alpha: 0.4),
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                                // Ana Çekirdek & Horus Gözü
-                                Container(
-                                  width: 62,
-                                  height: 62,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF2A1648),
-                                        Color(0xFF0F0B18),
-                                      ],
-                                    ),
-                                    border: Border.all(color: AppColors.ancientGold, width: 1.5),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.neonPurple.withValues(alpha: 0.35),
-                                        blurRadius: 18,
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '𓂀',
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        color: AppColors.ancientGold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          // 2. Mistik Oneiro Amblemi / Logo (Hilal, Kapalı Göz & Rüya Dalgası)
+                          const Center(
+                            child: OneiroLogo(
+                              size: 96,
+                              animate: true,
                             ),
                           ),
 

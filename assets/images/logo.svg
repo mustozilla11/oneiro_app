@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Ambient Cosmic Glow -->
+    <radialGradient id="nebulaGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7928CA" stop-opacity="0.35" />
+      <stop offset="35%" stop-color="#4361EE" stop-opacity="0.20" />
+      <stop offset="65%" stop-color="#0F172A" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Celestial Crescent Moon Gradient -->
+    <linearGradient id="crescentGrad" x1="12%" y1="0%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="20%" stop-color="#3B82F6" />
+      <stop offset="48%" stop-color="#7928CA" />
+      <stop offset="78%" stop-color="#C026D3" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Orbit Ring Gradient -->
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD166" stop-opacity="0.45" />
+      <stop offset="50%" stop-color="#7928CA" stop-opacity="0.20" />
+      <stop offset="100%" stop-color="#00F5FF" stop-opacity="0.40" />
+    </linearGradient>
+
+    <!-- Dream Eye Gradient -->
+    <linearGradient id="eyeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="30%" stop-color="#A78BFA" />
+      <stop offset="70%" stop-color="#FFD166" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Dream Wave Gradient -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7928CA" stop-opacity="0.3" />
+      <stop offset="30%" stop-color="#38BDF8" stop-opacity="0.9" />
+      <stop offset="70%" stop-color="#A855F7" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#FFD166" stop-opacity="0.35" />
+    </linearGradient>
+
+    <!-- Astral Star Gradient -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#FFF3B0" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Outer Soft Glow Filter -->
+    <filter id="neonBloom" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="8" result="blur1" />
+      <feGaussianBlur stdDeviation="2.5" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Crisp Subtle Glow Filter -->
+    <filter id="subtleGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. Cosmic Background Glow -->
+  <circle cx="256" cy="256" r="235" fill="url(#nebulaGlow)" />
+
+  <!-- 2. Celestial Orbit Circles -->
+  <circle cx="256" cy="256" r="212" fill="none" stroke="url(#orbitGrad)" stroke-width="1.2" stroke-dasharray="3 8" opacity="0.4" />
+  <circle cx="270" cy="256" r="168" fill="none" stroke="url(#orbitGrad)" stroke-width="0.8" stroke-dasharray="2 12" opacity="0.22" />
+
+  <!-- 3. The Grand Astral Crescent (Hilal) -->
+  <path d="
+    M 292 60
+    C 152 60 64 160 64 262
+    C 64 364 154 452 278 452
+    C 316 452 352 441 382 422
+    C 304 413 238 368 208 312
+    C 176 252 186 178 234 118
+    C 254 94 276 74 292 60
+    Z"
+    fill="url(#crescentGrad)"
+    filter="url(#neonBloom)"
+  />
+
+  <!-- Lunar Highlight Rim Curve (Gloss edge) -->
+  <path d="
+    M 284 76
+    C 160 84 82 172 82 262
+    C 82 344 148 420 252 438"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    opacity="0.32"
+  />
+
+  <!-- 4. The Sleeping Dream Eye (Kapalı Rüya Gözü - Minimalist & Zarif) -->
+  <g filter="url(#subtleGlow)">
+    <!-- Main Closed Eyelid (Gentle Peaceful Sleep Curve) -->
+    <path d="M 230 250 C 255 274 299 274 324 250"
+          fill="none"
+          stroke="url(#eyeGrad)"
+          stroke-width="4.2"
+          stroke-linecap="round"
+    />
+
+    <!-- Eyelash Rays (3 Delicate Downward Whispers) -->
+    <line x1="250" y1="265" x2="244" y2="280" stroke="url(#eyeGrad)" stroke-width="2.4" stroke-linecap="round" />
+    <line x1="277" y1="268" x2="277" y2="285" stroke="url(#eyeGrad)" stroke-width="2.6" stroke-linecap="round" />
+    <line x1="304" y1="265" x2="310" y2="280" stroke="url(#eyeGrad)" stroke-width="2.4" stroke-linecap="round" />
+  </g>
+
+  <!-- 5. Fluid Dream Waves (Soyut Bilinçaltı ve REM Dalgaları) -->
+  <g filter="url(#subtleGlow)">
+    <!-- Primary Wave -->
+    <path d="M 226 332 C 254 314 280 350 314 332 C 342 318 368 336 394 326"
+          fill="none"
+          stroke="url(#waveGrad)"
+          stroke-width="2.8"
+          stroke-linecap="round"
+    />
+
+    <!-- Secondary Wave -->
+    <path d="M 240 360 C 266 346 290 374 322 360 C 348 350 372 364 390 356"
+          fill="none"
+          stroke="url(#waveGrad)"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          opacity="0.6"
+    />
+  </g>
+
+  <!-- 6. The North Star / Astral Spark (Kuzey Rüya Yıldızı - ✦) -->
+  <g transform="translate(277, 164)" filter="url(#neonBloom)">
+    <!-- Radial Star Aura -->
+    <circle cx="0" cy="0" r="16" fill="#FFD166" opacity="0.3" />
+
+    <!-- 4-Pointed Celestial Diamond Star -->
+    <path d="
+      M 0 -24
+      Q 0 0 -22 0
+      Q 0 0 0 24
+      Q 0 0 22 0
+      Q 0 0 0 -24
+      Z"
+      fill="url(#starGrad)"
+    />
+
+    <!-- Pure Diamond Core Spark -->
+    <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
+
+    <!-- Starlight Ray Crosshair -->
+    <line x1="-30" y1="0" x2="30" y2="0" stroke="#FFFFFF" stroke-width="0.8" opacity="0.8" />
+    <line x1="0" y1="-30" x2="0" y2="30" stroke="#FFFFFF" stroke-width="0.8" opacity="0.8" />
+  </g>
+
+  <!-- 7. Ambient Dream Droplets & Cosmic Dust -->
+  <circle cx="372" cy="170" r="2.2" fill="#00F5FF" opacity="0.85" />
+  <circle cx="396" cy="225" r="1.8" fill="#FFD166" opacity="0.9" />
+  <circle cx="350" cy="110" r="2" fill="#FFFFFF" opacity="0.95" />
+  <circle cx="410" cy="285" r="2" fill="#E879F9" opacity="0.8" />
+  <circle cx="155" cy="175" r="1.6" fill="#818CF8" opacity="0.65" />
+  <circle cx="140" cy="330" r="1.8" fill="#38BDF8" opacity="0.55" />
+  <circle cx="320" cy="80" r="1.5" fill="#FFD166" opacity="0.7" />
+</svg>
