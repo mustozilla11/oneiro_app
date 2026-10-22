@@ -1,59 +1,83 @@
 import 'package:flutter/material.dart';
 
-/// Oneiro mistik renk paleti
+/// Oneiro - Minimalist Edebi Rüya Günlüğü (Editorial Journal) Renk Paleti
 class AppColors {
-  // Temel Arka Plan (OLED Black)
-  static const Color oledBlack = Color(0xFF000000);
-  static const Color surfaceDark = Color(0xFF0A0814);
-  static const Color surfaceCard = Color(0xFF120E24);
-  static const Color surfaceCardElevated = Color(0xFF1A1433);
-  static const Color surfaceInput = Color(0xFF0E0B1A);
+  AppColors._();
 
-  // Vurgular & Işıltılar (Neon Mor & Lila)
-  static const Color neonPurple = Color(0xFF9D4EDD);
-  static const Color deepViolet = Color(0xFF7B2CBF);
-  static const Color lightLilac = Color(0xFFC77DFF);
-  static const Color electricLavender = Color(0xFFE0AAFF);
+  // 1. Zemin ve Yüzeyler (Derin Kömür Siyahı)
+  static const Color charcoalBlack = Color(0xFF0A0A0C); // Ana derin kömür zemin
+  static const Color charcoalSurface = Color(0xFF111216); // Kart ve yüzey zemini
+  static const Color charcoalElevated = Color(0xFF16181E); // Yükseltilmiş kart
+  static const Color charcoalInput = Color(0xFF0F1014); // Girdi alanı zemini
 
-  // Kadim Mistik Vurgular (Altın & Kehribar)
-  static const Color ancientGold = Color(0xFFFFD166);
-  static const Color mysticalAmber = Color(0xFFFFB703);
-  static const Color antiqueBronze = Color(0xFFD4A373);
+  // 2. Vurgular (Mat Ay Işığı / Sıcak Kum ve Sis Grisi)
+  static const Color moonlight = Color(0xFFE6DEC8); // Mat ay ışığı / kum tonu
+  static const Color warmSand = Color(0xFFF4E8C1); // Soluk parşömen kum
+  static const Color mistGrey = Color(0xFF9EA3AE); // Soluk sis grisi
+  static const Color dimMist = Color(0xFF6B7280); // Çok soluk kılavuz grisi
 
-  // Kadim Ekoller Özel Renk Paleti
-  // 1. Antik Akdeniz Bilgeliği (Deniz & Gökyüzü Mavisi)
-  static const Color mediterraneanAzure = Color(0xFF0284C7);
-  static const Color mediterraneanSky = Color(0xFF38BDF8);
-  static const Color mediterraneanDeep = Color(0xFF0C4A6E);
+  // 3. Tipografi ve Metin Renkleri
+  static const Color textPrimary = Color(0xFFF5F3EF); // Edebi kemik beyazı
+  static const Color textSecondary = Color(0xFFD6D1C7); // Yumuşak kağıt okuma metni
+  static const Color textMuted = Color(0xFF9EA3AE); // Sis grisi ikincil metin
+  static const Color textDim = Color(0xFF6B7280); // Pasif meta veriler
 
-  // 2. Derinlik Psikolojisi (Bilinçaltı Koyu İndigo / Gece Moru)
-  static const Color subconsciousIndigo = Color(0xFF6366F1);
-  static const Color subconsciousViolet = Color(0xFF4F46E5);
-  static const Color subconsciousDark = Color(0xFF1E1B4B);
+  // 4. İnce Çizgi ve Ayırıcılar (Sadece Colors.white.withValues(alpha: 0.06))
+  static const Color borderSubtle = Color(0x0FFFFFFF); // 0.06 beyaz çizgi
+  static const Color borderLight = Color(0x1AFFFFFF); // 0.10 hafif çizgi
+  static const Color borderMoonlight = Color(0x33E6DEC8); // %20 ay ışığı bordürü
 
-  // 3. Doğu & İslam Geleneği (Kadim Altın & Sıcak Kehribar)
-  static const Color islamicGold = Color(0xFFFFD166);
-  static const Color islamicAmber = Color(0xFFFF9900);
+  // 5. Geriye Dönük Uyumluluk (Tüm neon/mor/cyan tonları mat ay ışığı ve kömüre dönüştürüldü)
+  static const Color oledBlack = charcoalBlack;
+  static const Color surfaceDark = charcoalBlack;
+  static const Color surfaceCard = charcoalSurface;
+  static const Color surfaceCardElevated = charcoalElevated;
+  static const Color surfaceInput = charcoalInput;
 
-  // Metin & Tipografi Renkleri
-  static const Color textPureWhite = Color(0xFFFFFFFF);
-  static const Color textSilver = Color(0xFFE2E8F0);
-  static const Color textMuted = Color(0xFF94A3B8);
-  static const Color textDim = Color(0xFF64748B);
+  static const Color ancientGold = moonlight;
+  static const Color mysticalAmber = warmSand;
+  static const Color antiqueBronze = moonlight;
 
-  // Kenarlık & Çizgiler
-  static const Color borderSubtle = Color(0xFF261D45);
-  static const Color borderGlow = Color(0xFF5A2A94);
-  static const Color borderGold = Color(0x66FFD166);
+  static const Color neonPurple = moonlight;
+  static const Color deepViolet = charcoalElevated;
+  static const Color lightLilac = moonlight;
+  static const Color electricLavender = warmSand;
 
-  // Gradyanlar
+  static const Color mediterraneanAzure = mistGrey;
+  static const Color mediterraneanSky = moonlight;
+  static const Color mediterraneanDeep = charcoalElevated;
+
+  static const Color subconsciousIndigo = mistGrey;
+  static const Color subconsciousViolet = moonlight;
+  static const Color subconsciousDark = charcoalElevated;
+
+  static const Color islamicGold = moonlight;
+  static const Color islamicAmber = warmSand;
+
+  static const Color textPureWhite = textPrimary;
+  static const Color textSilver = textSecondary;
+  static const Color textCreamWhite = textPrimary;
+  static const Color textWarmMuted = textMuted;
+
+  static const Color borderGlow = borderSubtle;
+  static const Color borderGold = borderMoonlight;
+
+  static const Color amazonDarkSlate = charcoalBlack;
+  static const Color amazonBoxFill = charcoalSurface;
+  static const Color amazonBoxFocused = charcoalElevated;
+  static const Color amazonAmber = moonlight;
+  static const Color amazonAmberLight = warmSand;
+  static const Color amazonAmberGlow = Color(0x1AE6DEC8);
+  static const Color dawnIndigo = charcoalElevated;
+  static const Color dawnViolet = charcoalSurface;
+
+  // Minimalist, Mat Edebi Gradyanlar (Parlak neon içermez)
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF9D4EDD),
-      Color(0xFF7B2CBF),
-      Color(0xFF5A189A),
+      Color(0xFFE6DEC8),
+      Color(0xFFD8CFB5),
     ],
   );
 
@@ -61,8 +85,8 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFFFD166),
-      Color(0xFFFFB703),
+      Color(0xFFE6DEC8),
+      Color(0xFFF4E8C1),
     ],
   );
 
@@ -70,9 +94,8 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFF16102D),
-      Color(0xFF0A0814),
-      Color(0xFF000000),
+      Color(0xFF111216),
+      Color(0xFF0A0A0C),
     ],
   );
 
@@ -80,50 +103,28 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF181333),
-      Color(0xFF0F0B21),
+      Color(0xFF131418),
+      Color(0xFF0F1014),
     ],
   );
 
-  // --- Amazon & Sabah Konforu Paleti (Morning-Comfort Antigravity) ---
-  // Gözü yormayan derin kömür zemin (saf zifiri siyah veya beyaz değil)
-  static const Color amazonDarkSlate = Color(0xFF0D1117);
-  // Kutunun içi: Zeminden ayrışan, derin mat gece safiri
-  static const Color amazonBoxFill = Color(0xFF151C28);
-  // Odaklandığında kutu içi
-  static const Color amazonBoxFocused = Color(0xFF1A2332);
-  // Amazon sıcak kehribarı (gözü yakmayan sıcak vurgu)
-  static const Color amazonAmber = Color(0xFFFF9900);
-  static const Color amazonAmberLight = Color(0xFFFFB84D);
-  static const Color amazonAmberGlow = Color(0x33FF9900);
-  // Şafak indigosu & lavanta (border geçişi için)
-  static const Color dawnIndigo = Color(0xFF4F46E5);
-  static const Color dawnViolet = Color(0xFF7C3AED);
-  // Sabah gözünü yormayan yumuşak ipeksi krem metinler
-  static const Color textCreamWhite = Color(0xFFECEFF4);
-  static const Color textWarmMuted = Color(0xFF8C96A5);
-
-  // Değişen / Akan Kutu Kenarlık Gradyanı (Antigravity Floating Border)
   static const LinearGradient antigravityBorderGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFFF9900), // Amazon Kehribar
-      Color(0xFFFFB84D), // Sıcak Altın
-      Color(0xFF818CF8), // İpeksi İndigo
-      Color(0xFF4F46E5), // Gece Mavisi
+      Color(0x33E6DEC8),
+      Color(0x0FFFFFFF),
+      Color(0x0FFFFFFF),
+      Color(0x33E6DEC8),
     ],
-    stops: [0.0, 0.35, 0.7, 1.0],
   );
 
-  // Amazon Sıcak Kehribar Buton Gradyanı
   static const LinearGradient amazonButtonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFFF9900),
-      Color(0xFFFF8500),
-      Color(0xFFE67300),
+      Color(0xFFE6DEC8),
+      Color(0xFFDDD4BD),
     ],
   );
 }

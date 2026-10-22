@@ -6,12 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../chat/presentation/screens/dream_chat_screen.dart';
-import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../providers/dream_provider.dart';
 import '../widgets/locked_tradition_card.dart';
-import '../widgets/mystical_card.dart';
 
+/// Minimalist ve Edebi Bir "Rüya Günlüğü (Editorial Journal)" Çözümleme Sayfası
 class DreamResultScreen extends ConsumerStatefulWidget {
   final DreamInterpretation interpretation;
 
@@ -27,62 +26,62 @@ class DreamResultScreen extends ConsumerStatefulWidget {
 class _DreamResultScreenState extends ConsumerState<DreamResultScreen> {
   bool _isSaved = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Yorum ekrana yüklendiğinde hafif dokunsal geri bildirim
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HapticFeedback.lightImpact();
+    });
+  }
+
   void _shareInterpretation(DreamInterpretation currentItem) {
     HapticFeedback.lightImpact();
     final text = '''
-🌙 Oneiro | Bilinçaltının Kadim Tabiri
+Oneiro | Rüya Günlüğü Çözümlemesi
 ━━━━━━━━━━━━━━━━━━━━━
-🔮 Anahtar Semboller: ${currentItem.symbols.join(', ')}
+Baskın Semboller: ${currentItem.symbols.join(', ')}
 
-🌌 Bilinçaltı Aynası:
+Psikolojik Anlam:
 ${currentItem.freeAnalysis.bilincaltiAynasi}
 
-📜 ${currentItem.primaryTradition.title} (${currentItem.primaryTradition.scholar}):
+${currentItem.primaryTradition.title} (${currentItem.primaryTradition.scholar}):
 ${currentItem.primaryTradition.interpretation ?? ''}
 
-🧭 Günün Pusulası:
+Günün İçgörüsü:
 "${currentItem.freeAnalysis.gununPusulasi}"
 
-Oneiro ile rüyalarının ardındaki kadim sırrı keşfet.
+Oneiro ile rüyalarınızın ardındaki edebi anlamı keşfedin.
 ''';
     Share.share(text);
   }
 
   void _saveToJournal() {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
     setState(() {
       _isSaved = !_isSaved;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              _isSaved ? Icons.bookmark_added : Icons.bookmark_remove,
-              color: AppColors.ancientGold,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              _isSaved
-                  ? 'Rüya kadim günlüğünüze mühürlendi.'
-                  : 'Rüya günlüğünüzden kaldırıldı.',
-              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
-            ),
-          ],
+        content: Text(
+          _isSaved
+              ? 'Rüya günlüğünüze kaydedildi.'
+              : 'Rüya günlüğünüzden çıkarıldı.',
+          style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
         ),
-        backgroundColor: AppColors.surfaceCardElevated,
+        backgroundColor: AppColors.charcoalElevated,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.borderGold, width: 1),
+          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
     );
   }
 
   void _navigateToChat(DreamInterpretation currentItem) {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => DreamChatScreen(interpretation: currentItem),
@@ -92,296 +91,221 @@ Oneiro ile rüyalarının ardındaki kadim sırrı keşfet.
 
   @override
   Widget build(BuildContext context) {
-    // Canlı state'ten gelen güncel yorum (kilit açıldıkça reaktif güncellenir)
     final liveInterpretation = ref.watch(dreamProvider).interpretation ?? widget.interpretation;
 
     return Scaffold(
-      backgroundColor: AppColors.oledBlack,
+      backgroundColor: AppColors.charcoalBlack,
       appBar: AppBar(
         title: Text(
-          'KADİM TABİR KARTI',
-          style: GoogleFonts.cinzel(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+          'RÜYA GÜNLÜĞÜ',
+          style: GoogleFonts.cormorantGaramond(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
             letterSpacing: 2.0,
-            color: AppColors.textSilver,
+            color: AppColors.moonlight,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).pop();
+          },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.workspace_premium_outlined, color: AppColors.ancientGold),
-            tooltip: 'Plus Avantajları',
-            onPressed: () => PaywallModal.show(context),
-          ),
-          IconButton(
             icon: Icon(
-              _isSaved ? Icons.bookmark : Icons.bookmark_border,
-              color: _isSaved ? AppColors.ancientGold : AppColors.textSilver,
+              _isSaved ? Icons.bookmark : Icons.bookmark_border_outlined,
+              size: 20,
+              color: _isSaved ? AppColors.moonlight : AppColors.mistGrey,
             ),
             onPressed: _saveToJournal,
           ),
           IconButton(
-            icon: const Icon(Icons.share_outlined, color: AppColors.textSilver),
+            icon: const Icon(Icons.share_outlined, size: 20, color: AppColors.mistGrey),
             onPressed: () => _shareInterpretation(liveInterpretation),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Rüya Özeti Kartı
+            // 1. Üst Meta Bilgisi (Arşivsel Günlük Başlığı)
+            Text(
+              'ÇÖZÜMLEME KAYDI • HİLAL 🌘',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.8,
+                color: AppColors.dimMist,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // 2. Edebi Başlık
+            Text(
+              'Bilinçdışının Kadim Yankısı',
+              style: GoogleFonts.cormorantGaramond(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: AppColors.moonlight,
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 3. Kullanıcının Rüya Notu (Edebi Alıntı Bloğu)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
               decoration: BoxDecoration(
-                color: AppColors.surfaceDark,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.borderSubtle, width: 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.neonPurple.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.neonPurple.withOpacity(0.3)),
-                        ),
-                        child: Text(
-                          'KADİM ANALİZ',
-                          style: GoogleFonts.cinzel(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.0,
-                            color: AppColors.electricLavender,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Az önce çözümlendi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.textDim,
-                        ),
-                      ),
-                    ],
+                border: Border(
+                  left: BorderSide(
+                    color: AppColors.moonlight.withValues(alpha: 0.35),
+                    width: 2,
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '"${liveInterpretation.dreamText}"',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.textSilver.withOpacity(0.85),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-
-            const SizedBox(height: 18),
-
-            // 1. Anahtar Semboller Kartı
-            MysticalCard(
-              title: 'ANAHTAR SEMBOLLER',
-              icon: Icons.vpn_key_outlined,
-              accentColor: AppColors.neonPurple,
-              content: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: liveInterpretation.symbols.map((sym) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceCardElevated,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.neonPurple.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('✦', style: TextStyle(color: AppColors.ancientGold, fontSize: 10)),
-                        const SizedBox(width: 6),
-                        Text(
-                          sym,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPureWhite,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ).animate().fadeIn(delay: 100.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
-
-            const SizedBox(height: 18),
-
-            // 2. Bilinçaltı Aynası (Ücretsiz Ana Analiz)
-            MysticalCard(
-              title: 'BİLİNÇALTI AYNASI',
-              icon: Icons.auto_awesome_mosaic_outlined,
-              accentColor: AppColors.neonPurple,
-              content: Text(
-                liveInterpretation.freeAnalysis.bilincaltiAynasi,
+              child: Text(
+                '"${liveInterpretation.dreamText}"',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                  fontSize: 14.5,
+                  fontStyle: FontStyle.italic,
                   height: 1.7,
-                  color: AppColors.textSilver,
+                  color: AppColors.textSecondary,
                 ),
               ),
-            ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
+            ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 36),
+            const Divider(color: AppColors.borderSubtle, height: 1),
+            const SizedBox(height: 32),
 
-            // 3. Birincil Kadim Tabir (Kullanıcının Seçtiği Ekol - Tam Açık)
-            () {
-              final primId = liveInterpretation.primaryTradition.traditionId;
-              IconData primIcon = Icons.menu_book_rounded;
-              Color primAccent = AppColors.ancientGold;
-
-              if (primId == 'antik_akdeniz') {
-                primIcon = Icons.account_balance;
-                primAccent = AppColors.mediterraneanSky;
-              } else if (primId == 'psikoloji') {
-                primIcon = Icons.psychology_outlined;
-                primAccent = AppColors.subconsciousIndigo;
-              }
-
-              return MysticalCard(
-                title: liveInterpretation.primaryTradition.title.toUpperCase(),
-                icon: primIcon,
-                accentColor: primAccent,
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: primAccent.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        'Temsil: ${liveInterpretation.primaryTradition.scholar}',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 11,
-                          color: primAccent,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+            // 4. Alt Bölüm: Baskın Semboller
+            _buildSectionHeader(
+              title: 'BASKIN SEMBOLLER',
+              icon: Icons.grain_outlined,
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: liveInterpretation.symbols.map((sym) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.borderSubtle,
+                      width: 1,
                     ),
-                    Text(
-                      liveInterpretation.primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        height: 1.7,
-                        color: AppColors.textSilver,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }().animate().fadeIn(delay: 300.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
-
-            const SizedBox(height: 18),
-
-            // 4. Günün Pusulası (Altın Vurgulu Kart)
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF261D0C),
-                    Color(0xFF140F04),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColors.ancientGold.withOpacity(0.5),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.ancientGold.withOpacity(0.12),
-                    blurRadius: 20,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.bolt, color: AppColors.ancientGold, size: 22),
-                      const SizedBox(width: 8),
-                      Text(
-                        'GÜNÜN PUSULASI',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                          color: AppColors.ancientGold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    liveInterpretation.freeAnalysis.gununPusulasi,
+                  child: Text(
+                    sym,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      height: 1.6,
-                      color: AppColors.textPureWhite,
-                    ),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 400.ms, duration: 400.ms).slideY(begin: 0.1, end: 0),
-
-            const SizedBox(height: 28),
-
-            // 5. Kilitli Kadim Gelenekler & Merak Fısıltıları (Teaser Tabanlı Freemium Kartları)
-            if (liveInterpretation.lockedTraditions.isNotEmpty) ...[
-              Row(
-                children: [
-                  const Icon(Icons.lock_clock, color: AppColors.ancientGold, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'DİĞER KADİM EKOL VE YANSIMALAR',
-                    style: GoogleFonts.cinzel(
                       fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: AppColors.ancientGold,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
+                );
+              }).toList(),
+            ).animate().fadeIn(duration: 400.ms),
 
+            const SizedBox(height: 36),
+            const Divider(color: AppColors.borderSubtle, height: 1),
+            const SizedBox(height: 32),
+
+            // 5. Alt Bölüm: Psikolojik Anlam (Bilinçaltı Aynası)
+            _buildSectionHeader(
+              title: 'PSİKOLOJİK ANLAM VE BİLİNÇALTI',
+              icon: Icons.psychology_outlined,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              liveInterpretation.freeAnalysis.bilincaltiAynasi,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15.5,
+                height: 1.85,
+                color: AppColors.textSecondary,
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+
+            const SizedBox(height: 36),
+            const Divider(color: AppColors.borderSubtle, height: 1),
+            const SizedBox(height: 32),
+
+            // 6. Alt Bölüm: Kadim Tabir (Birincil Ekol)
+            _buildSectionHeader(
+              title: liveInterpretation.primaryTradition.title.toUpperCase(),
+              icon: Icons.auto_stories_outlined,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Temsil: ${liveInterpretation.primaryTradition.scholar}',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: AppColors.dimMist,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              liveInterpretation.primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15.5,
+                height: 1.85,
+                color: AppColors.textSecondary,
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+
+            const SizedBox(height: 36),
+            const Divider(color: AppColors.borderSubtle, height: 1),
+            const SizedBox(height: 32),
+
+            // 7. Alt Bölüm: İçgörü (Günün Pusulası)
+            _buildSectionHeader(
+              title: 'GÜNÜN İÇGÖRÜSÜ',
+              icon: Icons.lightbulb_outline,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+              decoration: BoxDecoration(
+                color: AppColors.charcoalSurface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.borderSubtle,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                '"${liveInterpretation.freeAnalysis.gununPusulasi}"',
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 18,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w500,
+                  height: 1.6,
+                  color: AppColors.warmSand,
+                ),
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+
+            const SizedBox(height: 36),
+            const Divider(color: AppColors.borderSubtle, height: 1),
+            const SizedBox(height: 32),
+
+            // 8. Alt Bölüm: Diğer Kadim Ekoller (Locked Traditions)
+            if (liveInterpretation.lockedTraditions.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'DİĞER GELENEKLER VE YANSIMALAR',
+                icon: Icons.lock_clock_outlined,
+              ),
+              const SizedBox(height: 18),
               ...liveInterpretation.lockedTraditions.map((trad) {
                 return LockedTraditionCard(
                   key: ValueKey(trad.traditionId + (trad.isUnlocked ? '_unlocked' : '_locked')),
@@ -390,44 +314,41 @@ Oneiro ile rüyalarının ardındaki kadim sırrı keşfet.
               }),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-            // "Tabirciye Soru Sor" Butonu
+            // 9. Tabirci İle Teemmül (Edebi Soru Butonu)
             Container(
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.neonPurple.withOpacity(0.35),
-                    blurRadius: 18,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: AppColors.charcoalSurface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.borderMoonlight,
+                  width: 1,
+                ),
               ),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(14),
                   onTap: () => _navigateToChat(liveInterpretation),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
                           Icons.forum_outlined,
-                          color: AppColors.ancientGold,
-                          size: 20,
+                          color: AppColors.moonlight,
+                          size: 18,
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Text(
-                          'TABİRCİYE SORU SOR',
-                          style: GoogleFonts.cinzel(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.8,
-                            color: AppColors.textPureWhite,
+                          'TABİRCİ İLE TEEMMÜL ET (SORU SOR)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.0,
+                            color: AppColors.moonlight,
                           ),
                         ),
                       ],
@@ -435,12 +356,34 @@ Oneiro ile rüyalarının ardındaki kadim sırrı keşfet.
                   ),
                 ),
               ),
-            ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+            ).animate().fadeIn(duration: 400.ms),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 40),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionHeader({required String title, required IconData icon}) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 15,
+          color: AppColors.moonlight,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: GoogleFonts.cormorantGaramond(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.5,
+            color: AppColors.moonlight,
+          ),
+        ),
+      ],
     );
   }
 }

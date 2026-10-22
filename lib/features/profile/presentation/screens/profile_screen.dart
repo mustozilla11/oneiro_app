@@ -75,29 +75,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.surfaceCardElevated,
+          backgroundColor: AppColors.charcoalSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.ancientGold, width: 1),
+            side: const BorderSide(color: AppColors.borderSubtle),
           ),
           title: Row(
             children: [
-              const Icon(Icons.apple, color: AppColors.ancientGold, size: 24),
+              const Icon(Icons.apple, color: AppColors.moonlight, size: 22),
               const SizedBox(width: 8),
               Text(
                 'Apple ile Giriş',
-                style: GoogleFonts.cinzel(color: AppColors.textPureWhite, fontWeight: FontWeight.bold),
+                style: GoogleFonts.cormorantGaramond(
+                  color: AppColors.moonlight,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
           content: Text(
-            'Apple ile Giriş yalnızca iOS (iPhone / iPad) cihazlarda kullanılabilir.\n\nAndroid cihazınızda Google hesabınızla bağlanabilirsiniz.',
-            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, height: 1.5),
+            'Apple ile Giriş yalnızca iOS cihazlarda kullanılabilir.\n\nAndroid cihazınızda Google hesabınızla bağlanabilirsiniz.',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.mistGrey, height: 1.5, fontSize: 13),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Anladım', style: GoogleFonts.plusJakartaSans(color: AppColors.ancientGold)),
+              child: Text(
+                'Anladım',
+                style: GoogleFonts.plusJakartaSans(color: AppColors.moonlight, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),
@@ -267,30 +274,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.neonPurple.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.neonPurple.withOpacity(0.3)),
+                      color: AppColors.charcoalSurface,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.borderSubtle),
                     ),
-                    child: const Icon(Icons.person_outline_rounded, color: AppColors.ancientGold, size: 22),
+                    child: const Icon(Icons.person_outline_rounded, color: AppColors.moonlight, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ASTRAL PROFİL',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: AppColors.textPureWhite,
+                        'RÜYA PROFİLİ',
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.5,
+                          color: AppColors.moonlight,
                         ),
                       ),
                       Text(
-                        'Kullanıcı kimliği ve bilinçaltı arşivi',
+                        'Kişisel hesap ve bilinçaltı arşivi',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: AppColors.textDim,
+                          color: AppColors.mistGrey,
                         ),
                       ),
                     ],
@@ -298,51 +305,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // "Oneiro Nasıl Çalışır?" 6 Aşamalı Şema & Blok Diyagram Kutusu
+              // "Nasıl Çalışır?" 6 Aşamalı Şema & Blok Diyagram Kutusu
               GestureDetector(
-                onTap: () => HowItWorksModal.show(context),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  HowItWorksModal.show(context);
+                },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF1E1035), // Derin Mistik Mor
-                        Color(0xFF0F1E36), // Gece Safiri
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF00E5FF).withValues(alpha: 0.5), // Elektrik Camgöbeği
-                      width: 1.2,
+                      color: AppColors.borderSubtle,
+                      width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                        blurRadius: 16,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.4),
-                            width: 1,
-                          ),
+                          color: Colors.white.withValues(alpha: 0.04),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.borderSubtle),
                         ),
                         child: const Icon(
-                          Icons.schema_rounded,
-                          color: Color(0xFF00E5FF),
-                          size: 22,
+                          Icons.schema_outlined,
+                          color: AppColors.moonlight,
+                          size: 20,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -353,39 +346,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Row(
                               children: [
                                 Text(
-                                  'ONEIRO NASIL ÇALIŞIR?',
-                                  style: GoogleFonts.cinzel(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
+                                  'NASIL ÇALIŞIR?',
+                                  style: GoogleFonts.cormorantGaramond(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                     letterSpacing: 1.2,
-                                    color: AppColors.textPureWhite,
+                                    color: AppColors.moonlight,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.ancientGold.withValues(alpha: 0.2),
+                                    color: Colors.white.withValues(alpha: 0.04),
                                     borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.borderSubtle),
                                   ),
                                   child: Text(
                                     'ŞEMA',
-                                    style: GoogleFonts.cinzel(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.ancientGold,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.mistGrey,
+                                      letterSpacing: 0.8,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 4),
                             Text(
-                              'Rüya girişinden yapay zeka & kadim kitap taramasına kadar 6 aşamalı blok diyagramı inceleyin.',
+                              'Rüya metninden sembol ayrıştırmaya ve kadim kaynak taramasına kadar 6 aşamalı blok diyagram.',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
-                                height: 1.35,
-                                color: AppColors.textSilver,
+                                height: 1.4,
+                                color: AppColors.mistGrey,
                               ),
                             ),
                           ],
@@ -394,15 +389,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(width: 8),
                       const Icon(
                         Icons.arrow_forward_ios_rounded,
-                        color: Color(0xFF00E5FF),
-                        size: 14,
+                        color: AppColors.mistGrey,
+                        size: 13,
                       ),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
               // Profil Kartı & Kimlik Doğrulama
               StreamBuilder<OneiroUser?>(
@@ -413,66 +408,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? AuthService.instance.currentUser
                       : authSnap.data;
                   final isSignedIn = user != null && !user.isGuest;
-                  final userName = isSignedIn ? (user.displayName ?? 'Kadim Gezgin') : 'Misafir Seyyah';
+                  final userName = isSignedIn ? (user.displayName ?? 'Rüya Gezgini') : 'Misafir Okuyucu';
                   final userEmail = isSignedIn ? (user.email ?? 'Giriş Yapıldı') : 'Giriş yapılmadı';
-                  final avatarInitial = (isSignedIn && userName.isNotEmpty ? userName[0].toUpperCase() : '𓂀');
+                  final avatarInitial = (isSignedIn && userName.isNotEmpty ? userName[0].toUpperCase() : '☾');
 
                   return Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF191228),
-                          AppColors.surfaceCardElevated,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(22),
+                      color: AppColors.charcoalSurface,
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isSignedIn
-                            ? AppColors.ancientGold.withValues(alpha: 0.45)
-                            : AppColors.ancientGold.withValues(alpha: 0.22),
-                        width: 1.2,
+                        color: AppColors.borderSubtle,
+                        width: 1,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.neonPurple.withValues(alpha: 0.15),
-                          blurRadius: 18,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Column(
                       children: [
                         CircleAvatar(
-                          radius: 36,
-                          backgroundColor: AppColors.surfaceCardElevated,
+                          radius: 32,
+                          backgroundColor: AppColors.oledBlack,
                           child: Text(
-                            isSignedIn ? avatarInitial : '𓂀',
-                            style: TextStyle(
-                              fontSize: isSignedIn ? 28 : 32,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.ancientGold,
+                            avatarInitial,
+                            style: GoogleFonts.cormorantGaramond(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.moonlight,
                             ),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           userName,
-                          style: GoogleFonts.cinzel(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPureWhite,
+                          style: GoogleFonts.cormorantGaramond(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.moonlight,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           userEmail,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            color: AppColors.textDim,
+                            fontSize: 12,
+                            color: AppColors.mistGrey,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -482,13 +460,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(12),
                               onTap: _isLoading ? null : _handleGoogleSignIn,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
                                 decoration: BoxDecoration(
-                                  color: AppColors.textPureWhite,
-                                  borderRadius: BorderRadius.circular(14),
+                                  color: AppColors.moonlight,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -496,18 +474,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     const Text(
                                       'G',
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF4285F4),
+                                        color: AppColors.charcoalBlack,
                                       ),
                                     ),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Google ile Bağlan',
+                                      'Google ile Giriş Yap',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
+                                        color: AppColors.charcoalBlack,
                                       ),
                                     ),
                                   ],
@@ -521,26 +499,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(12),
                               onTap: _isLoading ? null : _handleAppleSignIn,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF161324),
-                                  borderRadius: BorderRadius.circular(14),
+                                  color: Colors.white.withValues(alpha: 0.04),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: AppColors.borderSubtle),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.apple, size: 20, color: AppColors.textPureWhite),
+                                    const Icon(Icons.apple, size: 18, color: AppColors.moonlight),
                                     const SizedBox(width: 10),
                                     Text(
                                       'Apple ile Bağlan',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
-                                        color: AppColors.textPureWhite,
+                                        color: AppColors.moonlight,
                                       ),
                                     ),
                                   ],
@@ -553,25 +531,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(12),
                               onTap: _isLoading ? null : _handleSignOut,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                 decoration: BoxDecoration(
-                                  color: AppColors.surfaceDark,
-                                  borderRadius: BorderRadius.circular(14),
+                                  color: Colors.white.withValues(alpha: 0.03),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: AppColors.borderSubtle),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.logout_rounded, size: 16, color: AppColors.textMuted),
+                                    const Icon(Icons.logout_rounded, size: 15, color: AppColors.mistGrey),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Oturumu Kapat',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13,
-                                        color: AppColors.textMuted,
+                                        fontSize: 12,
+                                        color: AppColors.mistGrey,
                                       ),
                                     ),
                                   ],
@@ -588,41 +566,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const SizedBox(height: 20),
 
-              // Kadim Gezgin Plus & Jeton Cüzdanı Kartı
+              // Gezgin Plus & Jeton Kartı
               Consumer(
                 builder: (context, ref, _) {
                   final sub = ref.watch(userSubscriptionProvider);
                   return Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      gradient: sub.isPremium
-                          ? const LinearGradient(colors: [Color(0xFF261D0C), Color(0xFF140F04)])
-                          : null,
-                      color: sub.isPremium ? null : AppColors.surfaceCardElevated,
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.charcoalSurface,
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: sub.isPremium ? AppColors.ancientGold : AppColors.borderGold,
-                        width: 1.2,
+                        color: AppColors.borderSubtle,
+                        width: 1,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (sub.isPremium ? AppColors.ancientGold : AppColors.neonPurple).withOpacity(0.15),
-                          blurRadius: 16,
-                        ),
-                      ],
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: (sub.isPremium ? AppColors.ancientGold : AppColors.neonPurple).withOpacity(0.15),
-                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.borderSubtle),
                           ),
                           child: Icon(
-                            sub.isPremium ? Icons.auto_awesome : Icons.token_rounded,
-                            color: sub.isPremium ? AppColors.ancientGold : AppColors.electricLavender,
-                            size: 24,
+                            sub.isPremium ? Icons.auto_stories_outlined : Icons.toll_outlined,
+                            color: AppColors.moonlight,
+                            size: 20,
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -631,39 +601,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                sub.isPremium ? 'KADİM GEZGİN PLUS' : 'KADİM JETON CÜZDANI',
-                                style: GoogleFonts.cinzel(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                  color: AppColors.ancientGold,
+                                sub.isPremium ? 'RÜYA GÜNLÜĞÜ PLUS' : 'RÜYA KONTÖRÜ',
+                                style: GoogleFonts.cormorantGaramond(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.0,
+                                  color: AppColors.moonlight,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 3),
                               Text(
                                 sub.isPremium
                                     ? 'Sınırsız Analiz & Sıfır Reklam'
-                                    : '${sub.dreamCredits} Jeton Mevcut (Günde 1 Ücretsiz)',
+                                    : '${sub.dreamCredits} Tabir Hakkı (Günde 1 Ücretsiz)',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
-                                  color: AppColors.textSilver,
+                                  color: AppColors.mistGrey,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         TextButton(
-                          onPressed: () => PaywallModal.show(context),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            PaywallModal.show(context);
+                          },
                           style: TextButton.styleFrom(
-                            backgroundColor: AppColors.ancientGold.withOpacity(0.2),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: Colors.white.withValues(alpha: 0.06),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(color: AppColors.borderSubtle),
+                            ),
                           ),
                           child: Text(
                             sub.isPremium ? 'Yönet' : 'Yükselt',
-                            style: GoogleFonts.cinzel(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.ancientGold,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.moonlight,
                             ),
                           ),
                         ),
@@ -673,7 +650,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // Bilinçaltı İstatistikleri
               Column(
@@ -681,24 +658,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   Text(
                     'BİLİNÇALTI İSTATİSTİKLERİ',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 12,
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                      color: AppColors.electricLavender,
+                      letterSpacing: 1.2,
+                      color: AppColors.moonlight,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Rüya günlüğünüzdeki sembol, duygu ve arketiplerden türetilir',
+                    'Rüya günlüğünüzdeki sembol ve arketiplerden türetilir',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: AppColors.textDim,
+                      fontSize: 12,
+                      color: AppColors.mistGrey,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               FutureBuilder<Map<String, String>>(
                 future: _calculateSubconsciousStats(),
@@ -715,7 +692,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildStatTile(stats['count']!, 'Çözülen Rüya', Icons.auto_awesome),
+                            child: _buildStatTile(stats['count']!, 'Çözülen Rüya', Icons.auto_stories_outlined),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -727,11 +704,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildStatTile(stats['archetype']!, 'Jungian Arketip', Icons.psychology_outlined),
+                            child: _buildStatTile(stats['archetype']!, 'Baskın Arketip', Icons.psychology_outlined),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildStatTile(stats['frequency']!, 'Lucid Frekans', Icons.insights_rounded),
+                            child: _buildStatTile(stats['frequency']!, 'Hatırlama Sıklığı', Icons.insights_outlined),
                           ),
                         ],
                       ),
@@ -742,30 +719,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const SizedBox(height: 28),
 
-              // Gizlilik & Veri Güvencesi (Hafif sarı/altın dikkat çekici uyarı kartı)
+              // Gizlilik & Veri Güvencesi
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF241C0A), // Sıcak sarı-kehribar koyu ton
-                      Color(0xFF191406),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.charcoalSurface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFFFD166).withOpacity(0.65), // Dikkat çekici sarı-altın çerçeve
-                    width: 1.3,
+                    color: AppColors.borderSubtle,
+                    width: 1,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFFD166).withOpacity(0.12),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -773,17 +736,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD166).withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.04),
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFFFD166).withOpacity(0.35),
-                          width: 1,
-                        ),
+                        border: Border.all(color: AppColors.borderSubtle),
                       ),
                       child: const Icon(
-                        Icons.shield_rounded,
-                        color: Color(0xFFFFD166),
-                        size: 20,
+                        Icons.shield_outlined,
+                        color: AppColors.moonlight,
+                        size: 18,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -792,21 +752,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Gizlilik & Veri Güvencesi',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.6,
-                              color: const Color(0xFFFFE082),
+                            'Gizlilik ve Mahremiyet',
+                            style: GoogleFonts.cormorantGaramond(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: AppColors.moonlight,
                             ),
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            'Rüyalarınız tamamen mahremdir ve sadece telefonunuzda saklanır. Google yalnızca kimliğinizi doğrular; rüya metinleriniz sunucularda depolanmaz veya üçüncü şahıslarla paylaşılmaz.',
+                            'Rüyalarınız tamamen mahremdir ve öncelikle cihazınızda saklanır. Google veya Apple yalnızca kimliğinizi doğrular; rüya metinleriniz üçüncü şahıslarla paylaşılmaz.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: AppColors.textPureWhite.withOpacity(0.9),
-                              height: 1.45,
+                              color: AppColors.mistGrey,
+                              height: 1.5,
                             ),
                           ),
                         ],
@@ -828,29 +788,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCard,
+        color: AppColors.charcoalSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.neonPurple, size: 20),
+          Icon(icon, color: AppColors.moonlight, size: 18),
           const SizedBox(height: 10),
           Text(
             value,
-            style: GoogleFonts.cinzel(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPureWhite,
+            style: GoogleFonts.cormorantGaramond(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.moonlight,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             label,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
-              color: AppColors.textDim,
+              color: AppColors.mistGrey,
             ),
           ),
         ],

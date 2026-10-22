@@ -129,113 +129,80 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     final currentStep = _progressiveSteps[_currentStepIndex];
 
     return Scaffold(
-      backgroundColor: AppColors.oledBlack,
+      backgroundColor: AppColors.charcoalBlack,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Mistik Dönen Astral Çember & Merkez Oneiro Amblemi
+              // Minimalist Monochrome Oneiro Amblemi ve İnce Çember
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.neonPurple.withValues(alpha: 0.3),
-                          blurRadius: 40,
-                          spreadRadius: 2,
-                        ),
-                        BoxShadow(
-                          color: AppColors.ancientGold.withValues(alpha: 0.15),
-                          blurRadius: 60,
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                  ),
-
                   // Dönen Dış İnce Çember
                   SizedBox(
-                    width: 124,
-                    height: 124,
+                    width: 110,
+                    height: 110,
                     child: CircularProgressIndicator(
-                      strokeWidth: 1.8,
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
-                      backgroundColor: AppColors.ancientGold.withValues(alpha: 0.2),
+                      strokeWidth: 1.5,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.moonlight),
+                      backgroundColor: Colors.white.withValues(alpha: 0.05),
                     ),
                   ),
 
-                  // Merkez Mistik Oneiro Logosu
-                  const OneiroLogo(size: 82, animate: true),
+                  // Merkez Minimalist Oneiro Logosu (Monokrom Mod)
+                  const OneiroLogo(size: 72, animate: true, monochrome: true),
                 ],
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 36),
 
-              // Adım Rozeti (Örn: 🔍 SEMBOL & DUYGU ANALİZİ)
+              // Adım Rozeti (Editorial Meta Rozet)
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
                 child: Container(
                   key: ValueKey<String>(currentStep['category']!),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.ancientGold.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.ancientGold.withValues(alpha: 0.4),
+                      color: AppColors.borderSubtle,
                       width: 1,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(currentStep['icon']!, style: const TextStyle(fontSize: 13)),
-                      const SizedBox(width: 8),
-                      Text(
-                        currentStep['category']!,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                          color: AppColors.ancientGold,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    currentStep['category']!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                      color: AppColors.moonlight,
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
-              // Dinamik Başlık (Aşama yazısı olmadan doğrudan başlık)
+              // Dinamik Başlık (Edebi Serif)
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: Text(
                   currentStep['title']!,
                   key: ValueKey<String>(currentStep['title']!),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                    color: AppColors.textPureWhite,
-                    shadows: [
-                      Shadow(
-                        color: AppColors.neonPurple.withValues(alpha: 0.5),
-                        blurRadius: 16,
-                      ),
-                    ],
+                  style: GoogleFonts.cormorantGaramond(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               // Alt Başlık / Net Açıklama
               AnimatedSwitcher(
@@ -245,16 +212,16 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                   key: ValueKey<String>(currentStep['subtitle']!),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.5,
-                    color: AppColors.textSilver,
-                    height: 1.45,
+                    fontSize: 13,
+                    color: AppColors.mistGrey,
+                    height: 1.5,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
-              // İlerleme Çubukları (Dinamik Aşamalı Gösterge)
+              // Minimalist 4 Aşamalı Nokta İlerleme Çubuğu
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(_progressiveSteps.length, (idx) {
@@ -263,23 +230,15 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: isActive ? 28 : 10,
-                    height: 4,
+                    width: isActive ? 22 : 6,
+                    height: 3,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColors.ancientGold
+                          ? AppColors.moonlight
                           : isDone
-                              ? AppColors.neonPurple
-                              : AppColors.borderSubtle,
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: isActive
-                          ? [
-                              BoxShadow(
-                                color: AppColors.ancientGold.withValues(alpha: 0.5),
-                                blurRadius: 8,
-                              ),
-                            ]
-                          : null,
+                              ? AppColors.mistGrey
+                              : Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   );
                 }),

@@ -10,67 +10,68 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.oledBlack,
-      primaryColor: AppColors.neonPurple,
+      scaffoldBackgroundColor: AppColors.charcoalBlack,
+      primaryColor: AppColors.moonlight,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.neonPurple,
-        secondary: AppColors.ancientGold,
-        surface: AppColors.surfaceCard,
-        surfaceContainerHighest: AppColors.surfaceCardElevated,
-        onPrimary: AppColors.textPureWhite,
-        onSecondary: AppColors.oledBlack,
-        onSurface: AppColors.textSilver,
+        primary: AppColors.moonlight,
+        secondary: AppColors.warmSand,
+        surface: AppColors.charcoalBlack,
+        surfaceContainerHighest: AppColors.charcoalSurface,
+        onPrimary: AppColors.charcoalBlack,
+        onSecondary: AppColors.charcoalBlack,
+        onSurface: AppColors.textPrimary,
+        outline: AppColors.borderSubtle,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.charcoalBlack,
         elevation: 0,
         centerTitle: true,
         scrolledUnderElevation: 0,
-        titleTextStyle: GoogleFonts.cinzel(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+        titleTextStyle: GoogleFonts.cormorantGaramond(
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
           letterSpacing: 1.5,
-          color: AppColors.textSilver,
+          color: AppColors.moonlight,
         ),
-        iconTheme: const IconThemeData(color: AppColors.electricLavender),
+        iconTheme: const IconThemeData(color: AppColors.moonlight),
       ),
       textTheme: TextTheme(
-        // Başlıklar için mistik Cinzel fontu
-        displayLarge: GoogleFonts.cinzel(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPureWhite,
-          letterSpacing: 2.0,
-        ),
-        displayMedium: GoogleFonts.cinzel(
-          fontSize: 26,
-          fontWeight: FontWeight.bold,
-          color: AppColors.ancientGold,
-          letterSpacing: 1.5,
-        ),
-        titleLarge: GoogleFonts.cinzel(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPureWhite,
+        // Başlıklar için edebi Cormorant Garamond fontu
+        displayLarge: GoogleFonts.cormorantGaramond(
+          fontSize: 34,
+          fontWeight: FontWeight.w600,
+          color: AppColors.moonlight,
           letterSpacing: 1.2,
+        ),
+        displayMedium: GoogleFonts.cormorantGaramond(
+          fontSize: 28,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+          letterSpacing: 1.0,
+        ),
+        titleLarge: GoogleFonts.cormorantGaramond(
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          color: AppColors.moonlight,
+          letterSpacing: 0.8,
         ),
         titleMedium: GoogleFonts.plusJakartaSans(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textSilver,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
         ),
-        // Gövde metinleri için modern ve okunaklı Plus Jakarta Sans
+        // Gövde metinleri ve okuma için modern, ferah Plus Jakarta Sans
         bodyLarge: GoogleFonts.plusJakartaSans(
-          fontSize: 15,
+          fontSize: 16,
           fontWeight: FontWeight.normal,
-          color: AppColors.textSilver,
-          height: 1.6,
+          color: AppColors.textSecondary,
+          height: 1.8,
         ),
         bodyMedium: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
+          fontSize: 14.5,
           fontWeight: FontWeight.normal,
-          color: AppColors.textMuted,
-          height: 1.5,
+          color: AppColors.textSecondary,
+          height: 1.7,
         ),
         bodySmall: GoogleFonts.plusJakartaSans(
           fontSize: 12,
@@ -78,45 +79,45 @@ class AppTheme {
           color: AppColors.textDim,
         ),
         labelLarge: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
-          letterSpacing: 1.0,
-          color: AppColors.textPureWhite,
+          letterSpacing: 1.2,
+          color: AppColors.charcoalBlack,
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surfaceCard,
+        color: AppColors.charcoalSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           side: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceInput,
+        fillColor: AppColors.charcoalInput,
         hintStyle: GoogleFonts.plusJakartaSans(
           color: AppColors.textDim,
-          fontSize: 14,
+          fontSize: 14.5,
         ),
-        contentPadding: const EdgeInsets.all(18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.neonPurple, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.borderMoonlight, width: 1),
         ),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderSubtle,
         thickness: 1,
-        space: 24,
+        space: 32,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -126,18 +127,19 @@ class AppTheme {
         },
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surfaceCardElevated,
-        elevation: 10,
+        backgroundColor: AppColors.charcoalElevated,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
-          side: const BorderSide(color: AppColors.borderGold, width: 1),
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.surfaceCardElevated,
-        elevation: 16,
+        backgroundColor: AppColors.charcoalElevated,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          side: BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
     );

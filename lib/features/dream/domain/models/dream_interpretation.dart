@@ -276,7 +276,7 @@ class DreamInterpretation {
           teaser: 'Artemidorus\'a göre "$symbolWord" sembolü, beklemediğiniz dünyevi bir kazancın veya gizli bir basiret sınavının habercisidir...',
           isUnlocked: false,
         ),
-        TraditionAnalysisItem(
+        const TraditionAnalysisItem(
           traditionId: 'psikoloji',
           title: 'Derinlik Psikolojisi',
           scholar: 'Carl G. Jung & Freud',

@@ -10,6 +10,7 @@ class PaywallModal extends ConsumerWidget {
   const PaywallModal({super.key});
 
   static Future<void> show(BuildContext context) {
+    HapticFeedback.lightImpact();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -24,10 +25,10 @@ class PaywallModal extends ConsumerWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surfaceCardElevated,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        color: AppColors.charcoalBlack,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: AppColors.ancientGold, width: 1.5),
+          top: BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -40,10 +41,10 @@ class PaywallModal extends ConsumerWidget {
             // Üst Tutamaç (Handle)
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: 36,
+                height: 3,
                 decoration: BoxDecoration(
-                  color: AppColors.borderSubtle,
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -53,24 +54,24 @@ class PaywallModal extends ConsumerWidget {
             // Rozet & Başlık
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.ancientGold.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: AppColors.ancientGold.withOpacity(0.4)),
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.borderSubtle),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
+                    const Icon(Icons.auto_stories_outlined, color: AppColors.moonlight, size: 13),
                     const SizedBox(width: 6),
                     Text(
-                      'KADİM GEZGİN PLUS',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2.0,
-                        color: AppColors.ancientGold,
+                      'RÜYA GÜNLÜĞÜ PLUS',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.5,
+                        color: AppColors.moonlight,
                       ),
                     ),
                   ],
@@ -80,23 +81,23 @@ class PaywallModal extends ConsumerWidget {
             const SizedBox(height: 14),
 
             Text(
-              'Bilinçaltının Tüm Kapılarını Arala',
+              'Bilinçaltının Tüm Sayfalarını Açın',
               textAlign: TextAlign.center,
-              style: GoogleFonts.cinzel(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-                color: AppColors.textPureWhite,
+              style: GoogleFonts.cormorantGaramond(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: AppColors.moonlight,
               ),
             ),
             const SizedBox(height: 8),
 
             Text(
-              'Günde 1 kahve parasına sınırsız kadim bilgelik, sıfır reklam ve anında açılan tüm gelenekler.',
+              'Sınırsız rüya tahlili, sıfır reklam ve doğrudan açılan tüm kadim ekoller.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
-                color: AppColors.textMuted,
+                color: AppColors.mistGrey,
                 height: 1.5,
               ),
             ),
@@ -104,21 +105,21 @@ class PaywallModal extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Özellikler Listesi
-            _buildFeatureRow(Icons.all_inclusive, 'Sınırsız Rüya Tabiri', 'Günlük limit veya bekleme süresi yok'),
+            _buildFeatureRow(Icons.all_inclusive, 'Sınırsız Rüya Tabiri', 'Günlük limit veya bekleme süresi olmaksızın'),
             const SizedBox(height: 12),
-            _buildFeatureRow(Icons.lock_open_rounded, 'Tüm Gelenekler Daima Açık', 'Doğu, Antik Akdeniz & Jung analizi tam metin'),
+            _buildFeatureRow(Icons.lock_open_rounded, 'Tüm Ekoller Daima Açık', 'Doğu, Antik Akdeniz ve Carl Jung çözümlemeleri'),
             const SizedBox(height: 12),
-            _buildFeatureRow(Icons.block, 'Sıfır Reklam', 'Mistik atmosferi bozan hiçbir video yok'),
+            _buildFeatureRow(Icons.block, 'Sade & Reklamsız Deneyim', 'Edebi odaklanmayı bozan hiçbir reklam yok'),
             const SizedBox(height: 12),
-            _buildFeatureRow(Icons.forum_outlined, 'Kadim Tabirciyle Sohbet', 'Rüyalarınla ilgili merak ettiğin her detayı sor'),
+            _buildFeatureRow(Icons.chat_bubble_outline_rounded, 'Kadim Bilgeyle Diyalog', 'Rüyalarınızla ilgili tüm ayrıntıları doğrudan sorun'),
 
             const SizedBox(height: 28),
 
             // 1. Seçenek: Aylık Abonelik (39,99 TL / ay)
             InkWell(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               onTap: () async {
-                HapticFeedback.heavyImpact();
+                HapticFeedback.lightImpact();
                 final result = await SubscriptionService.instance.purchaseMonthlySubscription();
                 if (result.success) {
                   await ref.read(userSubscriptionProvider.notifier).setPremium(true);
@@ -130,23 +131,23 @@ class PaywallModal extends ConsumerWidget {
                       content: Row(
                         children: [
                           Icon(
-                            result.success ? Icons.verified : Icons.info_outline,
-                            color: result.success ? AppColors.ancientGold : AppColors.electricLavender,
+                            result.success ? Icons.verified_outlined : Icons.info_outline,
+                            color: AppColors.moonlight,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               result.message,
-                              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, fontSize: 13),
+                              style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13),
                             ),
                           ),
                         ],
                       ),
-                      backgroundColor: AppColors.surfaceCardElevated,
+                      backgroundColor: AppColors.charcoalSurface,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: result.success ? AppColors.ancientGold : AppColors.borderSubtle),
+                        side: const BorderSide(color: AppColors.borderSubtle),
                       ),
                     ),
                   );
@@ -155,27 +156,20 @@ class PaywallModal extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF261D0C), Color(0xFF140F04)],
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.ancientGold, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.ancientGold.withOpacity(0.2),
-                      blurRadius: 16,
-                    ),
-                  ],
+                  color: AppColors.charcoalSurface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.moonlight.withValues(alpha: 0.5), width: 1.2),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.ancientGold.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.04),
                         shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.borderSubtle),
                       ),
-                      child: const Icon(Icons.star, color: AppColors.ancientGold, size: 22),
+                      child: const Icon(Icons.bookmark_border_rounded, color: AppColors.moonlight, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -185,45 +179,47 @@ class PaywallModal extends ConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                'Aylık Abonelik',
-                                style: GoogleFonts.cinzel(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPureWhite,
+                                'Aylık Üyelik',
+                                style: GoogleFonts.cormorantGaramond(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.moonlight,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.ancientGold,
+                                  color: Colors.white.withValues(alpha: 0.06),
                                   borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: AppColors.borderSubtle),
                                 ),
                                 child: Text(
-                                  'EN POPÜLER',
+                                  'ÖNERİLEN',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                    color: AppColors.warmSand,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(
-                            'İstediğin an iptal et',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.textDim),
+                            'İstediğiniz an iptal edilebilir',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.mistGrey),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       '39,99 ₺',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.ancientGold,
+                      style: GoogleFonts.cormorantGaramond(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.moonlight,
                       ),
                     ),
                   ],
@@ -231,13 +227,13 @@ class PaywallModal extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
             // 2. Seçenek: Tek Seferlik Jeton (19,99 TL)
             InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: () async {
-                HapticFeedback.mediumImpact();
+                HapticFeedback.lightImpact();
                 final result = await SubscriptionService.instance.purchaseCreditPack();
                 if (result.success) {
                   await ref.read(userSubscriptionProvider.notifier).addCredits(10);
@@ -249,23 +245,23 @@ class PaywallModal extends ConsumerWidget {
                       content: Row(
                         children: [
                           Icon(
-                            result.success ? Icons.token : Icons.info_outline,
-                            color: result.success ? AppColors.neonPurple : AppColors.electricLavender,
+                            result.success ? Icons.token_outlined : Icons.info_outline,
+                            color: AppColors.moonlight,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               result.message,
-                              style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite, fontSize: 13),
+                              style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13),
                             ),
                           ),
                         ],
                       ),
-                      backgroundColor: AppColors.surfaceCardElevated,
+                      backgroundColor: AppColors.charcoalSurface,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: result.success ? AppColors.neonPurple : AppColors.borderSubtle),
+                        side: const BorderSide(color: AppColors.borderSubtle),
                       ),
                     ),
                   );
@@ -274,39 +270,47 @@ class PaywallModal extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceCard,
+                  color: AppColors.charcoalSurface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderSubtle),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.token, color: AppColors.neonPurple, size: 24),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.borderSubtle),
+                      ),
+                      child: const Icon(Icons.toll_outlined, color: AppColors.moonlight, size: 18),
+                    ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '10 Ekstra Rüya Jetonu',
-                            style: GoogleFonts.cinzel(
-                              fontSize: 14,
+                            '10 Adet Rüya Kontörü',
+                            style: GoogleFonts.cormorantGaramond(
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPureWhite,
+                              color: AppColors.moonlight,
                             ),
                           ),
                           Text(
                             'Süresi dolmaz, tek seferlik ödeme',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.textDim),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.mistGrey),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       '19,99 ₺',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.electricLavender,
+                      style: GoogleFonts.cormorantGaramond(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.moonlight,
                       ),
                     ),
                   ],
@@ -317,14 +321,14 @@ class PaywallModal extends ConsumerWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                'Mevcut Bakiye: ${subState.isPremium ? "Sınırsız (Plus)" : "${subState.dreamCredits} Jeton"}',
+                'Mevcut Bakiye: ${subState.isPremium ? "Sınırsız (Plus)" : "${subState.dreamCredits} Tabir"}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
-                  color: AppColors.textDim,
+                  color: AppColors.mistGrey,
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -335,12 +339,13 @@ class PaywallModal extends ConsumerWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: AppColors.neonPurple.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
-          child: Icon(icon, color: AppColors.ancientGold, size: 16),
+          child: Icon(icon, color: AppColors.moonlight, size: 15),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -349,17 +354,17 @@ class PaywallModal extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.cinzel(
-                  fontSize: 13,
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPureWhite,
+                  color: AppColors.moonlight,
                 ),
               ),
               Text(
                 subtitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11.5,
-                  color: AppColors.textMuted,
+                  color: AppColors.mistGrey,
                 ),
               ),
             ],

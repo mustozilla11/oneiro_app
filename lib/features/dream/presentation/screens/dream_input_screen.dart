@@ -7,9 +7,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../providers/dream_provider.dart';
-import '../widgets/antigravity_dream_box.dart';
 import 'dream_loading_screen.dart';
 
+/// Minimalist, Modern ve Edebi Rüya Günlüğü (Editorial Journal) Giriş Sayfası
 class DreamInputScreen extends ConsumerStatefulWidget {
   const DreamInputScreen({super.key});
 
@@ -64,21 +64,21 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
   }
 
   void _onSolvePressed() {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
 
     final text = _textController.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Lütfen önce rüyanızı kaleme alın...',
-            style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
+            'Lütfen önce rüyanızı günlüğe aktarın...',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
           ),
-          backgroundColor: AppColors.surfaceCardElevated,
+          backgroundColor: AppColors.charcoalElevated,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: AppColors.neonPurple, width: 1),
+            side: const BorderSide(color: AppColors.borderSubtle, width: 1),
           ),
         ),
       );
@@ -106,375 +106,268 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
     );
   }
 
+  String _formatCurrentDate() {
+    final now = DateTime.now();
+    final months = [
+      'OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN',
+      'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'
+    ];
+    final days = [
+      'PAZARTESİ', 'SALI', 'ÇARŞAMBA', 'PERŞEMBE', 'CUMA', 'CUMARTESİ', 'PAZAR'
+    ];
+    return '${now.day} ${months[now.month - 1]} • ${days[now.weekday - 1]}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasFocus = _focusNode.hasFocus;
     final subState = ref.watch(userSubscriptionProvider);
     final selectedTradition = ref.watch(dreamProvider).preferredTradition;
 
-    // Seçili geleneğe göre dinamik başlık rengi ve etiketi
-    final Color traditionAccentColor;
-    final String traditionLabel;
-    switch (selectedTradition) {
-      case 'antik_akdeniz':
-        traditionAccentColor = AppColors.mediterraneanSky;
-        traditionLabel = 'RÜYANIZI ANLATIN • ANTİK AKDENİZ';
-        break;
-      case 'psikoloji':
-        traditionAccentColor = AppColors.subconsciousIndigo;
-        traditionLabel = 'RÜYANIZI ANLATIN • DERİNLİK PSİKOLOJİSİ';
-        break;
-      case 'islam_dogu':
-      default:
-        traditionAccentColor = AppColors.amazonAmberLight;
-        traditionLabel = 'RÜYANIZI ANLATIN • DOĞU & İSLAM';
-        break;
-    }
-
     return Scaffold(
-      backgroundColor: AppColors.amazonDarkSlate,
+      backgroundColor: AppColors.charcoalBlack,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 8),
+              // 1. Üst Meta Veri Çubuğu (Editorial Journal Header)
+              _buildEditorialMetaBar(subState),
 
-              // Üst Astral Başlık
-              Center(
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () => PaywallModal.show(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.neonPurple.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: AppColors.neonPurple.withOpacity(0.35),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
-                            const SizedBox(width: 6),
-                            Text(
-                              'ONEIRO ASTRAL PORTAL',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 2.0,
-                                color: AppColors.ancientGold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+              const SizedBox(height: 28),
 
-                    // Dinamik Kredi / Abonelik Durum Çipi (Tıklanabilir Paywall Erişimi)
-                    GestureDetector(
-                      onTap: () => PaywallModal.show(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: subState.isPremium
-                              ? LinearGradient(
-                                  colors: [
-                                    AppColors.ancientGold.withOpacity(0.25),
-                                    AppColors.neonPurple.withOpacity(0.2),
-                                  ],
-                                )
-                              : null,
-                          color: subState.isPremium ? null : AppColors.surfaceCardElevated,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: subState.isPremium
-                                ? AppColors.ancientGold
-                                : AppColors.neonPurple.withOpacity(0.4),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              subState.isPremium ? Icons.workspace_premium_rounded : Icons.stars_rounded,
-                              color: subState.isPremium ? AppColors.ancientGold : AppColors.electricLavender,
-                              size: 15,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              subState.isPremium
-                                  ? '👑 Kadim Üye • Sınırsız'
-                                  : '✨ Kalan Kredi: ${subState.dreamCredits}  |  Günlük Hak: ${subState.hasFreeDreamToday ? 1 : 0}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: subState.isPremium ? AppColors.ancientGold : AppColors.textPureWhite,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.ancientGold, size: 10),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Bilinçaltının Fısıltıları',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.cinzel(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.5,
-                        color: AppColors.textPureWhite,
-                        shadows: [
-                          Shadow(
-                            color: AppColors.neonPurple.withOpacity(0.6),
-                            blurRadius: 18,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Rüyanızdaki sembolleri, arketipleri ve kadim işaretleri çözün.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppColors.textMuted,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Enine Geniş, Sağda-Solda Neredeyse Boşluk Bırakmayan ve Yazıldıkça Boyuna Esneyen Rüya Penceresi
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      traditionLabel,
-                      style: GoogleFonts.cinzel(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.4,
-                        color: traditionAccentColor,
-                      ),
-                    ),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _textController,
-                      builder: (context, value, _) {
-                        if (value.text.isEmpty) {
-                          if (_lastDraftDreamText != null && _lastDraftDreamText!.isNotEmpty) {
-                            return InkWell(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                _textController.text = _lastDraftDreamText!;
-                                _textController.selection = TextSelection.fromPosition(
-                                  TextPosition(offset: _textController.text.length),
-                                );
-                                setState(() {});
-                              },
-                              borderRadius: BorderRadius.circular(10),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.history_rounded, size: 13, color: AppColors.ancientGold),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Son Rüyayı Getir',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.ancientGold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        }
-                        final words = value.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '$words kelime',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: AppColors.textWarmMuted,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                _lastDraftDreamText = _textController.text.trim();
-                                _saveDraftText(_lastDraftDreamText!);
-                                _textController.clear();
-                                setState(() {});
-                              },
-                              borderRadius: BorderRadius.circular(6),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                child: Text(
-                                  'Temizle',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.electricLavender,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+              // 2. Edebi Başlık ve Rehber Cümle
+              Text(
+                'Bu gece hangi eşikten geçtiniz?',
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                  color: AppColors.moonlight,
+                  height: 1.25,
                 ),
               ),
               const SizedBox(height: 10),
-
-              // Antigravity (Yerçekimsiz Süzülen, İçi ve Dışı Farklı, Seçilen Ekole Göre Rengi Akan) Rüya Kutusu
-              AntigravityDreamBox(
-                isFocused: hasFocus,
-                traditionId: selectedTradition,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  minLines: 8,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15.5,
-                    color: AppColors.textCreamWhite, // Sabah gözünü yakmayan ipeksi krem
-                    height: 1.6,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Dün gece ne gördünüz? Hatırladığınız tüm mekanları, kişileri, renkleri ve sembolleri özgürce buraya yazın...',
-                    hintStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.textWarmMuted,
-                      fontSize: 14.5,
-                      height: 1.5,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: (val) {
-                    ref.read(dreamProvider.notifier).setDreamText(val);
-                  },
+              Text(
+                'Zihninizin derinliklerinde kalan imgeleri, mekanları ve uyandığınızda hissettiğiniz yankıyı serbestçe kaleme alın.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: AppColors.mistGrey,
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 32),
 
-              // Birincil Kadim Ekol Seçimi (Kullanıcı hangi tabirin ilk ücretsiz açılacağını seçebilir)
-              _buildTraditionSelector(ref.watch(dreamProvider).preferredTradition),
+              // 3. Kenarlıksız Lüks Not Defteri / Günlük Sayfası
+              _buildJournalEditorCanvas(),
 
-              const SizedBox(height: 26),
+              const SizedBox(height: 32),
+              const Divider(color: AppColors.borderSubtle, height: 1),
+              const SizedBox(height: 28),
 
-              // Parlayan Mistik "RÜYAYI TABİR ET" Butonu
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF8B5CF6), // Canlı Eflatun
-                        Color(0xFF6D28D9), // Derin Kraliyet Moru
-                        Color(0xFF9333EA), // Işıltılı Ametist
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: const Color(0xFFE9D5FF).withOpacity(0.7), // Parlayan lavanta çerçeve
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF8B5CF6).withOpacity(0.55),
-                        blurRadius: 22,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFFC084FC).withOpacity(0.35),
-                        blurRadius: 36,
-                        spreadRadius: 3,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: _onSolvePressed,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.auto_awesome,
-                              color: AppColors.textPureWhite,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'RÜYAYI TABİR ET',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 2.2,
-                                color: AppColors.textPureWhite,
-                                shadows: [
-                                  Shadow(
-                                    color: const Color(0xFFE9D5FF).withOpacity(0.8),
-                                    blurRadius: 12,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // 4. Öncelikli Ekol Seçimi (Minimalist Edebi Çipler)
+              _buildTraditionSelector(selectedTradition),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 36),
+
+              // 5. Mat Ay Işığı "RÜYAYI ÇÖZÜMLE" Butonu
+              _buildSubmitButton(),
+
+              const SizedBox(height: 32),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEditorialMetaBar(dynamic subState) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.borderSubtle, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Tarih ve Ay Fazı
+          Row(
+            children: [
+              const Text('🌘', style: TextStyle(fontSize: 13)),
+              const SizedBox(width: 8),
+              Text(
+                _formatCurrentDate(),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: AppColors.mistGrey,
+                ),
+              ),
+            ],
+          ),
+
+          // Kredi / Üyelik Göstergesi (Sade, Dikkat Dağıtmayan)
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              PaywallModal.show(context);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  subState.isPremium
+                      ? 'KADİM PLUS'
+                      : 'HAK: ${subState.dreamCredits}',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                    color: AppColors.moonlight,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 9,
+                  color: AppColors.moonlight,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJournalEditorCanvas() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.charcoalSurface.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderSubtle,
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _textController,
+            focusNode: _focusNode,
+            minLines: 9,
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 15.5,
+              height: 1.85,
+              color: AppColors.textPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Dün gece ne gördünüz? Hatırladığınız mekanları, yüzleri, renkleri ve hissettiğiniz uyanış atmosferini buraya not edin...',
+              hintStyle: GoogleFonts.plusJakartaSans(
+                color: AppColors.dimMist,
+                fontSize: 14.5,
+                height: 1.7,
+              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              filled: false,
+              contentPadding: EdgeInsets.zero,
+            ),
+            onChanged: (val) {
+              ref.read(dreamProvider.notifier).setDreamText(val);
+            },
+          ),
+          const SizedBox(height: 14),
+          const Divider(color: AppColors.borderSubtle, height: 1),
+          const SizedBox(height: 12),
+
+          // Alt Editör Kontrolleri (Kelime Sayacı & Taslak Geri Yükleme)
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _textController,
+            builder: (context, value, _) {
+              final words = value.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    words > 0 ? '$words kelime kaleme alındı' : 'Rüya günlüğü hazır',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      color: AppColors.dimMist,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (value.text.isEmpty && _lastDraftDreamText != null && _lastDraftDreamText!.isNotEmpty)
+                        InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _textController.text = _lastDraftDreamText!;
+                            _textController.selection = TextSelection.fromPosition(
+                              TextPosition(offset: _textController.text.length),
+                            );
+                            setState(() {});
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.history_rounded, size: 12, color: AppColors.moonlight),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Son Notu Getir',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.moonlight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      if (value.text.isNotEmpty)
+                        InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _lastDraftDreamText = _textController.text.trim();
+                            _saveDraftText(_lastDraftDreamText!);
+                            _textController.clear();
+                            setState(() {});
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            child: Text(
+                              'Temizle',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.mistGrey,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -485,111 +378,94 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
         'id': 'islam_dogu',
         'title': 'Doğu & İslam',
         'scholar': 'İbn-i Sîrîn',
-        'icon': Icons.menu_book_rounded,
-        'color': AppColors.ancientGold,
-        'bg': const Color(0xFF261D0C),
+        'icon': Icons.menu_book_outlined,
       },
       {
         'id': 'antik_akdeniz',
         'title': 'Antik Akdeniz',
         'scholar': 'Artemidorus',
-        'icon': Icons.account_balance,
-        'color': AppColors.mediterraneanSky,
-        'bg': const Color(0xFF071F36),
+        'icon': Icons.account_balance_outlined,
       },
       {
         'id': 'psikoloji',
         'title': 'Psikoloji',
         'scholar': 'Carl Jung',
         'icon': Icons.psychology_outlined,
-        'color': AppColors.subconsciousIndigo,
-        'bg': const Color(0xFF160F2B),
       },
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'İLK AÇILACAK KADİM TABİR',
-                style: GoogleFonts.cinzel(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
-                  color: AppColors.amazonAmberLight,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'ÖNCELİKLİ KADİM BAKIŞ',
+              style: GoogleFonts.cormorantGaramond(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+                color: AppColors.moonlight,
               ),
-              Text(
-                '✦ Öncelikli Ekol',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ancientGold,
-                ),
+            ),
+            Text(
+              'İlk Açılacak Ekol',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppColors.dimMist,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
         Row(
           children: traditions.map((t) {
             final id = t['id'] as String;
             final title = t['title'] as String;
             final scholar = t['scholar'] as String;
             final icon = t['icon'] as IconData;
-            final color = t['color'] as Color;
-            final bg = t['bg'] as Color;
             final isSelected = selectedTradition == id;
 
             return Expanded(
               child: GestureDetector(
                 onTap: () {
-                  HapticFeedback.selectionClick();
+                  HapticFeedback.lightImpact();
                   ref.read(dreamProvider.notifier).setPreferredTradition(id);
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? bg : AppColors.surfaceCardElevated.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(14),
+                    color: isSelected
+                        ? AppColors.moonlight.withValues(alpha: 0.08)
+                        : AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? color : AppColors.borderSubtle,
-                      width: isSelected ? 1.6 : 1.0,
+                      color: isSelected
+                          ? AppColors.moonlight.withValues(alpha: 0.6)
+                          : AppColors.borderSubtle,
+                      width: 1.0,
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: color.withOpacity(0.25),
-                              blurRadius: 12,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                        : null,
                   ),
                   child: Column(
                     children: [
                       Icon(
                         icon,
-                        color: isSelected ? color : AppColors.textDim,
-                        size: 20,
+                        color: isSelected ? AppColors.moonlight : AppColors.dimMist,
+                        size: 18,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Text(
                         title,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.cinzel(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? AppColors.textPureWhite : AppColors.textMuted,
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 13,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected ? AppColors.textPrimary : AppColors.mistGrey,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -599,9 +475,8 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9.5,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? color : AppColors.textDim,
+                          fontSize: 10,
+                          color: isSelected ? AppColors.moonlight : AppColors.dimMist,
                         ),
                       ),
                     ],
@@ -614,5 +489,43 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
       ],
     );
   }
-}
 
+  Widget _buildSubmitButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.moonlight,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: _onSolvePressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.auto_stories_outlined,
+                  color: AppColors.charcoalBlack,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'RÜYAYI ÇÖZÜMLE',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                    color: AppColors.charcoalBlack,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

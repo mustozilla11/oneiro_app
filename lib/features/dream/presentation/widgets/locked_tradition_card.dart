@@ -231,76 +231,35 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
     final subState = ref.watch(userSubscriptionProvider);
     final isUnlocked = trad.isUnlocked;
 
-    // Gelenek İkonu, Renk ve Arka Plan Gradyanı Belirleme
-    IconData iconData = Icons.auto_awesome;
-    Color accentColor = AppColors.ancientGold;
-    LinearGradient cardBgGradient = const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFF261D0C), Color(0xFF140F04)],
-    );
+    IconData iconData = Icons.auto_stories_outlined;
 
     if (trad.traditionId == 'antik_akdeniz') {
-      iconData = Icons.account_balance;
-      accentColor = AppColors.mediterraneanSky;
-      cardBgGradient = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF071F36), Color(0xFF030D18)],
-      );
+      iconData = Icons.account_balance_outlined;
     } else if (trad.traditionId == 'psikoloji') {
       iconData = Icons.psychology_outlined;
-      accentColor = AppColors.subconsciousIndigo;
-      cardBgGradient = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF160F2B), Color(0xFF090614)],
-      );
     } else {
-      iconData = Icons.menu_book_rounded;
-      accentColor = AppColors.ancientGold;
-      cardBgGradient = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF261D0C), Color(0xFF140F04)],
-      );
+      iconData = Icons.menu_book_outlined;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        gradient: cardBgGradient,
-        borderRadius: BorderRadius.circular(22),
+        color: AppColors.charcoalSurface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isUnlocked ? accentColor.withOpacity(0.6) : AppColors.borderSubtle,
-          width: isUnlocked ? 1.5 : 1.0,
+          color: AppColors.borderSubtle,
+          width: 1.0,
         ),
-        boxShadow: isUnlocked
-            ? [
-                BoxShadow(
-                  color: accentColor.withOpacity(0.18),
-                  blurRadius: 18,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Kart Başlığı
+          // Kart Başlığı (Editorial Header)
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(iconData, color: accentColor, size: 20),
-                ),
+                Icon(iconData, color: AppColors.moonlight, size: 18),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -308,18 +267,19 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                     children: [
                       Text(
                         trad.title.toUpperCase(),
-                        style: GoogleFonts.cinzel(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 1.2,
-                          color: AppColors.textPureWhite,
+                          color: AppColors.textPrimary,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         trad.scholar,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11.5,
-                          color: AppColors.textDim,
+                          color: AppColors.mistGrey,
                         ),
                       ),
                     ],
@@ -328,31 +288,28 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isUnlocked
-                        ? AppColors.ancientGold.withOpacity(0.15)
-                        : Colors.white.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isUnlocked
-                          ? AppColors.ancientGold.withOpacity(0.4)
-                          : AppColors.borderSubtle,
+                      color: AppColors.borderSubtle,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isUnlocked ? Icons.lock_open : Icons.lock_outline,
-                        size: 12,
-                        color: isUnlocked ? AppColors.ancientGold : AppColors.textMuted,
+                        isUnlocked ? Icons.lock_open_outlined : Icons.lock_outline,
+                        size: 11,
+                        color: isUnlocked ? AppColors.moonlight : AppColors.mistGrey,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 5),
                       Text(
                         isUnlocked ? 'AÇILDI' : 'KİLİTLİ',
-                        style: GoogleFonts.cinzel(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: isUnlocked ? AppColors.ancientGold : AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.8,
+                          color: isUnlocked ? AppColors.moonlight : AppColors.mistGrey,
                         ),
                       ),
                     ],
@@ -366,99 +323,79 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
 
           // İçerik Alanı
           if (isUnlocked && trad.interpretation != null) ...[
-            // Tam Yorum Metni
+            // Tam Yorum Metni (Editorial Typography)
             Padding(
-              padding: const EdgeInsets.all(18),
-              child: Text(
-                _cleanInterpretation(trad.interpretation!),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  height: 1.7,
-                  color: AppColors.textSilver,
+              padding: const EdgeInsets.all(20),
+              child: AnimatedOpacity(
+                opacity: 1.0,
+                duration: const Duration(milliseconds: 400),
+                child: Text(
+                  _cleanInterpretation(trad.interpretation!),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    height: 1.85,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
           ] else ...[
-            // Kilitli Teaser (Merak Fısıltısı) Alanı
+            // Kilitli Teaser (Fısıltı Alıntısı)
             Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Merak Fısıltısı Kutusu
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: accentColor.withOpacity(0.25),
-                        width: 1,
+                      border: Border(
+                        left: BorderSide(
+                          color: AppColors.moonlight.withValues(alpha: 0.4),
+                          width: 2,
+                        ),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Text('🔮', style: TextStyle(fontSize: 14)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'MERAK FISILTISI (TEASER)',
-                              style: GoogleFonts.cinzel(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                                color: accentColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '"${trad.teaser ?? "Bu geleneğin rüyanızla ilgili gizemli bir uyarısı var..."}"',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13.5,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                            color: AppColors.textPureWhite,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      '"${trad.teaser ?? "Bu geleneğin rüyanızla ilgili gizemli bir uyarısı var..."}"',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w400,
+                        height: 1.6,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
-                  // Eyleme Çağrı Butonu (Rewarded Ad / Unlock)
+                  // Mat Ay Işığı Kilit Açma Butonu
                   Container(
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.neonPurple.withOpacity(0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      color: AppColors.moonlight,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: _isLoading ? null : _handleUnlock,
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: _isLoading
+                            ? null
+                            : () {
+                                HapticFeedback.lightImpact();
+                                _handleUnlock();
+                              },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                           child: _isLoading
                               ? const Center(
                                   child: SizedBox(
-                                    width: 22,
-                                    height: 22,
+                                    width: 18,
+                                    height: 18,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.charcoalBlack),
                                     ),
                                   ),
                                 )
@@ -467,10 +404,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                   children: [
                                     Icon(
                                       subState.isPremium
-                                          ? Icons.lock_open
-                                          : Icons.play_circle_outline_rounded,
-                                      color: AppColors.ancientGold,
-                                      size: 20,
+                                          ? Icons.lock_open_outlined
+                                          : Icons.play_arrow_outlined,
+                                      color: AppColors.charcoalBlack,
+                                      size: 18,
                                     ),
                                     const SizedBox(width: 8),
                                     Flexible(
@@ -479,13 +416,13 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                             ? 'Kadim Analizi Oku (Plus ile Açık)'
                                             : subState.dreamCredits > 0
                                                 ? 'Tam Analizi Oku (1 Reklam veya Jeton)'
-                                                : 'Kadim Analizin Tamamını Oku (1 Kısa Reklam İzle)',
+                                                : 'Kadim Analizi Oku (Kısa Reklam)',
                                         textAlign: TextAlign.center,
-                                        style: GoogleFonts.cinzel(
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.0,
-                                          color: AppColors.textPureWhite,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.5,
+                                          color: AppColors.charcoalBlack,
                                         ),
                                       ),
                                     ),
@@ -498,10 +435,13 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
 
                   // Plus Satın Alım Hatırlatıcısı
                   if (!subState.isPremium) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Center(
                       child: TextButton(
-                        onPressed: () => PaywallModal.show(context),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          PaywallModal.show(context);
+                        },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           visualDensity: VisualDensity.compact,
@@ -509,9 +449,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                         child: Text(
                           'Tüm kilitleri sınırsız aç: Kadim Gezgin Plus',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: AppColors.ancientGold,
+                            fontSize: 11.5,
+                            color: AppColors.mistGrey,
                             decoration: TextDecoration.underline,
+                            decorationColor: AppColors.mistGrey,
                           ),
                         ),
                       ),

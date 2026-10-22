@@ -7,7 +7,7 @@ class HowItWorksModal extends StatelessWidget {
   const HowItWorksModal({super.key});
 
   static void show(BuildContext context) {
-    HapticFeedback.mediumImpact();
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -21,51 +21,45 @@ class HowItWorksModal extends StatelessWidget {
     final steps = [
       {
         'number': '01',
-        'icon': '✍️',
+        'icon': Icons.edit_note_outlined,
         'title': 'Rüya ve Duygu Girişi',
         'subtitle': 'Bilinçaltı Vizyonu',
-        'desc': 'Rüyanızı kendi kelimelerinizle yazarsınız. Sistem duygu frekansını ve seçtiğiniz birincil kadim ekolü (Doğu & İslam, Antik Akdeniz, Psikoloji) kaydeder.',
-        'color': AppColors.neonPurple,
+        'desc': 'Rüyanızı kendi kelimelerinizle deftere aktarırsınız. Sistem seçtiğiniz birincil kadim ekolü (Doğu & İslam, Antik Akdeniz, Psikoloji) kaydeder.',
       },
       {
         'number': '02',
-        'icon': '🔬',
+        'icon': Icons.travel_explore_outlined,
         'title': 'Sembol ve Arketip Ayrıştırma',
-        'subtitle': 'Yapay Zeka Analizi',
-        'desc': 'Metin taranarak kilit nesneler (ör: Okul, Deniz, Anahtar) ve Carl Jung arketipleri (Gölge, Anima, Kahraman) yalın kökleriyle tespit edilir.',
-        'color': const Color(0xFF00E5FF),
+        'subtitle': 'Semantik Çözümleme',
+        'desc': 'Metin taranarak kilit nesneler ve Carl Jung arketipleri (Gölge, Anima, Kahraman) yalın kökleriyle tespit edilir.',
       },
       {
         'number': '03',
-        'icon': '📜',
-        'title': 'Kadim Kitaplık Taraması (RAG)',
+        'icon': Icons.auto_stories_outlined,
+        'title': 'Kadim Kitaplık Taraması',
         'subtitle': 'Bin Yıllık Kaynaklar',
         'desc': 'İbn-i Sîrîn, Artemidorus ve antik Doğu tabletlerinin orijinal metinleri taranır. Sembollerinize denk gelen en isabetli kaynak paragrafları çekilir.',
-        'color': AppColors.ancientGold,
       },
       {
         'number': '04',
-        'icon': '🧠',
-        'title': 'Çift Motorlu Yapay Zeka',
-        'subtitle': 'Google Gemini & DeepSeek',
-        'desc': 'Uydurma tabirler yerine, çekilen kadim metinler yapay zeka tarafından kullanıcının ana dilinde edebi, derin ve akıcı bir bilgelikle yorumlanır.',
-        'color': AppColors.electricLavender,
+        'icon': Icons.psychology_outlined,
+        'title': 'Derinlikli Akıl Yürütme',
+        'subtitle': 'Yapay Zeka Mimarisi',
+        'desc': 'Uydurma tabirler yerine, çekilen kadim metinler edebi, sakin ve derin bir bilgelikle yorumlanır.',
       },
       {
         'number': '05',
-        'icon': '🌌',
+        'icon': Icons.explore_outlined,
         'title': 'Bilinçaltı Aynası ve Pusula',
-        'subtitle': '3 Kadim Ekol Sentezi',
-        'desc': 'Rüya; Doğu & İslam, Antik Akdeniz ve Derinlik Psikolojisi ekolleriyle mühürlenir. Gün boyu hatırlanacak "Günün Pusulası" aforizması sunulur.',
-        'color': const Color(0xFF10B981),
+        'subtitle': '3 Ekolün Sentezi',
+        'desc': 'Rüya; Doğu & İslam, Antik Akdeniz ve Derinlik Psikolojisi ekolleriyle mühürlenir. Gün boyu eşlik edecek içsel bir pusula sunulur.',
       },
       {
         'number': '06',
-        'icon': '𓂀',
-        'title': 'Kadim Tabirci ile Canlı Sohbet',
-        'subtitle': 'Derin Diyalog',
-        'desc': 'Kilitlerini açtığınız tüm kaynaklar ve rüya hafızada saklanır. Tabirciye merak ettiğiniz ayrıntıları sorarak bilinçaltı yolculuğunuza devam edersiniz.',
-        'color': AppColors.ancientGold,
+        'icon': Icons.chat_bubble_outline_rounded,
+        'title': 'Kadim Bilge ile Diyalog',
+        'subtitle': 'Derin Soru & Cevap',
+        'desc': 'Kilitlerini açtığınız tüm kaynaklar ve rüya hafızada saklanır. Merak ettiğiniz ayrıntıları sorarak bilinçaltı yolculuğunuza devam edersiniz.',
       },
     ];
 
@@ -74,19 +68,12 @@ class HowItWorksModal extends StatelessWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.88,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCardElevated,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        color: AppColors.charcoalBlack,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
-          color: AppColors.ancientGold.withValues(alpha: 0.35),
+          color: AppColors.borderSubtle,
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.oledBlack.withValues(alpha: 0.8),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -94,30 +81,27 @@ class HowItWorksModal extends StatelessWidget {
           // Tutma Çubuğu (Drag Handle)
           const SizedBox(height: 12),
           Container(
-            width: 44,
-            height: 4,
+            width: 36,
+            height: 3,
             decoration: BoxDecoration(
-              color: AppColors.textDim.withValues(alpha: 0.4),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
 
           // Başlık Alanı
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+            padding: const EdgeInsets.fromLTRB(24, 18, 20, 16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(9),
                   decoration: BoxDecoration(
-                    color: AppColors.neonPurple.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: AppColors.ancientGold.withValues(alpha: 0.4),
-                      width: 1,
-                    ),
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.borderSubtle),
                   ),
-                  child: const Text('⚡', style: TextStyle(fontSize: 20)),
+                  child: const Icon(Icons.architecture_outlined, color: AppColors.moonlight, size: 20),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -125,27 +109,27 @@ class HowItWorksModal extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ONEIRO NASIL ÇALIŞIR?',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                        'NASIL ÇALIŞIR?',
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                           letterSpacing: 1.5,
-                          color: AppColors.textPureWhite,
+                          color: AppColors.moonlight,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Kadim Bilgelik & Hibrit Yapay Zeka Mimarisi',
+                        'Kadim Bilgelik ve Çift Motorlu Analiz Mimarisi',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          color: AppColors.electricLavender,
+                          fontSize: 12,
+                          color: AppColors.mistGrey,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textDim, size: 22),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.mistGrey, size: 20),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -158,56 +142,42 @@ class HowItWorksModal extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               itemCount: steps.length,
               itemBuilder: (context, index) {
                 final s = steps[index];
                 final isLast = index == steps.length - 1;
-                final color = s['color'] as Color;
+                final iconData = s['icon'] as IconData;
 
                 return IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Sol: Dikey Diyagram Çizgisi ve Düğüm (Node)
+                      // Sol: Dikey Çizgi ve Düğüm (Node)
                       Column(
                         children: [
                           Container(
-                            width: 38,
-                            height: 38,
+                            width: 34,
+                            height: 34,
                             decoration: BoxDecoration(
-                              color: AppColors.oledBlack,
+                              color: AppColors.charcoalSurface,
                               shape: BoxShape.circle,
-                              border: Border.all(color: color, width: 1.5),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: color.withValues(alpha: 0.4),
-                                  blurRadius: 10,
-                                ),
-                              ],
+                              border: Border.all(color: AppColors.borderSubtle),
                             ),
                             child: Center(
-                              child: Text(
-                                s['icon'] as String,
-                                style: const TextStyle(fontSize: 16),
+                              child: Icon(
+                                iconData,
+                                color: AppColors.moonlight,
+                                size: 16,
                               ),
                             ),
                           ),
                           if (!isLast)
                             Expanded(
                               child: Container(
-                                width: 2,
+                                width: 1,
                                 margin: const EdgeInsets.symmetric(vertical: 4),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      color,
-                                      (steps[index + 1]['color'] as Color).withValues(alpha: 0.4),
-                                    ],
-                                  ),
-                                ),
+                                color: AppColors.borderSubtle,
                               ),
                             ),
                         ],
@@ -218,12 +188,12 @@ class HowItWorksModal extends StatelessWidget {
                       Expanded(
                         child: Container(
                           margin: EdgeInsets.only(bottom: isLast ? 0 : 16),
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceCard,
-                            borderRadius: BorderRadius.circular(16),
+                            color: AppColors.charcoalSurface,
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: color.withValues(alpha: 0.25),
+                              color: AppColors.borderSubtle,
                               width: 1,
                             ),
                           ),
@@ -234,10 +204,10 @@ class HowItWorksModal extends StatelessWidget {
                                 children: [
                                   Text(
                                     s['number'] as String,
-                                    style: GoogleFonts.cinzel(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: color,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.warmSand,
                                       letterSpacing: 1.0,
                                     ),
                                   ),
@@ -245,31 +215,31 @@ class HowItWorksModal extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       s['title'] as String,
-                                      style: GoogleFonts.cinzel(
-                                        fontSize: 13.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPureWhite,
+                                      style: GoogleFonts.cormorantGaramond(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.moonlight,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 3),
                               Text(
                                 s['subtitle'] as String,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textDim,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.mistGrey,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 s['desc'] as String,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  height: 1.45,
-                                  color: AppColors.textSilver,
+                                  fontSize: 12.5,
+                                  height: 1.5,
+                                  color: AppColors.mistGrey,
                                 ),
                               ),
                             ],
@@ -285,7 +255,7 @@ class HowItWorksModal extends StatelessWidget {
 
           // Alt Kapat Butonu
           Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, MediaQuery.of(context).padding.bottom + 12),
+            padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).padding.bottom + 14),
             child: SizedBox(
               width: double.infinity,
               height: 48,
@@ -295,18 +265,20 @@ class HowItWorksModal extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.ancientGold,
-                  foregroundColor: Colors.black,
+                  backgroundColor: AppColors.moonlight,
+                  foregroundColor: AppColors.charcoalBlack,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
-                  'ANLADIM • BİLİNÇALTINI KEŞFET',
-                  style: GoogleFonts.cinzel(
+                  'GÜNLÜĞE DÖN',
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                    color: AppColors.charcoalBlack,
                   ),
                 ),
               ),

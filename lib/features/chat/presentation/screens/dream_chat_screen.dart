@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../dream/domain/models/dream_interpretation.dart';
 import '../providers/chat_provider.dart';
 
+/// Minimalist Edebi Diyalog & Teemmül Ekranı (Chatbot/Baloncuk Görünümü Yoktur)
 class DreamChatScreen extends ConsumerStatefulWidget {
   final DreamInterpretation interpretation;
 
@@ -31,6 +32,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
 
     // Sistem promptunu ve rüya bağlamını hazırla
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      HapticFeedback.lightImpact();
       ref.read(chatProvider.notifier).initialize(widget.interpretation);
     });
   }
@@ -76,313 +78,224 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
       }
     });
 
+    final symbolsSnippet = widget.interpretation.symbols.take(3).join(' • ');
+
     return Scaffold(
-      backgroundColor: AppColors.oledBlack,
+      backgroundColor: AppColors.charcoalBlack,
       appBar: AppBar(
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).pop();
+          },
         ),
-        title: Row(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppColors.primaryGradient,
-                    border: Border.all(color: AppColors.ancientGold, width: 1.2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.neonPurple.withOpacity(0.4),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text('𓂀', style: TextStyle(fontSize: 18, color: AppColors.ancientGold)),
-                  ),
-                ),
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10B981), // Astral online yeşili
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.oledBlack, width: 1.5),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            // Başlık & Durum
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Kadim Rüyabilimci',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppColors.textPureWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Bilinçaltı frekansı aktif • Derin Sohbet',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: AppColors.electricLavender,
-                    ),
-                  ),
-                ],
+            Text(
+              'TEEMMÜL & SÖYLEŞİ',
+              style: GoogleFonts.cormorantGaramond(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+                color: AppColors.moonlight,
               ),
             ),
+            if (symbolsSnippet.isNotEmpty)
+              Text(
+                symbolsSnippet,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.dimMist,
+                ),
+              ),
           ],
         ),
       ),
       body: Column(
         children: [
-          // Bağlam İpucu Barı (Hangi rüya konuşuluyor - Modern Glassmorphic Pill)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceCardElevated.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.ancientGold.withValues(alpha: 0.25),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.auto_awesome, color: AppColors.ancientGold, size: 14),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Aktif Bağlam: ${widget.interpretation.symbols.isNotEmpty ? widget.interpretation.symbols.take(3).join(', ') : 'Rüya Detayları'}',
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSilver,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.neonPurple.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'Tüm Kaynaklar Aktif',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: AppColors.ancientGold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const Divider(color: AppColors.borderSubtle, height: 1),
 
-          // Mesaj Listesi (WhatsApp benzeri, OLED Black temalı)
+          // Edebi Diyalog Listesi (Baloncuksuz, Açık Metin)
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
               itemCount: chatState.messages.length + (chatState.isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == chatState.messages.length && chatState.isTyping) {
-                  return _buildTypingBubble();
+                  return _buildTypingIndicator();
                 }
                 final message = chatState.messages[index];
-                return _buildMessageBubble(message);
+                return _buildDialogueEntry(message);
               },
             ),
           ),
 
-          // Hızlı Soru Önerileri (Sohbet başında kullanıcıya ilham veren pratik butonlar)
+          // Hızlı Soru Önerileri (Sade Çipler)
           if (chatState.messages.length <= 3)
             _buildSuggestionsBar(),
 
-          // Alt Mesaj Gönderme Çubuğu
+          // Alt Metin Giriş Çubuğu
           _buildInputBar(),
         ],
       ),
     );
   }
 
-  Widget _buildMessageBubble(dynamic message) {
+  Widget _buildDialogueEntry(dynamic message) {
     final isUser = message.isUser as bool;
     final timeStr = DateFormat('HH:mm').format(message.timestamp as DateTime);
 
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.78,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF22173B) : AppColors.surfaceCard,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(isUser ? 18 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 18),
-          ),
-          border: Border.all(
-            color: isUser
-                ? AppColors.neonPurple.withOpacity(0.4)
-                : AppColors.ancientGold.withOpacity(0.25),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isUser
-                  ? AppColors.neonPurple.withOpacity(0.08)
-                  : AppColors.ancientGold.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!isUser) ...[
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Konuşmacı Başlığı
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('✦', style: TextStyle(color: AppColors.ancientGold, fontSize: 10)),
-                  const SizedBox(width: 4),
+                  Icon(
+                    isUser ? Icons.edit_note_outlined : Icons.auto_stories_outlined,
+                    size: 13,
+                    color: isUser ? AppColors.mistGrey : AppColors.moonlight,
+                  ),
+                  const SizedBox(width: 6),
                   Text(
-                    'ONEIRO BİLGE',
-                    style: GoogleFonts.cinzel(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppColors.ancientGold,
-                    ),
+                    isUser ? 'SİZ' : 'KADİM REHBER',
+                    style: isUser
+                        ? GoogleFonts.plusJakartaSans(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                            color: AppColors.mistGrey,
+                          )
+                        : GoogleFonts.cormorantGaramond(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.4,
+                            color: AppColors.moonlight,
+                          ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-            ],
-            Text(
-              message.text as String,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                height: 1.55,
-                color: AppColors.textPureWhite,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
+              Text(
                 timeStr,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
-                  color: AppColors.textDim,
+                  color: AppColors.dimMist,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Metin Gövdesi (Kullanıcı için ince sol çizgi, bot için açık edebi paragraf)
+          if (isUser)
+            Container(
+              padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              child: Text(
+                message.text as String,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14.5,
+                  height: 1.75,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            )
+          else
+            Text(
+              message.text as String,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                height: 1.85,
+                color: AppColors.textSecondary,
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTypingBubble() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.neonPurple.withOpacity(0.2)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 12,
-              height: 12,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
-              ),
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.5,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.moonlight),
             ),
-            const SizedBox(width: 10),
-            Text(
-              'Kadim semboller sorgulanıyor...',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: AppColors.textMuted,
-              ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'Kadim kaynaklar taranıyor...',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppColors.mistGrey,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSuggestionsBar() {
     final suggestions = [
-      '🔮 Açtığım kaynakların ortak mesajı ne?',
-      '🌌 Bu rüyadaki sembollerin kökeni nedir?',
-      '🧭 Günün pusulası bana ne öğütlüyor?',
+      'Bu sembollerin kadim kökeni nedir?',
+      'Rüyadaki hisler neye işaret ediyor?',
+      'Bilinçaltım neyi entegre etmemi istiyor?',
     ];
 
     return Container(
-      height: 38,
-      margin: const EdgeInsets.only(bottom: 6),
+      height: 40,
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: suggestions.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final s = suggestions[index];
-          return ActionChip(
-            label: Text(
-              s,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                color: AppColors.ancientGold,
-                fontWeight: FontWeight.w500,
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              ref.read(chatProvider.notifier).sendMessage(s);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.charcoalSurface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.borderSubtle, width: 1),
+              ),
+              child: Text(
+                s,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
-            backgroundColor: AppColors.surfaceCardElevated,
-            side: BorderSide(
-              color: AppColors.borderGold.withValues(alpha: 0.6),
-              width: 1,
-            ),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              // Baştaki emojiyi temizleyerek metne aktar ve gönder
-              final cleanText = s.substring(2).trim();
-              _messageController.text = cleanText;
-              _sendMessage();
-            },
           );
         },
       ),
@@ -391,14 +304,9 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
 
   Widget _buildInputBar() {
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 10,
-        bottom: MediaQuery.of(context).padding.bottom + 10,
-      ),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).viewPadding.bottom + 12),
       decoration: const BoxDecoration(
-        color: AppColors.surfaceDark,
+        color: AppColors.charcoalBlack,
         border: Border(
           top: BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
@@ -407,57 +315,47 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
         children: [
           Expanded(
             child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.surfaceInput,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: AppColors.neonPurple.withOpacity(0.3),
-                  width: 1,
-                ),
+                color: AppColors.charcoalSurface,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: AppColors.borderSubtle, width: 1),
               ),
               child: TextField(
                 controller: _messageController,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: AppColors.textPureWhite,
+                  fontSize: 14.5,
+                  color: AppColors.textPrimary,
                 ),
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
                 decoration: InputDecoration(
                   hintText: 'Rüya hakkında bir soru sorun...',
                   hintStyle: GoogleFonts.plusJakartaSans(
-                    color: AppColors.textDim,
-                    fontSize: 13,
+                    color: AppColors.dimMist,
+                    fontSize: 13.5,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
+                  filled: false,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+                onSubmitted: (_) => _sendMessage(),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          // Gönder Butonu
           Container(
             decoration: const BoxDecoration(
+              color: AppColors.moonlight,
               shape: BoxShape.circle,
-              gradient: AppColors.primaryGradient,
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: _sendMessage,
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Icon(
-                    Icons.send_rounded,
-                    color: AppColors.textPureWhite,
-                    size: 20,
-                  ),
-                ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_upward_rounded,
+                color: AppColors.charcoalBlack,
+                size: 20,
               ),
+              onPressed: _sendMessage,
             ),
           ),
         ],

@@ -22,36 +22,36 @@ class DreamHistoryScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Başlık
+              // Başlık (Editorial Journal Arşivi)
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.neonPurple.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.neonPurple.withOpacity(0.3)),
+                      color: AppColors.charcoalSurface,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.borderSubtle),
                     ),
-                    child: const Icon(Icons.history_edu_rounded, color: AppColors.ancientGold, size: 22),
+                    child: const Icon(Icons.history_edu_outlined, color: AppColors.moonlight, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'KADİM GÜNLÜK',
-                        style: GoogleFonts.cinzel(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: AppColors.textPureWhite,
+                        'RÜYA ARŞİVİ',
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.5,
+                          color: AppColors.moonlight,
                         ),
                       ),
                       Text(
-                        'Cihazınızda gizli tutulan kadim rüya arşiviniz',
+                        'Kişisel rüya günlüğünüz ve çözümlenen kayıtlar',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: AppColors.textDim,
+                          color: AppColors.mistGrey,
                         ),
                       ),
                     ],
@@ -163,29 +163,29 @@ class DreamHistoryScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.neonPurple.withOpacity(0.1),
-              border: Border.all(color: AppColors.neonPurple.withOpacity(0.3)),
+              color: AppColors.charcoalSurface,
+              border: Border.all(color: AppColors.borderSubtle),
             ),
-            child: const Icon(Icons.auto_stories_outlined, color: AppColors.ancientGold, size: 36),
+            child: const Icon(Icons.auto_stories_outlined, color: AppColors.moonlight, size: 32),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             'Henüz Mühürlenmiş Bir Rüya Yok',
-            style: GoogleFonts.cinzel(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPureWhite,
+            style: GoogleFonts.cormorantGaramond(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.moonlight,
             ),
           ),
           const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Gördüğünüz rüyaları ana ekranda kaleme alın, kadim bilge tabirini günlüğünüze mühürlesin.',
+              'Gördüğünüz rüyaları ana ekranda kaleme alın, çözümlemeler günlüğünüze mühürlensin.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
-                color: AppColors.textMuted,
+                color: AppColors.mistGrey,
                 height: 1.5,
               ),
             ),
@@ -200,30 +200,30 @@ class DreamHistoryScreen extends StatelessWidget {
       {
         'title': 'Karanlık Deniz ve Altın Pusula',
         'date': '14 Ekim 2026',
-        'emotion': 'Lucid ✨',
+        'emotion': 'Duru Bilinç',
         'preview': 'Uçsuz bucaksız siyah bir denizdeydim, elimde parlayan bir pusula vardı...',
-        'symbols': ['Deniz', 'Pusula', 'Yıldız'],
+        'symbols': ['Deniz', 'Pusula', 'Kuzey Yıldızı'],
       },
       {
         'title': 'Eski Bir Evde Bilinmeyen Bir Kapı',
         'date': '12 Ekim 2026',
-        'emotion': 'Karışık 🌀',
+        'emotion': 'Arayış',
         'preview': 'Çocukluğumun geçtiği evin koridorunda daha önce hiç görmediğim ahşap bir kapı belirdi...',
-        'symbols': ['Kapı', 'Anahtar', 'Koridor'],
+        'symbols': ['Kapı', 'Anahtar', 'Geçmiş'],
       },
       {
         'title': 'Uçurum Kenarında Beyaz Bir Kuzgun',
         'date': '09 Ekim 2026',
-        'emotion': 'Huzurlu 🕊️',
+        'emotion': 'Sükunet',
         'preview': 'Yüksek bir kayalıkta rüzgarı hissediyordum, yanıma beyaz tüylü bir kuş kondu...',
-        'symbols': ['Kuzgun', 'Rüzgar', 'Uçurum'],
+        'symbols': ['Kuzgun', 'Rüzgar', 'İçsel Rehber'],
       },
     ];
 
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       itemCount: sampleHistory.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final item = sampleHistory[index];
         return _buildDreamCard(
@@ -237,7 +237,7 @@ class DreamHistoryScreen extends StatelessWidget {
             HapticFeedback.lightImpact();
             final mockInterpretation = DreamInterpretation.mockFromRequest(
               dreamText: item['preview'] as String,
-              emotion: (item['emotion'] as String).split(' ').first,
+              emotion: item['emotion'] as String,
             );
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -262,10 +262,10 @@ class DreamHistoryScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          borderRadius: BorderRadius.circular(18),
+          color: AppColors.charcoalSurface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: AppColors.borderSubtle,
             width: 1,
@@ -281,34 +281,36 @@ class DreamHistoryScreen extends StatelessWidget {
                   date,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
-                    color: AppColors.textDim,
+                    letterSpacing: 0.5,
+                    color: AppColors.mistGrey,
                   ),
                 ),
                 if (emotion.isNotEmpty && !emotion.toLowerCase().contains('mistik'))
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.neonPurple.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderSubtle),
                     ),
                     child: Text(
                       emotion,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.lightLilac,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.moonlight,
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               title,
-              style: GoogleFonts.cinzel(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPureWhite,
+              style: GoogleFonts.cormorantGaramond(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.moonlight,
               ),
             ),
             const SizedBox(height: 6),
@@ -318,20 +320,20 @@ class DreamHistoryScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
-                color: AppColors.textMuted,
-                height: 1.4,
+                color: AppColors.mistGrey,
+                height: 1.5,
               ),
             ),
             if (symbols.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
-                spacing: 6,
+                spacing: 8,
                 children: symbols.map((sym) {
                   return Text(
                     '#$sym',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
-                      color: AppColors.ancientGold.withOpacity(0.8),
+                      color: AppColors.warmSand.withValues(alpha: 0.8),
                     ),
                   );
                 }).toList(),

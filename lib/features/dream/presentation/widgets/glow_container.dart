@@ -31,12 +31,12 @@ class GlowContainer extends StatelessWidget {
         color: backgroundColor ?? AppColors.surfaceInput,
         borderRadius: effectiveRadius,
         border: Border.all(
-          color: glowColor.withOpacity(0.4),
+          color: glowColor.withValues(alpha: 0.4),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: glowColor.withOpacity(0.18),
+            color: glowColor.withValues(alpha: 0.18),
             blurRadius: blurRadius,
             spreadRadius: spreadRadius,
           ),

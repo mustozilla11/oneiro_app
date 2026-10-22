@@ -152,28 +152,13 @@ class _MainPagerScreenState extends State<MainPagerScreen> {
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeOutCubic,
                             margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: isActive ? 22 : 7,
-                            height: 7,
+                            width: isActive ? 20 : 6,
+                            height: 6,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              gradient: isActive
-                                  ? const LinearGradient(
-                                      colors: [
-                                        Color(0xFF00E5FF), // Canlı Elektrik Camgöbeği
-                                        Color(0xFF0091EA), // Derin Parlak Mavi
-                                      ],
-                                    )
-                                  : null,
-                              color: isActive ? null : AppColors.borderSubtle,
-                              boxShadow: isActive
-                                  ? [
-                                      BoxShadow(
-                                        color: const Color(0xFF00E5FF).withValues(alpha: 0.7),
-                                        blurRadius: 10,
-                                        spreadRadius: 1.5,
-                                      ),
-                                    ]
-                                  : null,
+                              color: isActive
+                                  ? AppColors.moonlight
+                                  : Colors.white.withValues(alpha: 0.15),
                             ),
                           ),
                         );
