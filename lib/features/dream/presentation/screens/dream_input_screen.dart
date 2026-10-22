@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../providers/dream_provider.dart';
-import '../widgets/glow_container.dart';
+import '../widgets/antigravity_dream_box.dart';
 import 'dream_loading_screen.dart';
 
 class DreamInputScreen extends ConsumerStatefulWidget {
@@ -85,7 +85,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
     final subState = ref.watch(userSubscriptionProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.oledBlack,
+      backgroundColor: AppColors.amazonDarkSlate,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -227,7 +227,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 1.5,
-                        color: AppColors.electricLavender,
+                        color: AppColors.amazonAmberLight,
                       ),
                     ),
                     ValueListenableBuilder<TextEditingValue>(
@@ -239,7 +239,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                           '$words kelime',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
-                            color: AppColors.textDim,
+                            color: AppColors.textWarmMuted,
                           ),
                         );
                       },
@@ -247,16 +247,12 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // Genişleyen Rüya Giriş Penceresi
-              GlowContainer(
-                glowColor: hasFocus ? AppColors.neonPurple : AppColors.deepViolet.withOpacity(0.6),
-                blurRadius: hasFocus ? 22 : 10,
-                spreadRadius: hasFocus ? 1.5 : 0.5,
-                borderRadius: BorderRadius.circular(18),
-                backgroundColor: AppColors.surfaceInput,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              // Antigravity (Yerçekimsiz Süzülen, İçi ve Dışı Farklı, Değişen Kenarlıklı) Rüya Kutusu
+              AntigravityDreamBox(
+                isFocused: hasFocus,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: TextField(
                   controller: _textController,
                   focusNode: _focusNode,
@@ -266,13 +262,13 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                   textInputAction: TextInputAction.newline,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15.5,
-                    color: AppColors.textPureWhite,
+                    color: AppColors.textCreamWhite, // Sabah gözünü yakmayan ipeksi krem
                     height: 1.6,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Dün gece ne gördünüz? Hatırladığınız tüm mekanları, kişileri, renkleri ve sembolleri özgürce buraya yazın...',
                     hintStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.textDim,
+                      color: AppColors.textWarmMuted,
                       fontSize: 14.5,
                       height: 1.5,
                     ),
@@ -287,19 +283,19 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
-              // "Tabiri Çöz" Butonu
+              // Amazon Sıcak Kehribar "Tabiri Çöz" Butonu
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    gradient: AppColors.amazonButtonGradient,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.neonPurple.withOpacity(0.4),
-                        blurRadius: 20,
+                        color: AppColors.amazonAmber.withValues(alpha: 0.38),
+                        blurRadius: 22,
                         offset: const Offset(0, 6),
                       ),
                     ],
@@ -316,7 +312,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                           children: [
                             const Icon(
                               Icons.auto_awesome,
-                              color: AppColors.ancientGold,
+                              color: AppColors.amazonDarkSlate,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
@@ -326,7 +322,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2.0,
-                                color: AppColors.textPureWhite,
+                                color: AppColors.amazonDarkSlate,
                               ),
                             ),
                           ],

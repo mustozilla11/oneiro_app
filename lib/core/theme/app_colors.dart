@@ -69,4 +69,46 @@ class AppColors {
       Color(0xFF0F0B21),
     ],
   );
+
+  // --- Amazon & Sabah Konforu Paleti (Morning-Comfort Antigravity) ---
+  // Gözü yormayan derin kömür zemin (saf zifiri siyah veya beyaz değil)
+  static const Color amazonDarkSlate = Color(0xFF0D1117);
+  // Kutunun içi: Zeminden ayrışan, derin mat gece safiri
+  static const Color amazonBoxFill = Color(0xFF151C28);
+  // Odaklandığında kutu içi
+  static const Color amazonBoxFocused = Color(0xFF1A2332);
+  // Amazon sıcak kehribarı (gözü yakmayan sıcak vurgu)
+  static const Color amazonAmber = Color(0xFFFF9900);
+  static const Color amazonAmberLight = Color(0xFFFFB84D);
+  static const Color amazonAmberGlow = Color(0x33FF9900);
+  // Şafak indigosu & lavanta (border geçişi için)
+  static const Color dawnIndigo = Color(0xFF4F46E5);
+  static const Color dawnViolet = Color(0xFF7C3AED);
+  // Sabah gözünü yormayan yumuşak ipeksi krem metinler
+  static const Color textCreamWhite = Color(0xFFECEFF4);
+  static const Color textWarmMuted = Color(0xFF8C96A5);
+
+  // Değişen / Akan Kutu Kenarlık Gradyanı (Antigravity Floating Border)
+  static const LinearGradient antigravityBorderGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFFF9900), // Amazon Kehribar
+      Color(0xFFFFB84D), // Sıcak Altın
+      Color(0xFF818CF8), // İpeksi İndigo
+      Color(0xFF4F46E5), // Gece Mavisi
+    ],
+    stops: [0.0, 0.35, 0.7, 1.0],
+  );
+
+  // Amazon Sıcak Kehribar Buton Gradyanı
+  static const LinearGradient amazonButtonGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFFF9900),
+      Color(0xFFFF8500),
+      Color(0xFFE67300),
+    ],
+  );
 }
