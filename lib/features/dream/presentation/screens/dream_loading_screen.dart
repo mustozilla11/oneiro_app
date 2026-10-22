@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/oneiro_logo.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
 import '../../domain/models/dream_interpretation.dart';
 import '../providers/dream_provider.dart';
@@ -23,19 +24,28 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
   final List<Map<String, String>> _progressiveSteps = const [
     {
-      'title': 'Kadim yazmalar ve semboller taranıyor...',
-      'subtitle': 'İbn-i Sîrîn ve Doğu tabletleri aralanıyor',
-      'icon': '📜',
+      'category': 'SEMBOL & DUYGU ANALİZİ',
+      'title': 'Rüyanızdaki anahtar semboller taranıyor...',
+      'subtitle': 'Metninizdeki nesneler, olaylar ve gizli temalar ayrıştırılıyor',
+      'icon': '🔍',
     },
     {
-      'title': 'Doğu ve Batı arketipleri karşılaştırılıyor...',
-      'subtitle': 'Artemidorus ve Carl Jung hafızası taranıyor',
-      'icon': '🏛️',
+      'category': 'BİNLERCE KİTAP TARAMASI',
+      'title': 'Binlerce sayfalık rüya kitapları taranıyor...',
+      'subtitle': 'İbn-i Sîrîn, Nablûsî ve kadim kaynaklarda rüyanıza uygun cümleler aranıyor',
+      'icon': '📚',
     },
     {
-      'title': 'Bilinçaltı aynası aralanıyor...',
-      'subtitle': 'Rüyanızın gizli işaretleri mühürleniyor',
-      'icon': '🌌',
+      'category': 'BİLİNÇALTI & PSİKOLOJİ',
+      'title': 'Bilinçaltı ve psikoloji kaynaklarıyla eşleştiriliyor...',
+      'subtitle': 'Carl Jung arketip analiziyle sembollerin zihninizdeki karşılığı çözülüyor',
+      'icon': '🧠',
+    },
+    {
+      'category': 'KİŞİYE ÖZEL TABİR',
+      'title': 'Size özel rüya tabiri ve yanıt hazırlanıyor...',
+      'subtitle': 'Kitaplardan toplanan anlamlar derlenerek kişiselleştirilmiş yorum oluşturuluyor',
+      'icon': '✨',
     },
   ];
 
@@ -60,7 +70,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
   }
 
   void _startProgressiveSteps() {
-    _stepTimer = Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+    _stepTimer = Timer.periodic(const Duration(milliseconds: 2200), (timer) {
       if (mounted) {
         setState(() {
           _currentStepIndex = (_currentStepIndex + 1) % _progressiveSteps.length;
@@ -126,7 +136,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Mistik Dönen Astral Çember
+              // Mistik Dönen Astral Çember & Merkez Oneiro Amblemi
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -152,8 +162,8 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
                   // Dönen Dış İnce Çember
                   SizedBox(
-                    width: 120,
-                    height: 120,
+                    width: 124,
+                    height: 124,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.8,
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
@@ -161,21 +171,49 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                     ),
                   ),
 
-                  // Merkez Mistik İkon
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    child: Text(
-                      currentStep['icon']!,
-                      key: ValueKey<int>(_currentStepIndex),
-                      style: const TextStyle(fontSize: 42),
-                    ),
-                  ),
+                  // Merkez Mistik Oneiro Logosu
+                  const OneiroLogo(size: 82, animate: true),
                 ],
               ),
 
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
-              // Dinamik Mistik Başlık (Aşama yazısı olmadan doğrudan başlık)
+              // Adım Rozeti (Örn: 🔍 SEMBOL & DUYGU ANALİZİ)
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                child: Container(
+                  key: ValueKey<String>(currentStep['category']!),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.ancientGold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.ancientGold.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(currentStep['icon']!, style: const TextStyle(fontSize: 13)),
+                      const SizedBox(width: 8),
+                      Text(
+                        currentStep['category']!,
+                        style: GoogleFonts.cinzel(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          color: AppColors.ancientGold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // Dinamik Başlık (Aşama yazısı olmadan doğrudan başlık)
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: Text(
@@ -183,9 +221,9 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                   key: ValueKey<String>(currentStep['title']!),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cinzel(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.8,
                     color: AppColors.textPureWhite,
                     shadows: [
                       Shadow(
@@ -199,7 +237,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
               const SizedBox(height: 8),
 
-              // Alt Başlık / Fısıltı
+              // Alt Başlık / Net Açıklama
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: Text(
@@ -207,19 +245,19 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                   key: ValueKey<String>(currentStep['subtitle']!),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: AppColors.textMuted,
-                    height: 1.4,
+                    fontSize: 12.5,
+                    color: AppColors.textSilver,
+                    height: 1.45,
                   ),
                 ),
               ),
 
               const SizedBox(height: 36),
 
-              // İlerleme Çubukları (3 Aşamalı Gösterge)
+              // İlerleme Çubukları (Dinamik Aşamalı Gösterge)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (idx) {
+                children: List.generate(_progressiveSteps.length, (idx) {
                   final isActive = idx == _currentStepIndex;
                   final isDone = idx < _currentStepIndex;
                   return AnimatedContainer(
