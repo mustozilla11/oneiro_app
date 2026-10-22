@@ -23,19 +23,16 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
   final List<Map<String, String>> _progressiveSteps = const [
     {
-      'step': '1. AŞAMA',
       'title': 'Kadim yazmalar ve semboller taranıyor...',
       'subtitle': 'İbn-i Sîrîn ve Doğu tabletleri aralanıyor',
       'icon': '📜',
     },
     {
-      'step': '2. AŞAMA',
       'title': 'Doğu ve Batı arketipleri karşılaştırılıyor...',
       'subtitle': 'Artemidorus ve Carl Jung hafızası taranıyor',
       'icon': '🏛️',
     },
     {
-      'step': '3. AŞAMA',
       'title': 'Bilinçaltı aynası aralanıyor...',
       'subtitle': 'Rüyanızın gizli işaretleri mühürleniyor',
       'icon': '🌌',
@@ -140,12 +137,12 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.neonPurple.withOpacity(0.3),
+                          color: AppColors.neonPurple.withValues(alpha: 0.3),
                           blurRadius: 40,
                           spreadRadius: 2,
                         ),
                         BoxShadow(
-                          color: AppColors.ancientGold.withOpacity(0.15),
+                          color: AppColors.ancientGold.withValues(alpha: 0.15),
                           blurRadius: 60,
                           spreadRadius: 4,
                         ),
@@ -160,7 +157,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                     child: CircularProgressIndicator(
                       strokeWidth: 1.8,
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.neonPurple),
-                      backgroundColor: AppColors.ancientGold.withOpacity(0.2),
+                      backgroundColor: AppColors.ancientGold.withValues(alpha: 0.2),
                     ),
                   ),
 
@@ -178,35 +175,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
 
               const SizedBox(height: 36),
 
-              // Aşama Rozeti
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Container(
-                  key: ValueKey<int>(_currentStepIndex),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.neonPurple.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.ancientGold.withOpacity(0.35),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    currentStep['step']!,
-                    style: GoogleFonts.cinzel(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2.0,
-                      color: AppColors.ancientGold,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Dinamik Aşamalı Mistik Başlık
+              // Dinamik Mistik Başlık (Aşama yazısı olmadan doğrudan başlık)
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: Text(
@@ -220,7 +189,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                     color: AppColors.textPureWhite,
                     shadows: [
                       Shadow(
-                        color: AppColors.neonPurple.withOpacity(0.5),
+                        color: AppColors.neonPurple.withValues(alpha: 0.5),
                         blurRadius: 16,
                       ),
                     ],
@@ -268,7 +237,7 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
                       boxShadow: isActive
                           ? [
                               BoxShadow(
-                                color: AppColors.ancientGold.withOpacity(0.5),
+                                color: AppColors.ancientGold.withValues(alpha: 0.5),
                                 blurRadius: 8,
                               ),
                             ]
