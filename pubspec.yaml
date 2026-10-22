@@ -39,6 +39,8 @@ dependencies:
 
   # In-App Purchases & Subscriptions (RevenueCat)
   purchases_flutter: ^8.1.0
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:

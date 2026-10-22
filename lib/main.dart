@@ -7,6 +7,7 @@ import 'core/theme/theme.dart';
 import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
 import 'features/home/presentation/screens/main_pager_screen.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
 import 'services/subscription_service.dart';
 
 void main() async {
@@ -46,6 +47,13 @@ void main() async {
     await AdService.instance.initialize();
   } catch (e) {
     debugPrint('[AdService] Başlatma uyarısı: $e');
+  }
+
+  // 5. Yerel Sabah Rüya Hatırlatıcı Bildirimlerini Başlat & Sırala
+  try {
+    await NotificationService.instance.initialize();
+  } catch (e) {
+    debugPrint('[NotificationService] Başlatma uyarısı: $e');
   }
 
   runApp(
