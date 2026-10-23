@@ -41,7 +41,7 @@ class _DreamResultScreenState extends ConsumerState<DreamResultScreen> {
   void _shareInterpretation(DreamInterpretation currentItem) {
     HapticFeedback.lightImpact();
     final text = '''
-Oneiro | Rüya Günlüğü Çözümlemesi
+DreamApp | Rüya Günlüğü Çözümlemesi
 ━━━━━━━━━━━━━━━━━━━━━
 Baskın Semboller: ${currentItem.symbols.join(', ')}
 
@@ -54,7 +54,7 @@ ${currentItem.primaryTradition.interpretation ?? ''}
 Günün İçgörüsü:
 "${currentItem.freeAnalysis.gununPusulasi}"
 
-Oneiro ile rüyalarınızın ardındaki anlamı keşfedin.
+DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 ''';
     Share.share(text);
   }

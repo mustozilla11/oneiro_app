@@ -76,7 +76,7 @@ class OneiroApp extends ConsumerWidget {
     final currentThemeMode = ref.watch(themeProvider);
 
     return MaterialApp(
-      title: 'Oneiro / Rüya Tabiri',
+      title: 'DreamApp',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.getTheme(currentThemeMode),
       home: AuthGate(key: ValueKey(currentThemeMode)),

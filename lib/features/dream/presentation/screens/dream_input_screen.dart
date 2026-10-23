@@ -12,7 +12,7 @@ import '../../../subscription/presentation/widgets/paywall_modal.dart';
 import '../providers/dream_provider.dart';
 import 'dream_loading_screen.dart';
 
-/// Çoklu Tema ve Seçili Ekole Göre Dinamik Ambiyanslı Rüya Günlüğü Giriş Sayfası
+/// Derli Toplu, Sıkı ve Seçili Kaynağa Göre Canlı Çerçeveli Rüya Günlüğü Ana Ekranı
 class DreamInputScreen extends ConsumerStatefulWidget {
   const DreamInputScreen({super.key});
 
@@ -119,11 +119,11 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
   String _formatCurrentDate() {
     final now = DateTime.now();
     final months = [
-      'OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN',
-      'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'
+      'OCA', 'ŞUB', 'MAR', 'NİS', 'MAY', 'HAZ',
+      'TEM', 'AĞU', 'EYL', 'EKİ', 'KAS', 'ARA'
     ];
     final days = [
-      'PAZARTESİ', 'SALI', 'ÇARŞAMBA', 'PERŞEMBE', 'CUMA', 'CUMARTESİ', 'PAZAR'
+      'PZT', 'SAL', 'ÇAR', 'PER', 'CUM', 'CMT', 'PAZ'
     ];
     return '${now.day} ${months[now.month - 1]} • ${days[now.weekday - 1]}';
   }
@@ -139,54 +139,50 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Üst Meta Veri Çubuğu (Tarih + Tam Sayfa Tema Değiştirici + Kredi)
+              // 1. Üst Kompakt Bar (DreamApp + Tarih + Tema + Hak)
               _buildEditorialMetaBar(subState, activeTheme),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
 
-              // 2. Başlık ve Rehber Cümle (Yalnızca aktif temanın renginde)
+              // 2. Sıkı Başlık & Kısa Rehber Cümle
               Text(
                 'Bu gece hangi eşikten geçtiniz?',
                 style: AppTheme.headingStyle(
-                  fontSize: 30,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
+                  letterSpacing: 0.4,
                   color: AppColors.moonlight,
-                  height: 1.25,
+                  height: 1.18,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               Text(
-                'Zihninizin derinliklerinde kalan imgeleri, mekanları ve uyandığınızda hissettiğiniz yankıyı serbestçe kaleme alın.',
+                'Gördüğünüz imgeleri, mekanları ve uyandığınızda kalan hissi kısaca not edin.',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  height: 1.6,
+                  fontSize: 12.5,
+                  height: 1.4,
                   color: AppColors.mistGrey,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
 
               // 3. Rüya Yazma Kutusu (Sadece border rengi seçili kaynağa göre açıktan koyuya sürekli değişir)
               _buildJournalEditorCanvas(selectedTradition),
 
-              const SizedBox(height: 28),
-              Divider(color: AppColors.borderSubtle, height: 1),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
 
-              // 4. Öncelikli Ekol Seçimi (Doğu Altın, Akdeniz Mavi, Psikoloji Mor)
+              // 4. Öncelikli Kaynak Seçimi (Doğu Altın, Akdeniz Mavi, Psikoloji Mor)
               _buildTraditionSelector(selectedTradition),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 14),
 
               // 5. Aktif Temaya Uyumlu "RÜYAYI ÇÖZÜMLE" Butonu
               _buildSubmitButton(),
-
-              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -199,7 +195,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     OneiroThemeMode activeTheme,
   ) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppColors.borderSubtle, width: 1),
@@ -208,13 +204,29 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Tarih ve Ay Fazı
+          // Marka Rozeti & Tarih
           Flexible(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('🌘', style: TextStyle(fontSize: 13)),
-                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 0.8),
+                  ),
+                  child: Text(
+                    'DreamApp',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 7),
                 Flexible(
                   child: Text(
                     _formatCurrentDate(),
@@ -223,7 +235,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 1.0,
+                      letterSpacing: 0.8,
                       color: AppColors.mistGrey,
                     ),
                   ),
@@ -239,10 +251,10 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               GestureDetector(
                 onTap: () => ThemeSelectorBar.showQuickModal(context),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.charcoalSurface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: AppColors.borderMoonlight, width: 1),
                   ),
                   child: Row(
@@ -250,14 +262,14 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                     children: [
                       Icon(
                         Icons.palette_outlined,
-                        size: 13,
+                        size: 12,
                         color: AppColors.moonlight,
                       ),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
                       Text(
                         activeTheme.title,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
@@ -266,7 +278,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
               // Kredi / Üyelik Göstergesi
               GestureDetector(
@@ -274,27 +286,35 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                   HapticFeedback.lightImpact();
                   PaywallModal.show(context);
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      subState.isPremium
-                          ? 'KADİM PLUS'
-                          : 'HAK: ${subState.dreamCredits}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.borderSubtle, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        subState.isPremium
+                            ? 'PLUS'
+                            : 'HAK: ${subState.dreamCredits}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                          color: AppColors.moonlight,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 8.5,
                         color: AppColors.moonlight,
                       ),
-                    ),
-                    const SizedBox(width: 3),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 9,
-                      color: AppColors.moonlight,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -318,20 +338,20 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
         return Container(
           decoration: BoxDecoration(
             color: AppColors.charcoalSurface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: pulsingBorderColor,
               width: 1.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: pulsingBorderColor.withValues(alpha: 0.14 * t + 0.04),
-                blurRadius: 14,
+                color: pulsingBorderColor.withValues(alpha: 0.12 * t + 0.03),
+                blurRadius: 12,
                 spreadRadius: 0,
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
           child: child,
         );
       },
@@ -341,22 +361,22 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
           TextField(
             controller: _textController,
             focusNode: _focusNode,
-            minLines: 8,
-            maxLines: null,
+            minLines: 5,
+            maxLines: 7,
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 15.5,
-              height: 1.85,
+              fontSize: 14.5,
+              height: 1.65,
               color: AppColors.textPrimary,
             ),
             decoration: InputDecoration(
               hintText:
-                  'Dün gece ne gördünüz? Hatırladığınız mekanları, yüzleri, renkleri ve hissettiğiniz uyanış atmosferini buraya not edin...',
+                  'Dün gece ne gördünüz? Hatırladığınız mekanları, yüzleri, sembolleri ve uyandığınızdaki hissi buraya yazın...',
               hintStyle: GoogleFonts.plusJakartaSans(
                 color: AppColors.dimMist,
-                fontSize: 14.5,
-                height: 1.7,
+                fontSize: 13.5,
+                height: 1.55,
               ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -368,9 +388,9 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               ref.read(dreamProvider.notifier).setDreamText(val);
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           Divider(color: AppColors.borderSubtle, height: 1),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Alt Editör Kontrolleri (Kelime Sayacı & Taslak Geri Yükleme)
           ValueListenableBuilder<TextEditingValue>(
@@ -380,12 +400,23 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    words > 0 ? '$words kelime kaleme alındı' : 'Rüya günlüğü hazır',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11.5,
-                      color: AppColors.dimMist,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.edit_note_rounded,
+                        size: 14,
+                        color: words > 0 ? baseTradColor : AppColors.dimMist,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        words > 0 ? '$words kelime yazıldı' : 'Rüya günlüğü hazır',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppColors.dimMist,
+                        ),
+                      ),
+                    ],
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -402,15 +433,15 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                           },
                           borderRadius: BorderRadius.circular(6),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             child: Row(
                               children: [
-                                Icon(Icons.history_rounded, size: 13, color: baseTradColor),
+                                Icon(Icons.history_rounded, size: 12, color: baseTradColor),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Son Notu Getir',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.5,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     color: baseTradColor,
                                   ),
@@ -430,11 +461,11 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                           },
                           borderRadius: BorderRadius.circular(6),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             child: Text(
                               'Temizle',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.mistGrey,
                               ),
@@ -459,21 +490,21 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
         'title': 'Doğu & İslam',
         'scholar': 'İbn-i Sîrîn',
         'icon': Icons.menu_book_outlined,
-        'color': AppColors.islamGold, // Kehribar / Altın
+        'color': AppColors.islamGold,
       },
       {
         'id': 'antik_akdeniz',
         'title': 'Antik Akdeniz',
         'scholar': 'Artemidorus',
         'icon': Icons.account_balance_outlined,
-        'color': AppColors.mediterraneanBlue, // Akdeniz Mavisi
+        'color': AppColors.mediterraneanBlue,
       },
       {
         'id': 'psikoloji',
         'title': 'Psikoloji',
         'scholar': 'Carl Jung',
         'icon': Icons.psychology_outlined,
-        'color': AppColors.psychologyPurple, // Bilinçaltı Moru
+        'color': AppColors.psychologyPurple,
       },
     ];
 
@@ -484,24 +515,24 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ÖNCELİKLİ KADİM BAKIŞ',
+              'ÖNCELİKLİ KAYNAK SEÇİMİ',
               style: AppTheme.headingStyle(
-                fontSize: 15.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 1.4,
+                letterSpacing: 1.2,
                 color: AppColors.moonlight,
               ),
             ),
             Text(
-              'İlk Açılacak Ekol',
+              'İlk Açılacak Yorum',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
+                fontSize: 10.5,
                 color: AppColors.dimMist,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
         Row(
           children: traditions.map((t) {
             final id = t['id'] as String;
@@ -518,12 +549,12 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                   ref.read(dreamProvider.notifier).setPreferredTradition(id);
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                  duration: const Duration(milliseconds: 220),
+                  margin: const EdgeInsets.symmetric(horizontal: 3.5),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                   decoration: BoxDecoration(
                     color: AppColors.charcoalSurface,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
                           ? tradColor.withValues(alpha: 0.85)
@@ -532,33 +563,34 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                     ),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         icon,
                         color: isSelected ? tradColor : AppColors.mistGrey,
-                        size: 20,
+                        size: 18,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 5),
                       Text(
                         title,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTheme.headingStyle(
-                          fontSize: 13.5,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: isSelected ? AppColors.textPrimary : AppColors.mistGrey,
-                          letterSpacing: 0.4,
+                          letterSpacing: 0.3,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         scholar,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
+                          fontSize: 10,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected ? tradColor : AppColors.dimMist,
                         ),
@@ -578,37 +610,37 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.moonlight.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: AppColors.moonlight.withValues(alpha: 0.22),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           onTap: _onSolvePressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.auto_stories_outlined,
                   color: Color(0xFF090A0D),
-                  size: 18,
+                  size: 17,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Text(
                   'RÜYAYI ÇÖZÜMLE',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                    letterSpacing: 1.1,
                     color: const Color(0xFF090A0D),
                   ),
                 ),

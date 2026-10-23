@@ -292,7 +292,7 @@ class _OnboardingAuthScreenState extends ConsumerState<OnboardingAuthScreen> {
 
                             // 3. Marka Başlığı
                             Text(
-                              'ONEIRO',
+                              'DREAMAPP',
                               textAlign: TextAlign.center,
                               style: AppTheme.headingStyle(
                                 fontSize: 30,

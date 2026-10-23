@@ -63,7 +63,7 @@ class NotificationService {
     ),
     DreamNotificationItem(
       title: 'Sessiz bir mesajın var 🌙',
-      body: 'Dün geceki rüyan zihninin derinliklerinden fısıldadı. Günlük silinmeden gel Oneiro\'ya yaz.',
+      body: 'Dün geceki rüyan zihninin derinliklerinden fısıldadı. Günlük silinmeden gel DreamApp\'e yaz.',
     ),
   ];
 
@@ -163,7 +163,7 @@ class NotificationService {
 
       const androidDetails = AndroidNotificationDetails(
         'oneiro_morning_reminders',
-        'Oneiro Sabah Rüya Hatırlatıcıları',
+        'DreamApp Sabah Rüya Hatırlatıcıları',
         channelDescription: 'Her sabah rüyanızı unutmadan tabir ettirmeniz için bilge fısıltılar',
         importance: Importance.high,
         priority: Priority.high,

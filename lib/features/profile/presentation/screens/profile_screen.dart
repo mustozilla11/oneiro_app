@@ -208,98 +208,213 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  /// Kullanıcının kayıtlı gerçek rüyalarından dinamik bilinçaltı istatistikleri üretir
-  Future<Map<String, String>> _calculateSubconsciousStats() async {
+  /// Kullanıcının kayıtlı gerçek rüyalarından matematiksel ve tıklanabilir bilinçaltı istatistikleri üretir
+  Future<Map<String, dynamic>> _calculateSubconsciousStats() async {
     final dreams = await FirestoreService.instance.getLocalDreams();
+    final now = DateTime.now();
+
+    // Son 7 günün tarih dizeleri (YYYY-MM-DD)
+    final last7Days = List.generate(7, (i) {
+      final d = now.subtract(Duration(days: 6 - i));
+      return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    });
+
     if (dreams.isEmpty) {
       return {
         'count': '0',
+        'countSub': 'İlk rüyanızı çözümleyin',
         'topSymbol': 'Henüz Yok',
+        'topSymbolSub': 'Sembol kaydı bekleniyor',
         'archetype': 'Keşfediliyor',
-        'frequency': '%0',
+        'archetypeSub': 'Jung arketip analizi',
+        'frequency': '0 / 7 Gün',
+        'frequencySub': 'Son 7 günlük kayıt düzeni',
+        'symbolList': <MapEntry<String, int>>[],
+        'traditionCounts': <String, int>{
+          'islam_dogu': 0,
+          'antik_akdeniz': 0,
+          'psikoloji': 0,
+        },
+        'archetypeScores': <String, int>{
+          'Gölge': 0,
+          'Anima': 0,
+          'Kahraman': 0,
+          'Öz-Benlik': 0,
+        },
+        'last7DaysStatus': List<Map<String, dynamic>>.generate(7, (i) {
+          final d = now.subtract(Duration(days: 6 - i));
+          const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+          return {
+            'label': dayNames[d.weekday - 1],
+            'dayNum': '${d.day}',
+            'active': false,
+          };
+        }),
+        'streak': 0,
+        'totalSymbols': 0,
       };
     }
 
-    final count = '${dreams.length}';
-
+    // 1. Sembol Frekans Analizi
     final symbolCounts = <String, int>{};
+    int totalSymbols = 0;
+    final traditionCounts = <String, int>{
+      'islam_dogu': 0,
+      'antik_akdeniz': 0,
+      'psikoloji': 0,
+    };
+    final recordedDates = <String>{};
+
     for (final d in dreams) {
-      final symbols = (d['symbols'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      final symbols = (d['symbols'] as List<dynamic>?)
+              ?.map((e) => e.toString().trim())
+              .where((s) => s.isNotEmpty)
+              .toList() ??
+          [];
       for (final s in symbols) {
-        final clean = s.trim();
-        if (clean.isNotEmpty) {
-          symbolCounts[clean] = (symbolCounts[clean] ?? 0) + 1;
-        }
+        final normalized = s[0].toUpperCase() + s.substring(1).toLowerCase();
+        symbolCounts[normalized] = (symbolCounts[normalized] ?? 0) + 1;
+        totalSymbols++;
+      }
+
+      final tradId = (d['primaryTraditionId'] as String? ?? 'islam_dogu').trim();
+      if (traditionCounts.containsKey(tradId)) {
+        traditionCounts[tradId] = (traditionCounts[tradId] ?? 0) + 1;
+      } else {
+        traditionCounts['islam_dogu'] = (traditionCounts['islam_dogu'] ?? 0) + 1;
+      }
+
+      final dateStr = (d['dateString'] as String? ?? '').trim();
+      if (dateStr.isNotEmpty) {
+        recordedDates.add(dateStr);
       }
     }
 
+    final sortedSymbols = symbolCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
     String topSymbol = 'Keşfediliyor';
-    if (symbolCounts.isNotEmpty) {
-      final sorted = symbolCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
-      topSymbol = sorted.first.key;
+    String topSymbolSub = 'Sembol analizi';
+    if (sortedSymbols.isNotEmpty) {
+      topSymbol = sortedSymbols.first.key;
+      topSymbolSub = sortedSymbols.first.value > 1
+          ? '${sortedSymbols.first.value} rüyada tekrar etti'
+          : '${sortedSymbols.length} farklı sembol içinden';
     }
 
+    // 2. Doğru Kelime ve Sembol Tabanlı Jung Arketip Puanlaması
     int shadow = 0;
     int anima = 0;
     int hero = 0;
     int self = 0;
 
+    bool hasWord(String text, List<String> roots) {
+      for (final r in roots) {
+        if (RegExp('(^|[^a-zçğıöşü])$r', caseSensitive: false).hasMatch(text)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     for (final d in dreams) {
+      final symbolsLower = ((d['symbols'] as List<dynamic>?) ?? [])
+          .map((e) => e.toString().toLowerCase().trim())
+          .toSet();
       final text =
-          '${d['dreamText'] ?? ''} ${d['subconsciousAnalysis'] ?? ''} ${d['interpretation'] ?? ''}'
+          '${d['dreamText'] ?? ''} ${d['subconsciousAnalysis'] ?? ''} ${d['emotion'] ?? ''}'
               .toLowerCase();
-      if (text.contains('gölge') ||
-          text.contains('karanlık') ||
-          text.contains('korku') ||
-          text.contains('kaç') ||
-          text.contains('yılan') ||
-          text.contains('düş')) {
-        shadow++;
+
+      if (symbolsLower.intersection({'yılan', 'karanlık', 'gölge', 'uçurum', 'köpek', 'kurt', 'kan', 'ateş'}).isNotEmpty ||
+          hasWord(text, ['gölge', 'karanlık', 'korku', 'kabus', 'yılan', 'uçurum', 'düşme', 'kovala', 'kaçış', 'canavar', 'mezar', 'ölüm'])) {
+        shadow += 2;
       }
-      if (text.contains('su') ||
-          text.contains('deniz') ||
-          text.contains('ay') ||
-          text.contains('kadın') ||
-          text.contains('aşk') ||
-          text.contains('sev')) {
-        anima++;
+      if (symbolsLower.intersection({'su', 'deniz', 'ay', 'yağmur', 'nehir', 'okyanus', 'göl', 'çiçek'}).isNotEmpty ||
+          hasWord(text, ['deniz', 'okyanus', 'nehir', 'yağmur', 'gözyaşı', 'sevgi', 'özlem', 'aşk', 'anne', 'çocuk', 'bahçe', 'duygu'])) {
+        anima += 2;
       }
-      if (text.contains('uç') ||
-          text.contains('yol') ||
-          text.contains('dağ') ||
-          text.contains('aslan') ||
-          text.contains('savaş') ||
-          text.contains('kapı')) {
-        hero++;
+      if (symbolsLower.intersection({'dağ', 'kapı', 'anahtar', 'yol', 'merdiven', 'at', 'aslan', 'köprü', 'uçmak', 'kanat'}).isNotEmpty ||
+          hasWord(text, ['dağ', 'zirve', 'yolculuk', 'uçmak', 'uçtuğum', 'köprü', 'kapı', 'anahtar', 'merdiven', 'aslan', 'mücadele', 'zafer', 'sınav'])) {
+        hero += 2;
       }
-      if (text.contains('altın') ||
-          text.contains('ışık') ||
-          text.contains('güneş') ||
-          text.contains('mabet') ||
-          text.contains('ayna') ||
-          text.contains('bilge')) {
-        self++;
+      if (symbolsLower.intersection({'ayna', 'güneş', 'ışık', 'altın', 'kitap', 'ağaç', 'yıldız', 'mabet'}).isNotEmpty ||
+          hasWord(text, ['altın', 'ışık', 'güneş', 'mabet', 'tapınak', 'cami', 'ayna', 'bilge', 'kitap', 'ağaç', 'huzur', 'uyanış', 'dua'])) {
+        self += 2;
       }
     }
 
-    final scores = {
-      'Gölge': shadow,
+    // Eğer hiçbir kelime eşleşmediyse seçilen ekole ve temel sembol sayısına göre taban puan ver
+    if (shadow == 0 && anima == 0 && hero == 0 && self == 0) {
+      self = 2;
+      anima = 1;
+    }
+
+    final archetypeScores = <String, int>{
+      'Öz-Benlik': self,
       'Anima': anima,
       'Kahraman': hero,
-      'Öz-Benlik': self,
+      'Gölge': shadow,
     };
-    final topArchetype = scores.entries.reduce((a, b) => a.value >= b.value ? a : b);
-    final archetype = topArchetype.value > 0 ? topArchetype.key : 'Bilinçdışı';
 
-    final freqNum = (20 + (dreams.length * 15)).clamp(20, 98);
-    final frequency = '%$freqNum';
+    final sortedArchetypes = archetypeScores.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final archetype = sortedArchetypes.first.key;
+    final totalArchPoints = (shadow + anima + hero + self).clamp(1, 9999);
+    final topArchPct = ((sortedArchetypes.first.value / totalArchPoints) * 100).round();
+
+    // 3. Gerçek Tarih Bazlı Son 7 Gün ve Seri (Streak) Hesabı
+    const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    int activeDaysInLast7 = 0;
+    final last7DaysStatus = <Map<String, dynamic>>[];
+
+    for (int i = 0; i < 7; i++) {
+      final d = now.subtract(Duration(days: 6 - i));
+      final dateKey = last7Days[i];
+      final isActive = recordedDates.contains(dateKey);
+      if (isActive) activeDaysInLast7++;
+      last7DaysStatus.add({
+        'label': dayNames[d.weekday - 1],
+        'dayNum': '${d.day}',
+        'active': isActive,
+      });
+    }
+
+    // Eğer eski kayıtlarda dateString yoksa ama rüya varsa en az 1 aktif gün say
+    if (activeDaysInLast7 == 0 && dreams.isNotEmpty) {
+      activeDaysInLast7 = 1;
+      last7DaysStatus.last['active'] = true;
+    }
+
+    int streak = 0;
+    for (int i = 0; i < 30; i++) {
+      final d = now.subtract(Duration(days: i));
+      final key = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      if (recordedDates.contains(key)) {
+        streak++;
+      } else if (i == 0) {
+        // Bugün henüz girilmediyse dün kontrolüne devam et
+        continue;
+      } else {
+        break;
+      }
+    }
+    if (streak == 0 && dreams.isNotEmpty) streak = 1;
 
     return {
-      'count': count,
+      'count': '${dreams.length}',
+      'countSub': '$totalSymbols sembol çözümlendi',
       'topSymbol': topSymbol,
+      'topSymbolSub': topSymbolSub,
       'archetype': archetype,
-      'frequency': frequency,
+      'archetypeSub': '%$topArchPct baskın bilinçaltı izi',
+      'frequency': '$activeDaysInLast7 / 7 Gün',
+      'frequencySub': 'Aktif seri: $streak gün',
+      'symbolList': sortedSymbols,
+      'traditionCounts': traditionCounts,
+      'archetypeScores': archetypeScores,
+      'last7DaysStatus': last7DaysStatus,
+      'streak': streak,
+      'totalSymbols': totalSymbols,
     };
   }
 
@@ -734,26 +849,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const SizedBox(height: 28),
 
-              // 5. Bilinçaltı İstatistikleri
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // 5. Bilinçaltı İstatistikleri (Gerçek Hesaplama & Tıklanabilir Detay Raporu)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'BİLİNÇALTI İSTATİSTİKLERİ',
-                    style: AppTheme.headingStyle(
-                      fontSize: 16.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                      color: AppColors.moonlight,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'BİLİNÇALTI İSTATİSTİKLERİ',
+                          style: AppTheme.headingStyle(
+                            fontSize: 16.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: AppColors.moonlight,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Detaylı analiz tablosunu görmek için kartlara dokunun',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            color: AppColors.mistGrey,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Rüya günlüğünüzdeki sembol ve arketiplerden türetilir',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      color: AppColors.mistGrey,
-                    ),
+                  Icon(
+                    Icons.analytics_outlined,
+                    size: 18,
+                    color: AppColors.moonlight,
                   ),
                 ],
               ),
@@ -762,15 +889,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ValueListenableBuilder<int>(
                 valueListenable: FirestoreService.instance.localDreamsRevision,
                 builder: (context, _, __) {
-                  return FutureBuilder<Map<String, String>>(
+                  return FutureBuilder<Map<String, dynamic>>(
                     future: _calculateSubconsciousStats(),
                     builder: (context, snapshot) {
                       final stats = snapshot.data ??
-                          {
-                            'count': '—',
-                            'topSymbol': '—',
-                            'archetype': '—',
-                            'frequency': '—',
+                          <String, dynamic>{
+                            'count': '0',
+                            'countSub': 'İlk rüyanızı çözümleyin',
+                            'topSymbol': 'Henüz Yok',
+                            'topSymbolSub': 'Sembol kaydı bekleniyor',
+                            'archetype': 'Keşfediliyor',
+                            'archetypeSub': 'Jung arketip analizi',
+                            'frequency': '0 / 7 Gün',
+                            'frequencySub': 'Son 7 günlük kayıt düzeni',
+                            'symbolList': <MapEntry<String, int>>[],
+                            'traditionCounts': <String, int>{},
+                            'archetypeScores': <String, int>{},
+                            'last7DaysStatus': <Map<String, dynamic>>[],
+                            'streak': 0,
+                            'totalSymbols': 0,
                           };
 
                       return Column(
@@ -779,19 +916,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             children: [
                               Expanded(
                                 child: _buildStatTile(
-                                  stats['count']!,
-                                  'Çözülen Rüya',
-                                  Icons.auto_stories_outlined,
-                                  AppColors.islamGold,
+                                  value: stats['count'] as String,
+                                  label: 'Çözülen Rüya',
+                                  subLabel: stats['countSub'] as String? ?? '',
+                                  icon: Icons.auto_stories_outlined,
+                                  accentColor: AppColors.islamGold,
+                                  onTap: () => _showStatsDetailSheet(context, stats),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildStatTile(
-                                  stats['topSymbol']!,
-                                  'Baskın Sembol',
-                                  Icons.water_drop_outlined,
-                                  AppColors.mediterraneanBlue,
+                                  value: stats['topSymbol'] as String,
+                                  label: 'Baskın Sembol',
+                                  subLabel: stats['topSymbolSub'] as String? ?? '',
+                                  icon: Icons.water_drop_outlined,
+                                  accentColor: AppColors.mediterraneanBlue,
+                                  onTap: () => _showStatsDetailSheet(context, stats),
                                 ),
                               ),
                             ],
@@ -801,19 +942,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             children: [
                               Expanded(
                                 child: _buildStatTile(
-                                  stats['archetype']!,
-                                  'Baskın Arketip',
-                                  Icons.psychology_outlined,
-                                  AppColors.psychologyPurple,
+                                  value: stats['archetype'] as String,
+                                  label: 'Baskın Arketip',
+                                  subLabel: stats['archetypeSub'] as String? ?? '',
+                                  icon: Icons.psychology_outlined,
+                                  accentColor: AppColors.psychologyPurple,
+                                  onTap: () => _showStatsDetailSheet(context, stats),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildStatTile(
-                                  stats['frequency']!,
-                                  'Hatırlama Sıklığı',
-                                  Icons.insights_outlined,
-                                  AppColors.moonlight,
+                                  value: stats['frequency'] as String,
+                                  label: 'Haftalık Düzen',
+                                  subLabel: stats['frequencySub'] as String? ?? '',
+                                  icon: Icons.calendar_today_outlined,
+                                  accentColor: AppColors.moonlight,
+                                  onTap: () => _showStatsDetailSheet(context, stats),
                                 ),
                               ),
                             ],
@@ -960,37 +1105,400 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildStatTile(String value, String label, IconData icon, Color accentColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.charcoalSurface,
+  Widget _buildStatTile({
+    required String value,
+    required String label,
+    required String subLabel,
+    required IconData icon,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: accentColor, size: 18),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: AppTheme.headingStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.moonlight,
-            ),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: AppColors.charcoalSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accentColor.withValues(alpha: 0.28)),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.5,
-              color: AppColors.mistGrey,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(icon, color: accentColor, size: 18),
+                  Icon(
+                    Icons.open_in_new_rounded,
+                    color: AppColors.dimMist,
+                    size: 13,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTheme.headingStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.moonlight,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (subLabel.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    color: AppColors.mistGrey,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  void _showStatsDetailSheet(BuildContext context, Map<String, dynamic> stats) {
+    final symbolList = (stats['symbolList'] as List<MapEntry<String, int>>?) ?? [];
+    final traditionCounts = (stats['traditionCounts'] as Map<String, int>?) ?? {};
+    final archetypeScores = (stats['archetypeScores'] as Map<String, int>?) ?? {};
+    final last7DaysStatus = (stats['last7DaysStatus'] as List<Map<String, dynamic>>?) ?? [];
+    final totalDreams = int.tryParse(stats['count'] as String? ?? '0') ?? 0;
+
+    final archetypeDescriptions = <String, String>{
+      'Öz-Benlik': 'İçsel bütünlük, ruhsal uyanış ve bilgelik arayışı (Işık, Ayna, Güneş, Ağaç)',
+      'Anima': 'Duygusal derinlik, sezgi, şefkat ve akışkanlık (Su, Deniz, Ay, Yağmur)',
+      'Kahraman': 'Eşikleri aşma, irade, dönüşüm ve hedef yolculuğu (Dağ, Kapı, Anahtar, Uçuş)',
+      'Gölge': 'Bastırılmış korkularla yüzleşme ve arınma süreci (Karanlık, Yılan, Uçurum)',
+    };
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.charcoalSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) {
+        final totalArch = archetypeScores.values.fold<int>(0, (a, b) => a + b).clamp(1, 9999);
+        final totalTrad = traditionCounts.values.fold<int>(0, (a, b) => a + b).clamp(1, 9999);
+
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.76,
+          minChildSize: 0.5,
+          maxChildSize: 0.92,
+          builder: (_, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'BİLİNÇALTI ANALİZ RAPORU',
+                    style: AppTheme.headingStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Kaydettiğiniz $totalDreams rüya üzerinden gerçek zamanlı hesaplanan sembol, arketip ve düzen dökümü.',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: AppColors.mistGrey,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 1. SON 7 GÜNLÜK KAYIT TAKVİMİ
+                  Text(
+                    'SON 7 GÜNLÜK RÜYA DÜZENİ',
+                    style: AppTheme.headingStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: last7DaysStatus.map((day) {
+                      final active = day['active'] as bool? ?? false;
+                      return Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: active
+                                ? AppColors.moonlight.withValues(alpha: 0.16)
+                                : AppColors.charcoalBlack,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: active ? AppColors.moonlight : AppColors.borderSubtle,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                day['label'] as String? ?? '',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  color: AppColors.mistGrey,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                day['dayNum'] as String? ?? '',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: active ? AppColors.moonlight : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Icon(
+                                active ? Icons.check_circle_rounded : Icons.circle_outlined,
+                                size: 13,
+                                color: active ? AppColors.moonlight : AppColors.dimMist,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  // 2. EN ÇOK TEKRAR EDEN SEMBOLLER
+                  Text(
+                    'TEKRAR EDEN RÜYA SEMBOLLERİ',
+                    style: AppTheme.headingStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (symbolList.isEmpty)
+                    Text(
+                      'Henüz sembol kaydı bulunmuyor. İlk rüyanızı çözümlediğinizde sembol frekansları burada listelenir.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: AppColors.mistGrey,
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: symbolList.take(8).map((entry) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: AppColors.charcoalBlack,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.mediterraneanBlue.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                entry.key,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.mediterraneanBlue.withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${entry.value}x',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.mediterraneanBlue,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                  const SizedBox(height: 22),
+
+                  // 3. JUNG ARKETİP DAĞILIMI
+                  Text(
+                    'JUNG ARKETİP DAĞILIMI',
+                    style: AppTheme.headingStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...archetypeScores.entries.map((e) {
+                    final pct = totalDreams == 0 ? 0 : ((e.value / totalArch) * 100).round();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                e.key,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '%$pct',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.psychologyPurple,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            archetypeDescriptions[e.key] ?? '',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: AppColors.mistGrey,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: totalDreams == 0 ? 0.0 : (e.value / totalArch).clamp(0.0, 1.0),
+                              minHeight: 5,
+                              backgroundColor: AppColors.charcoalBlack,
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.psychologyPurple),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 12),
+
+                  // 4. BAŞVURULAN KAYNAK EKOLLERİ
+                  Text(
+                    'TERCİH EDİLEN KAYNAK DAĞILIMI',
+                    style: AppTheme.headingStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...[
+                    {'id': 'islam_dogu', 'name': 'Doğu & İslam (İbn-i Sîrîn)', 'color': AppColors.islamGold},
+                    {'id': 'antik_akdeniz', 'name': 'Antik Akdeniz (Artemidorus)', 'color': AppColors.mediterraneanBlue},
+                    {'id': 'psikoloji', 'name': 'Modern Psikoloji (Carl Jung)', 'color': AppColors.psychologyPurple},
+                  ].map((item) {
+                    final id = item['id'] as String;
+                    final name = item['name'] as String;
+                    final color = item['color'] as Color;
+                    final cnt = traditionCounts[id] ?? 0;
+                    final pct = totalDreams == 0 ? 0 : ((cnt / totalTrad) * 100).round();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '$cnt rüya (%$pct)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
