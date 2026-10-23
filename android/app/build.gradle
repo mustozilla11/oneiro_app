@@ -51,6 +51,10 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            // R8 küçültücü SharedPreferences ve bildirim (Gson) eklentilerinin
+            // metodlarını siliyordu -> oturum/tema/rüya kayıtları tutulmuyordu.
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
