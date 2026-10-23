@@ -969,7 +969,7 @@ class ChatResponse(BaseModel):
 # 6. KAVRAM KÜMESİ & SEMBOL BAZLI HASSAS RAG RETRIEVAL MOTORU
 # -----------------------------------------------------------------------------
 def score_passage_relevance(
-    concepts: List[Dict[str, Any]],
+    concepts: List[Tuple[str, Set[str]]],
     dream_keywords: List[str],
     chunk: Dict[str, Any]
 ) -> Tuple[float, List[str]]:
@@ -989,9 +989,7 @@ def score_passage_relevance(
     matched_clusters: List[str] = []
 
     # 1. Kavram Kümesi Eşleşmesi (Çok Dilli Sembol Karşılıkları: TR + EN + AR + Kök)
-    for concept in concepts:
-        cid = concept["cluster_id"]
-        c_terms = concept["search_terms"]
+    for cid, c_terms in concepts:
         common = chunk_words.intersection(c_terms)
         if common:
             # Sözlük madde başlığında (ilk 75 karakterde) geçiyorsa yüksek öncelik ver
@@ -1075,10 +1073,9 @@ def retrieve_by_tradition(dream_text: str, tradition_id: str, top_k: int = 4) ->
         seen_chunk_ids = set()
 
         # Adım 1: Rüyadaki her bir sembol/kavram için en yüksek puanlı pasajı garanti altına al
-        for concept in concepts:
-            cid = concept["cluster_id"]
+        for cid, _ in concepts:
             for item in scored:
-                c_id = item["chunk"]["id"]
+                c_id = id(item["chunk"])
                 if c_id not in seen_chunk_ids and cid in item["matched_concepts"]:
                     selected.append(item)
                     seen_chunk_ids.add(c_id)
@@ -1090,7 +1087,7 @@ def retrieve_by_tradition(dream_text: str, tradition_id: str, top_k: int = 4) ->
         for item in scored:
             if len(selected) >= top_k:
                 break
-            c_id = item["chunk"]["id"]
+            c_id = id(item["chunk"])
             if c_id not in seen_chunk_ids:
                 selected.append(item)
                 seen_chunk_ids.add(c_id)
@@ -1136,10 +1133,9 @@ def retrieve_top_k(dream_text: str, top_k: int = 4, tradition_id: Optional[str] 
     if scored:
         selected: List[Dict[str, Any]] = []
         seen_ids = set()
-        for concept in concepts:
-            cid = concept["cluster_id"]
+        for cid, _ in concepts:
             for item in scored:
-                c_id = item["chunk"]["id"]
+                c_id = id(item["chunk"])
                 if c_id not in seen_ids and cid in item["matched_concepts"]:
                     selected.append(item)
                     seen_ids.add(c_id)
@@ -1149,7 +1145,7 @@ def retrieve_top_k(dream_text: str, top_k: int = 4, tradition_id: Optional[str] 
         for item in scored:
             if len(selected) >= top_k:
                 break
-            c_id = item["chunk"]["id"]
+            c_id = id(item["chunk"])
             if c_id not in seen_ids:
                 selected.append(item)
                 seen_ids.add(c_id)
