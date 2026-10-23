@@ -184,6 +184,7 @@ def detect_language(text: str) -> str:
 
 
 CHUNKS_DB: List[Dict[str, Any]] = []
+CHUNKS_BY_TRADITION: Dict[str, List[Dict[str, Any]]] = {}
 
 # Kadim arketipleri Türkçe kitap dizinine bağlayan çok dilli köprü sözlüğü (RU, EN, DE, ES, FR, AR)
 CROSS_LINGUAL_SYMBOLS: Dict[str, str] = {
@@ -487,17 +488,19 @@ def detect_tradition_id(filename: str, sample_text: str = "") -> str:
     fn = normalize_turkish(filename.lower())
     if any(k in fn for k in (
         "islam", "sirin", "nablusi", "nabulusi", "dogu", "cafer", "sadik",
-        "suleyman", "gazali", "arabi", "tasavvuf", "kuran", "hadis", "tabirname", "diyanet"
+        "suleyman", "gazali", "arabi", "tasavvuf", "kuran", "hadis", "tabirname", "diyanet",
+        "ansiklopedi", "sunnah", "jibali"
     )):
         return "islam_dogu"
     if any(k in fn for k in (
         "antik", "yunan", "artemidorus", "oneirocritica", "roma", "akdeniz",
-        "mitoloji", "misir", "mezopotamya", "babil", "asur", "homeros", "hipokrat", "galen", "kehanet"
+        "mitoloji", "misir", "mezopotamya", "babil", "asur", "homeros", "hipokrat", "galen", "kehanet",
+        "aristo", "aristotle", "platon", "plato", "parva"
     )):
         return "antik_akdeniz"
     if any(k in fn for k in (
         "psik", "jung", "freud", "arketip", "bilinc", "analiz", "adler",
-        "fromm", "lacan", "modern", "terapi", "golge", "anima", "ego"
+        "fromm", "lacan", "modern", "terapi", "golge", "anima", "ego", "miller"
     )):
         return "psikoloji"
 
@@ -639,7 +642,7 @@ def chunk_text(text: str, source_name: str) -> List[Dict[str, Any]]:
 
 def index_books():
     """`backend/books/` klasöründeki tüm kitapları (.txt, .pdf, .md) okur ve gelenek metadata'sı ile belleğe alır."""
-    global CHUNKS_DB
+    global CHUNKS_DB, CHUNKS_BY_TRADITION
 
     if not os.path.exists(BOOKS_DIR):
         os.makedirs(BOOKS_DIR, exist_ok=True)
@@ -675,7 +678,11 @@ def index_books():
         return
 
     CHUNKS_DB = all_chunks
-    logger.info(f"✅ Toplam {len(supported_files)} kitaptan {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi.")
+    CHUNKS_BY_TRADITION = {
+        t_id: [c for c in all_chunks if c.get("tradition") == t_id]
+        for t_id in TRADITIONS.keys()
+    }
+    logger.info(f"✅ Toplam {len(supported_files)} kitaptan {len(CHUNKS_DB)} paragraf metadata ile arama belleğine yüklendi. (Gelenek Dağılımı: { {t: len(cl) for t, cl in CHUNKS_BY_TRADITION.items()} })")
 
 
 @asynccontextmanager
@@ -800,6 +807,16 @@ def score_passage_relevance(dream_keywords: List[str], chunk: Dict[str, Any]) ->
     if not chunk_words and chunk_norm:
         chunk_words = set(re.findall(r"\b[^\W\d_]{3,}\b", chunk_norm, flags=re.UNICODE))
 
+    # Hızlı Ön Filtre (25.000+ paragrafta CPU ve gecikme optimizasyonu):
+    has_exact = bool(chunk_words.intersection(dream_keywords))
+    if not has_exact:
+        kw_prefixes = {kw[:3] for kw in dream_keywords if len(kw) >= 3}
+        chunk_prefixes = {w[:3] for w in chunk_words if len(w) >= 3}
+        has_prefix = bool(kw_prefixes.intersection(chunk_prefixes))
+        has_substr = any(len(kw) >= 4 and kw in chunk_norm for kw in dream_keywords)
+        if not (has_prefix or has_substr):
+            return 0.0
+
     total_score = 0.0
     matched_keywords_count = 0
 
@@ -883,7 +900,9 @@ def retrieve_by_tradition(dream_text: str, tradition_id: str, top_k: int = 1) ->
     Eğer rüyadaki kelimeler kitapta doğrudan geçmiyorsa veya nadir bir kelimeyse,
     o geleneğin en zengin ve temsili 2 genel pasajını DeepSeek'e bağlam olarak iletir.
     """
-    tradition_chunks = [c for c in CHUNKS_DB if c.get("tradition") == tradition_id]
+    tradition_chunks = CHUNKS_BY_TRADITION.get(tradition_id)
+    if tradition_chunks is None:
+        tradition_chunks = [c for c in CHUNKS_DB if c.get("tradition") == tradition_id]
     if not tradition_chunks:
         logger.warning(f"'{tradition_id}' geleneğine ait indekslenmiş pasaj bulunamadı.")
         return []

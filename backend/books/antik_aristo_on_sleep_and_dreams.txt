@@ -1,0 +1,2132 @@
+This is a reproduction of a library book that was digitized 
+by Google as part of an ongoing effort to preserve the 
+information in books and make it universally accessible. 
+
+Gooqle books 
+
+https://books.google.com 
+
+THE 
+
+/ORKS ORARISTOTLE 
+
+TRANSLATED INTO ENGLISH 
+UNDER THE EDITORSHIP 
+| oF - 
+
+J. A. SMITH M.A. 
+
+FELLOW OF BALLIOL COLLEGE 
+
+W. D. ROSS M.A. 
+
+FELLOW OF ORIEL COLLEGE 
+
+OXFORD 
+AT THE CLARENDON PRESS 
+
+HENRY FROWDE, M.A. 
+PUBLISHER TO THE UNIVERSI1Y OF OXFORD 
+LONDON, EDINBURGH 
+NEW YORK AND TORONTO 
+
+PREFACE 
+
+IT was the desire of the late Master of Balliol, Dr. Ben- 
+jamin Jowett, as formulated in his will, that the proceeds 
+from the sale of his works, the copyright in which he 
+bequeathed to Balliol College, should be used to promote the 
+study of Greek Literature, especially by the publication of 
+new translations and editions of Greek authors. In a codicil 
+to his will he expressed the hope that the translation of 
+Aristotle’s works begun by his own translation of the Politics 
+should be proceeded with as speedily as possible. The 
+College resolved that the funds thus accruing to them should, 
+in memory of his services to the College and to Greek 
+letters, be applied to the subvention of a series of translations 
+of the works of Aristotle. Through the co-operation, financial 
+and other, of the Delegates of the University Press it has now 
+become possible to begin the realization of this design. By 
+agreement between the College and the Delegates of the Press 
+' the present editors were appointed to superintend the carrying 
+
+out of the scheme. The series, of which the first instalment | 
+
+is now brought before the public, is published at the joint 
+expense and risk of the College and the Delegates of the 
+Press. 
+
+The editors have secured the co-operation of various 
+scholars in the task of translation. “he translations make 
+no claim to finality, but aim at being such as a scholar might 
+construct in preparation for a critical edition and commentary. 
+The translation will not presuppose any critical reconstitution 
+of the text. Wherever new readings are proposed the fact 
+will be indicated, but notes justificatory of conjectural 
+
+emendations or defensive of novel interpretations will, where 
+
+25268855 
+
+PREFACE 
+
+admitted, be reduced to the smallest compass. The editors, 
+while retaining a general right of revision and annotation, 
+will leave the responsibility for each translation to its author, 
+whose name will in all cases be given. 
+
+Translators have been found for the Organon, Physics, 
+De Caelo, De Anima, Historia Animalium, De Animalium 
+Generatione, De Insecabilibus Lineis, Metaphysics, Eudemian 
+Ethics, Rhetoric, and Poetics, and it іѕ hoped that the 
+series may in course of time include translations of all the 
+extant works of Aristotle. The editors would be glad te 
+hear of scholars who are willing to undertake the translation 
+of such treatises as have not already been provided for, and 
+invite communications to this end. | 
+
+The editors desire to acknowledge their obligation to 
+Mr. Charles Cannan for valuable aid in the revision of the 
+present volume, and to Mr. G. R. T. Ross for the preparation 
+of the Index. І 
+
+J A 5. 
+W. D. R. 
+December, 1907. , 
+
+ы 
+
+THE 
+
+PARVA NATURALIA 
+
+DE SENSU ET SENSIBILI 
+
+DE MEMORIA ET REMINISCENTIA 
+DE SOMNO DE SOMNIIS 
+
+DE DIVINATIONE PER SOMNUM 
+
+BY 
+
+J. I. BEARE, M.A. 
+
+FELLOW OF TRINITY COLLEGE, DUBLIN ; REGIUS PROFESSOR OF GREEK 
+(SOMETIME PROFESSOR OF MORAL PHILOSOPHY) IN THE 
+UNIVERSITY OF DUBLIN 
+
+DE LONGITUDINE ET BREVITATE VITAE 
+DE IUVENTUTE ET SENECTUTE 
+DE VITA ET MORTE DE RESPIRATIONE | 
+
+BY 
+
+G. R. T. ROSS, M.A., D.PHIL. 
+
+LECTURER ON PHILOSOPHY AND EDUCATION IN THE 
+HARTLEY UNIVERSITY COLLEGE, SOUTHAMPTON 
+
+OXFORD 
+AT THE CLARENDON PRESS 
+
+. 1908 
+
+HENRY FROWDE, M.A. 
+PUBLISHER TO THE UNIVERSITY OF OXFORD 
+LONDON, EDINBURGH 
+NEW YORK AND TORONTO 
+
+453b - DE SOMNO ET VIGILIA 
+
+CHAPTER I 
+
+WITH regard to sleep and waking, we must consider what 
+they are; whether they are peculiar to soul or to body, 
+or common to both ; and if. common, to what part of soul 
+or body they appertain: further, from what cause it arises 
+
+rs that they are attributes of animals, and whether all animals 
+share in them both, or some partake of the one only, others 
+of the other only, or some partake of neither and some 
+of both. 
+
+Further, in addition to these questions, we must also 
+inquire what the dream is, and from what cause sleepers 
+sometimes dream, and sometimes do not; or whether the 
+truth is that sleepers always dream but do not always 
+
+го remember (their dream); and if this occurs, what its ex- 
+planation is. 
+
+Again, [we must inquire] whether it is possible or not to 
+foresee the future (in dreams), and if it be possible, in what 
+manner ; further, whether, supposing it possible, it extends only 
+to things to be accomplished by the agency of Man, or to those 
+also of which the cause lies in supra-human agency, and which 
+result from the workings of Nature, or of Spontaneity. 
+
+25 First, then, this much is clear, that waking and sleep 
+appertain to the same part of an animal, inasmuch as they 
+are opposites, and sleep is evidently a privation of waking. 
+For contraries, in natural as well as in all other matters, 
+are seen always to présent themselves in the same subject, 
+and to be affections of the same: examples are— health 
+
+3o and sickness, beauty and ugliness, strength and weakness, 
+sight and blindness, hearing and deafness. This is also clear 
+
+454 a from the following considerations. The criterion by which 
+we know the waking person to be awake is identical with 
+that by which we know the sleeper to be asleep; for we 
+assume that one who is exercising sense-perception is awake, 
+
+CHAPTER I... 454a 
+
+and that every one who is awake perceives either some 
+external movement or else some movement in his own con- 
+sciousness. If waking, then, consists in nothing else than 5 
+the exercise of sense-perception, the inference is clear, that 
+the organ, in virtue of which animals perceive, is that by 
+which they wake, when they are awake, or sleep, when they 
+are asleep. | 
+
+But since! the exercise of sense-perception 2 does: not 
+belong to soul or body exclusively, then (since the subject of 
+actuality is in every case identical with that of potentiality, 
+and what is called sense-perception, as actuality, is a move- 
+ment of the soul through the body) it is clear that 15 
+affection * is not an affection of soul exclusively, and that to 
+a ‘soulless body has not the potentiality? of perception 9. 
+[| Thus sleep and waking are not attributes of pure intelligence, 
+on the one hand, or of inanimate bodies, on the other.] 
+
+Now, whereas we have already elsewhere distinguished what 
+are called the parts of the soul, and whereas the nutrient is, in 
+all living bodies, capable of existing without the other parts, 
+while none of the others can exist without the nutrient ; it is 
+clear that” sleep and waking are not affections of such living 15 
+things as partake only of growth and decay, e.g. not of 
+plants, because these have not the faculty of sense-perception, - 
+
+1 Since waking is not peculiar to soul or body, neither is sleeping ; 
+for sleeping is the potentiality of waking, and if the actuality can- 
+not be peculiar to body or to soul, neither can the potentiality be so. 
+Sleep is an affection (máĝos) which renders ‘ potential ' the airônoıs, whose 
+actuality is waking. But instead of concluding ‘neither is the aos: 
+peculiar to soul or body’, or ‘neither is the affection peculiar to soul, 
+nor can a body without soul sleep’, he winds up with the conclusion : 
+‘nor is a body without soul capable of sense-perception’ ; which involves 
+the other point; and is really what he aims at. For to be capable of 
+aig avec Oat, without being actually aic@avdpevos, is to be asleep: to be 
+incapable of it is to be incapable of sleeping as well as of waking. The 
+nerve of the reasoning is contained i in the parenthesis. 
+
+2 ie. in the form of еуріуорочв. 
+
+T 96, that of alto 0no'is. 
+
+4 Sc. Umvos ; see 453? 28, 29. 
+
+5 Cf. 454b 11- 12, where also what is capable of sleeping is virtually 
+identified with rò боуатбу aicbaverOatyrd кат” еуеру. аісбаубиеуоу. 
+
+6 Sc. cannot sleep: Sleep, the табов, as the ,parenthesis shows, is 
+here regarded as диғаше, waking as вируса, of alaOnows. Vide de An. 
+II. i. 4128 23-26. 
+
+7 The clauses preceding ee От: are only the preamble, not the reason, 
+of what follows. For оғ... óre cf. 443° 23, 24. 
+
+454a 
+
+20 
+
+DE SOMNO ET VIGILIA 
+
+whether or not this be capable of separate! existence ; in its 
+potentiality, indeed, and in its relationships, it zs separable [sc. 
+from rà Өреттікд |. 
+
+Likewise it is clear that [of those which either sleep 
+or wake] there is no animal which is always awake or 
+always asleep, but that both these affections belong [alter- 
+nately] to the same animals.? For if there be an animal 
+not endued with sense-perception, it is impossible that this 
+should either? sleep or wake ; since both these are affections 
+
+1 Capable of existing separately from rò Өреттікбу and the vegeta- 
+tive functions. With тд «iva cf. 448% 20 (note) where то Абуф 
+explains it. Nowhere in the world can Aristotle find rà aicOnrixéy apart 
+from rò Өбрелтікб». He cannot say that it is хорютоу árAós, Or Xoptoroy 
+rómo, Or неуебе,, yet it is separate тф elva, i.e. in its relationship to objects. 
+It is separate also ту доғара. This difference may be expressed by 
+saying that тб @pemruxóy is a боғаше Operrrian, rò айобптикбу а боғаше ala Ónrun. 
+т) Óvrdpe therefore = ‘in respect of its potentiality as part of soul’, or 
+briefly ‘as a faculty ’, 
+
+* rois avrois тәр (gov = е same animals ', as іп 450% 15 érépos ràv (.— 
+‘different animals’. 
+
+5 The difficulty of this whole passage becomes acute here. The 
+traditional translation involves a misuse of обте before the infinitive. The 
+grammatical version would be —‘it cannot either sleep or wake,’ obre ... 
+одге explicating ov. As the text stands this would make no sense. Inserting 
+р) before Ехо» we could restore sense and grammar. This has been assumed 
+іп the translation. It is to be observed that the меу after боа in % 15 
+has no answering é. But Aristotle would naturally have gone on from 
+* plants' to the case of animals which stood on the border line. Having 
+said that фита (which have not the organ of sense-perception) cannot 
+sleep or wake, he would naturally say that if there be any animal which 
+has not perception it too cannot,sleep or wake. In 778° 23-779? 10 һе 
+considers such animals, viz. €é&Spva, which (he there says) do not sleep but 
+do something like it, ‘just like plants.’ In Pol. 1335? 24, too, he refers 
+to these before the stage of ata8go:s, before which stage ентоквісбав бей rhv 
+ápgAocw. In another respect the received translation is wrong, for 
+є Tí ёст: (pov xov aioÜgow does not really = ‘if an animal is, &c. ', but 
+‘if there be any animal having aisĝnoıs’: the former would be repre- 
+sented rather by ei 2оті (@ov rò Zxov aícÜnow. Thus, too, уар * 21 first 
+gets any meaning, by making it refer to ov уар... €yovot in 8 17. Then, 
+however, it appears that époiws...ravra % 10-21 is out of its place. If, 
+however, we transfer this to * 24 after aio@nrixov we find the next words 
+tautological. So that there is something almost certainly wrong with 
+the text. I believe the insertion of uy to be required absolutely by the 
+grammar, and critically justifiable by the consideration that it would 
+have easily been lost owing to the appearance it has of contradicting 
+Aristotle's well-known definition of (oov. At least its insertion has as 
+good critical ground to stand upon as that of u? in 449* 3 (un) aia Sávera:. 
+The general sense of *21-26 (ой yàp . . . еуртуореға) is—‘ For while 
+without sensation no creature can do either, 40/77 sensation every creature 
+must do both.’ 
+
+An explanation of the passage from *19 to * 32 communicated by 
+Mr. Charles Cannan seems so valuable, based as it is on minute and 
+
+CHAPTER I 454a 
+
+of the activity of the primary faculty of sense-perception. 
+But it is equally impossible also that either of these two affec- 
+tions should perpetually attach itself to the same animal, e.g. 
+that some species of animal should be always asleep or always 25 
+awake, without intermission; for all organs which have a 
+natural function must lose power when they work beyond the 
+natural time-limit of their working period ; for instance, the 
+eyes [must lose power] from [too-long continued] seeing, and 
+must give it ир; and so it is with the hand and every other 
+member which has a function. Now, if sense-perception is the 3o 
+function of a special organ, this also, if it continues perceiving 
+beyond the appointed time-limit of its continuous working 
+period, will lose its power, and will do its work no longer. 
+Accordingly, if the waking period is determined by this fact, 
+that in it sense-perception is free; if in the case of some 454 b 
+contraries one of the two must be present, while in the case of 
+others this is not necessary!; if waking is the contrary of 
+sleeping, and one of these two must be present to every animal: 
+
+it must follow that the state of sleeping is necessary. Finally, 
+
+if such affection is Sleep, and this is a state of powerlessness 
+arising from excess of waking, and excess of waking is in its 5 
+
+scholarly analysis of the sense and grammar, that his permission to print it 
+has been gladly accepted. Mr. Cannan suggests that in * 21 we should read 
+ov yàp ei Ti етті (gov, ог (eov (uópiov), and explains * 19-32 as follows: 
+* But it is equally plain that there is nothing which has one of the two 
+always, but both affections belong to the same 247/5 and kinds of 
+animals [az»:a/s, for plants are excluded above]. For [(a) as to parts] 
+it does not follow that, if some part of an animal has sense-perception, 
+it—the mere part— has the faculty. either of sleeping or of waking; for 
+both these affections are incident, not to a single organ, but to the 
+primary faculty of sense-perception [for example, the heart is not always 
+asleep and the brain always awake (cf. Michael, p. 44. 13, Arist. 4553" 13), 
+for in the proper sense they do not sleep or wake at all]; nor [(2)'as 
+to kinds], on the other hand, can either sleeping or waking attach itself 
+for ever, to the exclusion of the other, to the same thing, in the sense 
+that some particular kind of animal [e.g. the weasel] is always awake, 
+and some other [e.g. the dormouse) is always asleep. For (6r) all 
+things having a natural £pyov become incapable in time of that еруоу; 
+therefore, that of which ro аісбауєсда is ап Еруоу will become incapable 
+of 76 аѓсдауєсда, and leave a blank which must be filled up with sleep, 
+its contrary.’ 
+
+1 Read in 454b 1 with EMY тор Ó' évavriov ray меу ауаукц батероу dci 
+mapeiwat, тә» 8 од. There are certain pairs of contraries (e.g. xaxia and 
+аретп, Cf. 1145* 25) one of which is not always predicable of living animals ; 
+while there are others of which one must be always present, and to this 
+class belong sleep and waking. 
+
+454 b DE SOMNO ET VIGILIA 
+
+origin sometimes morbid, sometimes not, so that the power- 
+lessness or dissolution of activity will be so or not; it is 
+inevitable that every creature which wakes must also be 
+capable of sleeping, since it is impossible that it should con- 
+tinue actualizing its powers perpetually. 
+. So, also, it is impossible for any animal to continue always 
+ro sleeping. For sleep is an affection of the organ! of sense- 
+perception—a sort of tie or inhibition of function imposed on 
+it, so that every creature that sleeps must needs have the 
+organ of sense-perception. Now, that alone which is capable 
+of sense-perception in actuality has the faculty of sense- 
+perception ; but to realize this faculty, in the proper and 
+unqualified sense, is impossible while one is asleep. All 
+sleep, therefore, must be susceptible of awakening. Accord- 
+15 ingly, almost all other animals are clearly observed to partake 
+in sleep, whether they are aquatic, aerial, or terrestrial, sincc 
+fishes of all kinds, and molluscs, as well as all others which havc 
+cyes, have been seen sleeping. * Hard-eyed' creatures and 
+insects manifestly assume the posture? of sleep; but the sleep 
+of all such creatures is of brief duration, so that often it might 
+well baffle one's observation to decide whether they sleep? 
+or not. Of testaceous animals, on the contrary, no direct 
+sensible evidence is as yet forthcoming to determine whether 
+they sleep, but if the above reasoning be convincing to any 
+one, he who follows it will admit this* [viz. that they do so]. 
+That, therefore, all animals sleep may be gathered from 
+these considerations. For an animal is defined as such by 
+its possessing sense-perception ; and we assert that sleep is, 
+in a certain way, an inhibition of function, or, as it were, a tie, 
+imposed on sense-perception, while its loosening or remission 
+constitutes the being awake. But no plant can partake in 
+either of these affections, for without sense-perception there 
+
+2 
+
+о 
+
+ta 
+ел 
+
+! What affects the organ, affects the faculty, id theré is no need to 
+press the distinction here. 
+
+? [f we cannot see that they are asleep, we can see them “ couching '. 
+The notion of коту in коцфиеуа is important ; the allusion to it contains 
+the point here. 
+
+5 peréxovau той кабеидер, not = кабейдомов. The point is that mere ob- 
+servation cannot decide the general question: but with the а priori 
+argument (ó Хехбее Абуов) it helps to convince. 
+
+4 [Read тофто for rovro, with Bywater, /. P. xxviii. 243. Edd.] 
+
+CHAPTER I 454 b 
+
+is neither sleeping nor waking. But creatures which have 
+sense-perception have likewise the feeling of pain and plea- 3o 
+sure, while those which have these have appetite as well; but 
+plants have none of these affections. A mark of this! is 
+
+that the nutrient part does its own work better when 455a 
+(the animal) is asleep than when it is awake. Nutrition 
+
+and growth are then especially promoted, a fact which 
+implies that creatures do not need sense-perception to assist 
+these processes. l 
+
+CHAPTER II 
+
+We must now proceed to inquire into the cause why one 
+sleeps and wakes, and into the particular nature of the sense- 
+perception, or sense-perceptions, if theré be several, on which 
+these affections depend. Since, then, some animals possess 5 
+all the modes of sense-perception, and some not all, not, for 
+example, sight, while all possess touch and taste, except such 
+animals as are imperfectly developed, a class of which we 
+have already treated in our work on the soul ; and since an 
+animal when asleep is unable to exercise, in the simple sense, 
+any particular? sensory faculty whatever, it follows that in 10 
+the state called sleep the same affection must extend to all 5 
+the special senses ; because, if it attaches itself to one of them 
+but not to another, then an animal while asleep may perceive 
+with the latter ; but this is impossible. 
+
+Now, since every sense has something peculiar, and also 
+something common; peculiar, as, e.g., seeing is to the sense 
+of sight, hearing to the auditory sense, and so on with the 15 
+other senses severally ; while all are accompanied by a com- 
+mon power, in virtue whereof a person perceives ‘at he sees 
+or hears (for, assuredly, it is not by the special * sense of sight 
+that one sees that he sees; and it is not by mere taste, or 
+
+1 Separableness of the nutrient from the sentient faculty. 
+
+2 Sleep is an affection of the general faculty rò aieÓgrikóv mdyroyv, 
+which does not preclude such exercise of this as takes place in 
+dreaming. | 
+
+5 The text is exceedingly doubtful: cf. 825 /z7/a (where the conclusion 
+of the matter is given) 5:6 каї raow imdpyxe rots (dos, and also the words 
+el yap T@ тасас ті mretrovOevat š 27-8. 
+
+* But by the ‘general’ sense, gza related to the ‘ special’. 
+
+455a DE SOMNO ET VIGILIA 
+
+sight, or both together that one discerns, and has the faculty of 
+discerning, that sweet things are different from white things, 
+but by a faculty connected in common with all the organs of 
+
+20 sense; for there is one sensory function, and the controlling 
+sensory faculty is one, though differing as a faculty of percep- 
+tion! in relation to each genus of sensibles, e. g., sound or 
+colour); and since this [common sensory activity] subsists in 
+association chiefly with the faculty of touch (for this [touch] 
+can exist apart from all the other organs of sense, but none 
+of them can exist apart from it—a subject of which we 
+
+25 have treated in our speculations concerning the Soul); it is 
+therefore evident that waking and sleeping are an affection 
+
+_ of this [common and controlling organ of sense-perception |. 
+This explains why they belong to all animals, for touch 
+[with which this common organ is chiefly connected], alone, 
+[is common] to all [animals]. 
+
+For if sleeping were caused by the special senses having 
+each and all undergone some affection, it would be strange 
+that these senses, for which it is neither necessary nor in 
+a manner possible to realize their powers simultaneously, 
+
+3o should necessarily all go idle and become motionless simul- 
+taneously. For the contrary experience, viz. that they 
+should not go to rest altogether, would have been more 
+reasonably anticipated. But, according to the explanation 
+just given, all is quite clear regarding those also. For, when 
+the sense organ which controls all the others, and to which 
+all the others are tributary, has been in some way affected, 
+
+455b that these others should be all affected at the same time 
+is inevitable, whereas, if one of the tributaries becomes power- 
+less, that the controlling organ should also become powerless 
+need in no wise follow. 
+
+It is indeed evident from many considerations that slecp 
+does not consist in the mere fact that the special senses do 
+not function or that one does not employ them; and that 
+it does not consist merely in an inability to exercise the 
+
+5 sense-perceptions ; for such is what happens in cases of 
+swooning. А swoon means just such impotence of percep- 
+
+! tò 9 elvai aicOnoe erepov. Cf. 4592 16 то ё elvai фаутастік. aicOnoer 
+governs тоо yevous. Cf. 449% 18 (note). 
+
+CHAPTER II 455 b 
+
+/ tion, and certain other cases of unconsciousness also аге of 
+this nature. Moreover, persons who have the blood-vessels 
+in the neck compressed become insensible. But sleep super- 
+venes when such incapacity of exercise has neither arisen in 
+some casual organ of sense, nor from some chance cause, 
+but when, as has been just stated, it has its seat in the !o 
+primary organ with which one perceives objects in general. 
+For when this has become powerless all the other sensory 
+organs also must lack power to perceive; but when one of 
+them has become powerless, it is not necessary for this also 
+to lose its power. 
+
+We must next state the cause to which it is due, and 
+its quality as an affection. Now, since there are several 
+types of cause (for we assign equally the ‘final’, the * efficient’, 15 
+the ‘ material ', and the ‘ formal’ as causes), in the first place, 
+then, as we assert that Nature operates for the sake of an 
+end, and that this end is a good ? ; and that to every creature 
+which is endowed by nature with the power to move, but 
+cannot with pleasure ? to itself move always and continuously, 
+rest is necessary and beneficial ; and since, taught by experi- 
+ence, men apply to sleep this metaphorical * term, calling 
+it a “rest” [from the strain of movement implied in sense- 
+perception]: we conclude that its end is the conservation of 
+animals. But the waking state is for an animal its highest 
+end, since the exercise of sense-perception or of thought is the 
+highest end for all beings to which either of these appertains ; 
+inasmuch as these are best, and the highest end is what is 
+best: whence it follows that sleep belongs of necessity to 25 
+each animal. I use the term ‘necessity’ in its conditional 
+sense, meaning that if an animal is to exist and have its own 
+proper nature, it must have certain endowments; and, if these 
+
+to 
+о 
+
+1 See 440% 17 то aioOnrixov партоу. 
+ауатауоче is an end, i.e. а good ; but /Ze end, i. e. the highest end, of 
+animal life is то аіо0. каї rò $poveiv, to which vUmvos is subordinated. Cf. 
+infra > 23-25. Тһе ауаббу т‹ is distinguished from rò теХов. 
+
+3 Anaxagoras held that all aïsônoıs is pera Avmns. Theophr. de Sens. 
+$29. Cf. also Aristotle, Л. Æ. 115477 dei yàp movet то (ov Фотер xai oi 
+QvotoAóyot paprvpoUgt, ró брау, тб dkovew dáaxovres elvat AuTNpdv. 
+
+4 Тһе metaphor is plain enough in the Greek word avamavots. 
+No word in English seems to meet the case so well as ‘rest’. EM give 
+катафораһр, which, however, it would be difficult to translate here. But cf. 
+karaQéprrai, 456? 24. 
+
+455 b 
+
+- 
+59 
+
+DE SOMNO ET VIGILIA 
+
+are to belong to it, certain others likewise must belong to it 
+[as their condition]. 
+
+The next question to be discussed is that of the kind of 
+movement or action, taking place within their bodies, from 
+which the affection of waking or sleeping arises in animals. 
+Now, we must assume that the causes of this affection in all 
+other animals are identical with, or analogous to, those which 
+operate in sanguineous animals ; and that the causes operat- 
+ing in sanguineous animals generally are identical with those 
+operating in man. Hence we must consider the entire sub- 
+ject in the light of these instances [afforded by sanguineous 
+
+456 a animals, especially man]. Now, it has been definitely settled 
+
+ел 
+
+ш- 
+о 
+
+already іп another work that sense-perception іп animals 
+originates in the same part of the organism in which move- 
+ment originates. This locus of origination is one of three 
+determinate loci, viz. that which lies midway between the 
+head and the abdomen. This in sanguineous animals is 
+the region of the heart; for all sanguineous animals have 
+a heart; and from this it is that both motion and the con- 
+trolling sense-perception originate. Now, as regards move- 
+ment, it is obvious that that of breathing and of the cooling 
+process generally takes its rise there; and it is with a view to 
+the conservation of the [due amount of] heat in this part that 
+nature has formed as she has both the animals which respire, 
+and those which cool themselves by moisture. Of this 
+[cooling process] fer se we shall treat hereafter. In bloodless 
+animals, and insects, and such as do not respire, the “соп- 
+natural spirit'! is seen alternately puffed up and subsiding 
+in the part which is in them analogous [to the region of the 
+heart in sanguineous animals]. This is clearly observable 
+in the holoptera [insects with undivided wings] as wasps and 
+bees; also in flies and such creatures. And since to move 
+
+15 anything, or do anything, is impossible without strength, and 
+
+holding the breath produces strength—in creatures which 
+inhale, the holding of that breath ? which comes from without, 
+
+! тд “cuphuroy mveüpa, i.e. the mveópa which is naturally inherent, as 
+opposed to that inhaled (rà Фурабеу ётєісактор). 
+2% бирабеу i is short for , Tov борабер mvevparos kdÜe£is, as ñ соџфотоѕ 
+also = у тод cundbúrou mrevparos кабебіс. 
+
+CHAPTER Il 456a 
+
+but, in creatures which do not respire, of that which is con- 
+natural (which explains why winged insects of the class 
+holoptera, when they move, are perceived to make a hum- 
+ming noise, due to the friction of the connatural spirit collid- 
+ing with the diaphragm); and since movement? is, in every го 
+animal, attended? with some sense-perception, either internal 
+or external?, in the primary organ of sense, [we conclude] 
+accordingly that if sleeping and waking are affections of this 
+organ, the place in which, or the organ in which, sleep and 
+waking originate, is self-evident [being that in which move- 25 
+ment and sense-perception originate, viz. the heart |. 
+
+Some persons move in their sleep, and perform many acts 
+like waking acts, but not without a phantasm or an exercise 
+of sense-perception ; for a dream is in a certain way a sense- 
+impression. But of them we have to speak later on. Why 
+it is that persons when aroused remember their dreams, but 
+do not remember these acts which are like waking acts, has 
+been already explained in the work ‘ Of Problems’. 
+
+CHAPTER III 
+
+The point for consideration next in order to the preceding 30 
+is :— What are the processes in which the affection of waking 
+and sleeping originates, and whence do they arise? Now, 
+since it is when it has sense-perception that an animal must 
+first zaket food and receive growth, and in all cases food in its 
+ultimate form is, in sanguineous animals, the natural sub- 35 
+stance blood, or, in bloodless animals, that which is analogous 
+to this; and since the veins are the place of the blood, while 456 b 
+the origin of these is the heart—an assertion which is proved — 
+by anatomy—it is manifest that, when the external nutrimeni >> А 
+
+! коеітас... аісбптпріф. Aristotle does not mean that whenever опе * ~ 
+has ап alaÜneis he moves (or is moved) locally. Тһе xweira« here and 
+the xwety 8 15 refer to /oca movement, involving output of bodily energy, 
+not to the xiynors (ог stimulation) of sense. 
+
+2 820 If instead of. yuopévns (š 20) yevouévgs were read, the movement 
+should be regarded as prompted by the perception—a very important 
+difference. 
+
+* oixeias ñ а\\отріаѕ : arising either from an intra-organic or an extra- 
+organic stimulus. 
+
+i,e. gua animal; before this, in the embryonic stage, it grows and 45 
+nourished like a vegetable. 
+
+456b DE SOMNO ET VIGILIA 
+
+enters the parts fitted for its reception, the evaporation arising 
+
+from it enters into the veins, and there, undergoing a change, 
+s is converted into blood, and makes its way to their source 
+
+[the heart]. We have treated of all this when discussing 
+
+the subject of nutrition; but must here recapitulate what was 
+
+there said, in order that we may obtain a scientific view of the 
+beginnings of the process, and come to know what exactly 
+happens to the primary organ of sense-perception to account 
+for the occurrence of waking and sleep. For sleep, as has 
+10 been shown, is not any given impotence of the perceptive 
+faculty ; for unconsciousness, a certain form of asphyxia, and 
+swooning, all produce such impotence. Moreover it is an estab- 
+lished fact that some persons in a profound trance have still had 
+the imaginative faculty in play. This last point, indeed, gives 
+rise to a difficulty ; for if it is conceivable that one who had 
+swooned should in this state fall asleep, the phantasm also which 
+then presented itself to his mind might be regarded as a dream. 
+15 Persons, too, who have fallen into a deep trance, and have 
+come to be regarded as dead, say many things while in 
+this condition. The same view, however, is to be taken of 
+all these cases, [i.e. that they are not cases of sleeping or 
+dreaming |. 
+
+As we observed above, sleep is not co-extensive with any and 
+every impotence of the perceptive faculty, but this affection is 
+one which arises from the evaporation attendant upon the 
+process of nutrition. The matter evaporated must be driven 
+onwards to a certain point, then turn back, and change its 
+current to and fro, like a tide-race in a narrow strait. Now, 
+in every animal the hot naturally tends to. move [and carry 
+other things] upwards, but when it has reached the parts above, 
+[becoming cool, see 457 ^ 30] it turns back again, and moves 
+downwards in a mass. This explains why fits of drowsiness are 
+especially apt to come on after meals; for the matter, both the 
+
+25 liquid and the corporeal, which is borne upwards in a mass, is 
+
+then of considerable quantity. When, therefore, this comes to 
+
+a stand it weighs a person down and causes him to nod, but 
+
+`w when it has actually sunk downwards, and by its return has re- 
+
+x ~ pulsed the hot, sleep comes on, and the animal so affected is 
+SR ` presently asleep. A confirmation of this appears from consider- 
+
+x. 
+
+- 
+
+2 
+
+о 
+
+CHAPTER III 456 b 
+
+ing the things which induce sleep; they all, whether potable 3o 
+or edible, for instance poppy, mandragora, wine, darnel, produce 
+
+a heaviness in the head ; and persons borne down [by sleepi- 
+ness] and nodding [drowsily] all seem affected in this way, 
+
+i. e. they are unable to lift up the head or the eye-lids. Апа 
+
+it is after meals especially that sleep comes on like this, for 
+
+the evaporation from the foods eaten is then copious. It also 
+follows certain forms of fatigue ; for fatigue operates as a 
+solvent, and the dissolved matter acts, if not cold, like food 35 
+prior to digestion. Moreover, some kinds of illness have 457a 
+this same effect ; those arising from moist and hot secretions, 
+as happens with fever-patients and in cases of lethargy:! 
+Extreme youth also has this effect ; infants, for example, 
+sleep a great deal, because of the food being all borne upwards 
+—a mark whereof appears in the disproportionately large size 
+of the upper parts compared with the lower during infancy, 
+which is due to the fact that growth predominates in the 
+direction of the former. Hence also they are subject to 
+epileptic? seizures; for sleep is like epilepsy, and, in a sense, 
+actually is a seizure of this sort. Accordingly, the beginning 10 
+of this malady takes place with many during sleep, and their 
+subsequent habitual seizures occur in sleep, not in waking 
+hours. For when the spirit [evaporation] moves upwards in 
+a volume, on its return downwards it distends the veins, and 
+forcibly compresses the passage through which respiration is 
+effected. This explains why wines are not good for infants 
+or for wet nurses (for it makes no difference, doubtless, 
+whether the infants themselves, or their nurses, drink them), 
+but such persons should drink them [if at all| diluted with 
+water and in small quantity. For wine is spirituous, and of all 
+wines the dark more so than any other. The upper parts, 
+in infants, are so filled with nutriment that within five months 
+[after birth] they do not even turn the neck [sc. to raise the 
+head] ; for in them, as in persons deeply intoxicated, there is 
+ever a large quantity of moisture ascending. It is reasonable, 
+
+“J 
+
+om 
+
+5 
+
+to 
+
+о 
+
+! lf ev Бе right, AnOupyos may be either a substantive or an adjective 
+in agreement with тәретоіс understood. 
+$ Not merely childish fits and convulsions, but ед еріс fits. The 
+
+word in this sense is as old as Hippocrates, and the facts here stated are 
+all medical truths. 
+
+457 а DE SOMNO ET VIGILIA 
+
+too, to think that this affection is the cause of the embryo’s 
+remaining at rest іп the womb at first. Also, as a general rule, 
+persons whose veins are inconspicuous, as well as those who 
+are dwarf-like, or have abnormally large heads, are addicted 
+to sleep. For in the former the veins are narrow, so that 
+it is.not easy for the moisture to flow down through them ; 
+while in the case of dwarfs and those whose heads are ab- 
+25 normally large, the impetus of the evaporation upwards is 
+excessive. Those [on the contrary] whose veins are large 
+are, thanks to the easy flow through the veins, not addicted 
+to sleep, unless, indeed, they labour under some other affec- 
+tion which counteracts [this easy flow]. Мог are the 'atra- 
+bilious' addicted to sleep, for in them the inward region is 
+cooled so that the quantity of evaporation in their case is not 
+great. For this reason they have large appetites, though 
+3o spare and lean; for their bodily condition is as if they 
+derived no benefit from what they eat. The dark bile, too, 
+being itself naturally cold, cools also the nutrient tract, and 
+the other parts wheresover such secretion [bile] is potentially 
+present [i. e. tends to be formed]. 
+457b Hence it is plain from what has been said that sleep is 
+a sort of concentration, or natural recoil! of the hot matter 
+inwards [towards its centre], due to the cause above men- 
+tioned. Hence restless movement is a marked feature in the 
+case of a person when drowsy. But where it [the heat in the 
+upper and outer parts] begins to fail, he grows cool, and 
+owing to this cooling process his eye-lids droop. Accord- 
+5ingly [in sleep] the upper and outward parts are cool, but 
+
+1 What is meant is otherwise expressed, 458% Io сууеоа рё kTÀ. 
+бутитеріатаочх is not here used in its strict sense, іп which it involves real 
+‘circulation’, Hence ris goes with it as well as with ооробов. дутітеріста- 
+ows is defined by Simplicius as a circular process in which * when a body 
+is pushed out of its place that which has expelled it occupies the place, 
+while that which has been thrust out pushes the adjoining body from its 
+place, until the last moved in this series finds itself in the place of the 
+first, which extruded something else’. It depends on the fact that there 
+is no vacuum. (Cf. 266% 25 seqq., 459^ 2, 472^ 17 ; Zeller, Plato (E.T.), 
+р. 430; Zeller, Arist. 1. 515, ii. 378, n.) So Aristotle explained physical 
+facts like the motion of projectiles. Plato, Tim. 79 B-E, uses the word 
+тершәдеі» for what A. refers to dvrurepicranis. We see the effect of the 
+process when on suddenly opening a door in a room the opposite door 
+shuts, or vice versa. Reference to this explains ris арх) 454" 2, g.v. 
+
+CHAPTER III 
+
+the inward and lower, i.e. the parts at the feet and in the 
+interior of the body, are hot. 
+
+Yet one might found a difficulty on the facts that sleep is 
+most oppressive in its onset after meals, and that wine, and 
+other such things, though they possess heating properties, are 
+productive of sleep,! for it is not probable that sleep should be 
+a process of cooling while the things that cause sleeping are 
+themselves hot. Is the explanation of this, then, to be found 
+in the fact that, as the stomach when empty is hot, while 
+replenishment cools it by the movement it occasions, so the 
+passages and tracts іп the head are cooled as the “еуарога- 
+tion’ ascends thither? Or, as those who have hot water 
+poured on them feel a sudden shiver of cold, just so in the 
+case before us, may it be that, when the hot substance ascends, 
+the cold rallying to meet it cools [the aforesaid parts], deprives 
+their native heat of all its power, and compels it to retire? 
+Moreover, when much food is taken, which [i.e. the nutrient 
+evaporation from which] the hot substance carries upwards, 
+this latter, like a fire when fresh logs are laid upon it, is itself 
+cooled, until the food has been digested. | 
+
+For, as has been observed elsewhere; sleep comes on when 
+the corporeal element [in the *evaporation'] is conveyed 
+upwards by the hot, along the veins, to the head. But when 
+that which has been thus carried up can no longer ascend, 
+but is too great in quantity? [to do so], it forces the hot 
+back again and flows downwards. Hence it is that men sink 
+down [as they do in sleep] when the heat which tends to keep 
+them erect (man alone, among animals, being naturally erect) 
+is withdrawn ; and this, when it befalls them, causes uncon- 
+sciousness, and afterwards? phantasy. 
+
+Or are the solutions thus proposed barely conceivable 
+accounts of the refrigeration which takes place, while, as 
+
+! b o. There should be only а comma after roraðra. де here gives the 
+argument from the opponent's point of view, and = ‘ for’. 
+
+? De Part. An. ii. 7, 653? ro. 
+
+? A new factor—mechanical pressure—is here introduced. 
+
+* émureoóv 5С. тд Фтестаосба: rò Ücpuóv. Bonitz, Znd. 267% 32 makes 
+то берибу alone agree with еттесбу, and so Freudenthal translates * wieder- 
+eindringend erzeugt das Warme Bewusstlosigkeit'. émurírrev expresses 
+a hostile attack, an onset. | 
+
+5 ‘Afterwards’, i.e. when the process of duixrors sets іп; cf. 4619 25. 
+
+AR PN G 
+
+457 b 
+
+457 b DE SOMNO ET VIGILIA 
+
+a matter of fact, the region of the brain is, as stated else- 
+where, the main determinant of the matter? For the brain, 
+3o or in creatures without a brain that which corresponds to it, 
+is of all parts of the body the coolest. Therefore, as moisture 
+turned into vapour by the sun's heat is, when it has ascended 
+to the upper regions, cooled by the coldness of the latter, and 
+becoming condensed, is carried downwards, and turned into 
+458 a water once more; just so the excrementitious evaporation, when 
+carried up by the heat to the region of the brain, is condensed 
+into a ‘phlegm’ (which explains why catarrhs are seen to 
+proceed from the head); while that evaporation which is 
+5 nutrient and not unwholesome, becoming condensed, descends 
+and cools the hot. The tenuity or narrowness of the veins 
+about the brain itself contributes to its being kept cool, and 
+to its not readily admitting the evaporation. This, then, is 
+a suffidient explanation of the cooling which takes place, 
+despite the fact that the evaporation is exceedingly hot. 
+io A person awakes from sleep when digestion is completed : 
+when the heat, which had been previously forced together in 
+large quantity within a small compass from out the surround- 
+ing part, has once more prevailed, and when a separation has 
+been effected! between the more corporeal and the purer 
+blood. The finest and purest blood is that contained in the 
+head, while the thickest and most turbid is that in the lower 
+15 parts. The source of all the blood is, as has been stated 
+both here and elsewhere, the heart. Now of the chambers in 
+the heart the central communicates with each of the two 
+others. Each of the latter again acts as receiver from each, 
+respectively, of the two vessels? called the *great' and the 
+*aorta'. It is in the central chamber that the [above-men- 
+20 tioned] separation takes place. То go into these matters 
+in detail would, however, be more propeily the business of 
+a different treatise from the present. Owing to the fact that 
+the blood formed after the assimilation of food is especially 
+
+! Sc. in the heart ; see below ? 19. 
+
+2 Contained in the ‘ evaporated substance’ now collected back into the 
+heart. | 
+
+° To use the term ‘artery’ here in translation would mislead any mere 
+English reader into thinking that Aristotle knew the difference between 
+arteries and veins. 
+
+CHAPTER III 458a 
+
+in need of separation, sleep [then especially] occurs [and 
+lasts] until the purest part of this blood has been separated 
+off into the upper parts of the body, and the most turbid 
+into the lower parts. When this has taken place animals 
+awake from sleep, being released from the heaviness conse- 
+quent on taking food. | | 
+
+We have now stated the cause! of sleeping, viz., that it 25 
+consists in the recoil by ? the corporeal element, upborne by 
+the connatural heat, in a mass upon the primary sense-organ ; 
+we have also stated what* sleep is, having shown that it is 
+a seizure of the primary sense-organ, rendering it unable to 
+actualize its powers ; arising of necessity (for it is impossible зо 
+for an animal to exist if the conditions which render it an 
+animal be not fulfilled), i. e., for the sake of its conservation‘ ; 
+since remission of movement tends to the conservation of 
+animals. 
+
+1 This gives the cause 00еу ñ xivnots, or efficient cause: the kinetic 
+energy of то epuóv. The material cause is то ауабдошорєроу, and the other 
+material conditions, regarded statically, i.e. in abstraction from their 
+Kiyats. 
+
+2 j...dvrurepioragus SC. ycyvogévg. In 458? І тб беррду is used for 
+Tò ооратббес то avah. tmo той cundórou бериоо here. The agency which 
+causes the recoil is the cold of the brain: hence ітб 826 = (not ' caused 
+by’, but) ‘undergone by’. The іто in this sense is curious, but arr:- 
+mepigracis (corresponding to dvrimeptornvat, not. to dvrurepuorávat) 15 a sort 
+of manceuvre effected by the substance. 
+
+3 i. e. its definition or formal cause. 
+* cornpía is the final cause. 
+
+458b 
+
+5 
+
+DE SOMNIIS 
+CHAPTER I 
+
+WE must, in the next place, investigate the subject of the 
+dream, and first inquire to which of the faculties of the soul it 
+presents itself, i. e. whether the affection is one which per- 
+tains to the faculty of intelligence or to that of sense- percep- 
+tion; for these are the only faculties within us by which we 
+acquire knowledge. 
+
+If, then, the exercise of the faculty of sight is actual seeing, 
+that of the auditory faculty, hearing, and, in general that of 
+the faculty of sense-perception, perceiving ; and if there are 
+some perceptions common to the senses, such as figure, mag- 
+nitude, motion, &c., while there are others, as colour, sound, 
+taste, peculiar [each to its own sense]; and further, if all 
+creatures, when the eyes are closed in sleep, are unable to see, 
+
+and the analogous statement is true of the other senses, so 
+
+that manifestly we perceive nothing! when asleep; we may 
+conclude that it is not by sense-perception we perceive 
+a dream. 
+
+But neither is it by opinion that we do so. For [in 
+dreams] we not only assert, e.g., that some object approach- 
+ing is a man or a horse [which would be an exercise of 
+opinion], but that the object is white or beautiful, points 
+on which opinion without sense-perception asserts nothing 
+
+! 458» 8. Read after Christ's соп). ovdév еу. We do not perceive any- 
+thing in sleep with the particular or special senses, but the тротоу аѓісбдртікбь 
+is active in the dream, i.e. we “perceive, іп a way to be explained 
+in these chapters, with the general sense as re-presentative faculty. 
+Biehl wrongly marks the apodosis at Фоте 98: it really begins at ойк 
+ара ye bo. Тһе ócre clause states the consequence of the fact contained 
+in the clause commencing aduvaret де, and therefore belongs to the 
+premisses. ‘ We cannot by sense perceive either the коа or the tha 
+in sleep, so that we cannot then perceive anything at all; therefore it 
+is not by sense that we perceive a dream (not, that is, by special sense, 
+as afterwards to be explained). Such is the argument. 
+
+CHAPTER I 
+
+either truly or falsely. It is, however, a fact that the soul 
+makes such assertions in sleep. We seem to see equally well 
+that the approaching figure is a man, and that it is white. 
+[In dreams], too, we think something else, over and above 
+the dream presentation, just as we do in waking moments 
+when we perceive something ; for we often also reason about 
+that which we perceive. So, too, in sleep we sometimes have 
+thoughts other than the mere phantasms immediately before 
+our minds. This would be manifest to any one who should 
+attend and try, immediately on arising from sleep, to remem- 
+ber [his dreaming experiences]. There are cases of persons 
+who have seen such dreams, those, for example, who believe 
+themselves to be mentally arranging a given list of subjects 
+according to the mnemonic rule. They frequently find 
+themselves engaged in something else besides the dream, viz. 
+in setting a phantasm which they envisage into its mnemonic 
+position.’ Hence it is plain that not every ' phantasm ' in sleep 
+is a mere dream-image, and that the further thinking which we 
+perform then is due to an exercise of the faculty of opinion. - 
+So much at least is plain on all these points, viz. that 
+the faculty by which, in waking hours, we are subject to 
+illusion when affected by disease, is identical with that which 
+produces illusory effects in sleep. So, even when persons are 
+in excellent health, and know the facts of the case perfectly 
+well, the sun, nevertheless, appears? to them to be only a 
+foot wide. Now, whether the presentative faculty of the 
+soul be identical with, or different from, the faculty of sense- 
+perception, in either case the illusion does not occur without 
+our actually seeing or [otherwise] perceiving something. Even 
+1 The word $ávraepa here and іп b 24-15, according to Freudenthal, а 
+generalized ‘ vorstellung ', of the nature of a concept. But as we see from 
+458? 18 and 462% 29 its proper application is to the dream-image. Неге 
+that which is тара ró évurmoy is not the mere фаутасие, but the activity 
+of thought expressed in riÜeaat eis тду тбпоу фартасиа, this clause being 
+in apposition to dÀAo rt, which it explains. In b 24, however, фа?тасна 
+
+seems to refer to that activity. 
+2 okei is here used improperly for the more correct файжта. See 
+
+458 b 
+
+бә 
+о 
+
+de Ал. 4289 1-3 qaiverat pév ó FAcos modulos, пётесто Ó ° «уа: рео тўе ` 
+
+oikovuévgs. See also 460° 18. We cannot suppose Aristotle to be here 
+alluding to the unscientific opinion of those who (like Epicurus and his 
+school afterwards) insisted that the sun. is only so large as it seems to 
+the eye. Cf. Kant's reference to the ‘ persistent illusion’ of sense on 
+this point (of the size of the sun or moon). 
+
+458b | DE SOMNIIS 
+
+to see wrongly or to hear wrongly can happen only to one 
+who sees or hears something real, though not exactly what he 
+supposes. But we have assumed that in sleep one neither 
+459 а sees, nor hears, nor exercises any sense whatever. Perhaps 
+we may regard it as true that the dreamer sees nothing, yet 
+as false that his faculty of sense-perception is unaffected, the 
+fact being that the sense of seeing and the other senses may . 
+possibly be then in a certain way affected, while cach of these 
+affections, as duly as when he is awake, gives its impulse in 
+5a certain manner to his [primary] faculty of sense, though 
+not in precisely the same manner! as when he is awake. 
+Sometimes, too, opinion says [to dreamers] just as to those 
+who are awake, that the object seen is an illusion; at other 
+times it is inhibited, and becomes a mere follower of the 
+phantasm. 
+
+It is plain therefore that this affection, which we name 
+
+‘dreaming’, is no mere exercise of opinion or intelligence, 
+ro but yet is not an affection of the faculty of perception in the 
+simple sense? If it were the latter it would be possible 
+[when asleep] to hear and see in the simple sense. 
+
+How then, and in what manner, it takes place, is what we 
+have to examine. Let us assume, what is indeed clear 
+enough, that the affection [of dreaming] pertains to sense- 
+perception as surely as sleep itself does. For sleep does not 
+pertain to one organ in animals and dreaming to another ; 
+both pertain to the same organ. 
+
+15 But since we have, in our work on the Soul? treated of 
+presentation and the faculty of presentation is identical 
+
+1 обу... Фатер: not directly from the айобпттоу, but indirectly or me- 
+
+diately from the residual xivnois—the айюбптиа vnóAourov. 
+
+2 пісдауеобда: dwAGs: Opp. ката mpdaGeow, ‘with a difference or qualifi- 
+cation” Dreaming is afterwards shown to be aic@dveoOa іп a secondary 
+sense, or ката avpuBeBnkós, 1. е. in virtue of the residual коес left in the 
+organs after ato6nais has departed. 
+
+* 427° 27-4298 9. 
+
+í The word ‘imagination’, owing to popular and psychological asso- 
+ciations, is unfitted to be a rendering of $arracía here, and ‘ presenta- 
+tion’ is now a recognized term x re-presentation. For the operation 
+of darvracia in ordinary aivénors see 460" 18, where $aíverai = to have а 
+presentation —a $irracpga— not a 7e-presentation. Presentation differs 
+from aig@nots (in which it is involved). It is the aspect in which that 
+which а(обуоіе apprehends is put before the mind’s eye, so to speak. 
+«420015 takes the «їду dvev vAns of alcOnra, and ‘ presents? them as 
+
+CHAPTER I 459 a 
+
+with ! that of sense-perception, though the essential notion of 
+
+a faculty of presentation is different from that of a faculty 
+of sense-perception ; and since presentatioñ is the movement 
+set up by a sensory faculty when actually discharging its 
+function, while a dream appears to be a presentation (for 
+a presentation which occurs in sleep—whether simply? or in 20 
+some particular way—is what we call a dream): it manifestly 
+follows that dreaming is an activity of the faculty of sense- 
+perception, but belongs to this faculty gua presentative. - 
+
+CHAPTER II 
+
+We can best obtain a scientific view of the nature of the 
+dream and the manner in which it originates by regarding it 
+in the light of the circumstances attending sleep. The objects 25 
+of sense-perception corresponding cach sensory organ pro- 
+duce sense-perception in us, and the affection due to their 
+operation is present in the organs of sense not only when 
+the perceptions are actualized, but even when they have 
+departed. 
+
+What happens in these cases may be compared with what 
+happens in the case of projectiles moving in space. For in 
+the case of these the movement continues even when that 
+which set up the movement is no longer in contact [with the 3o 
+things that are moved]. For that which set them in motion 
+moves’ a certain portion of air, and this, in turn, being moved 
+excites motion in another portion; and so, accordingly, it is 
+in this way that [the bodies], whether in air or in liquids, 
+continue moving, until they * come to a standstill. 
+
+material of thought or opinion. This explains how rò eivat avracrixg (the 
+essential notion of a faculty of presentation) differs from rà elvat аѓсбттікф, 
+See 449% 16-20, 454% 19, 455* 21, with notes. | 
+
+1 i.e. inseparable 2202270, and іп concrete existence, from it. 
+
+2 апл : without specifying particular conditions: rpómo» Tud, i.e. in 
+the way defined 462* 29, where the ódyracua of the dream is said to be 
+formed ато ris кіуцоеов roy alaOnpárov : the case to which the dream proper 
+is here restricted. 
+
+5 éxivnoev not ‘consuetudinal aorist ’, but referring to the time of муфта». 
+Still it may be rendered as in the text. 
+
+t Zes dv orn sc. та фербиеуа. While their movement lasts it is to this 
+cause it is due. The emphasis lies on rovrov róv трбто. Тһе move- 
+ment lasts until the last thing (portion of air) has come into the place of 
+the first movement —éos rìs dpyrs. See next note but one. 
+
+459 b 
+
+en 
+
+IO 
+
+DE SOMNIIS 
+
+This we must likewise assume to happen in the case of 
+qualitative change!; for that part which [for example] has been 
+heated by something hot, heats [in turn] the part next to it, 
+and this propagates the affection continuously onwards until 
+the process has come round to its point of origination.? This 
+must also happen in the organ wherein the exercise of sense- 
+perception takes place, since sense-perception, as realized in 
+actual perceiving, is a mode of qualitative change. This 
+explains why the affection continues in the sensory organs, 
+both in their deeper and in their more superficial parts, not 
+merely while they are actually engaged іп perceiving, but even 
+after they have ceased to do so. That they do this, indeed, is 
+obvious in cases where we continue for some time engaged 
+in a particular form of perception, for then, when we shift 
+the scene of our perceptive activity, the previous affection 
+remains; for instance, when we have turned our gaze from 
+sunlight? into darkness. For the result of this is that one 
+sees nothing, owing to the motion excited by the light 
+still subsisting in our eyes. Also, when we have looked 
+steadily for a long while at one colour, e. g. at white or green, 
+that to which we next transfer our gaze appears to be of 
+
+! Not merely, as with projectiles, in change of place. 
+
+2 “әс rrjs apyns. The process of dAdoiwors in a material body is like that 
+of dvrurepiaracis (see note 457? 2), which ends when the last thing moved 
+takes the place vacated by the first. This place is 5 dpyy: i.e. 
+the place dev ў xümodc архета. Something is here supposed to occur 
+in the process of heating analogous to what occurs in the case of the 
+projectile. The heat having been applied (and then withdrawn—this is 
+the meaning), something (corresponding to the displaced part of the air) 
+is displaced by it in тб wAnoiov, which becomes hot, while that which 
+was displaced again retires, and so оп (кат dvraÀAayyv тӧу тбтоу, as 
+Simplic. would say) until the process ends where it began. Тһе air in 
+successive parts retires before the stone; what retires before rò Oepuáv? 
+то Nrvxpór or 7 Wuxpérns, which for Aristotle was a positive. The con- 
+clusion of the process in the case of the stone is a state of rest—the 
+stopping of the stone. What is it in the case of Óépuavysw (a word 
+which Bonitz omits in his Index, though it occurs 10679 12 g.7.)? Тһе 
+answer 15--) беррбтпе тоо дАо», With this the «ivnow (involved in the 
+АХХоішоче) ceases: for есті ody n дєрибтпе kivgaus, АМ n Géppavors (10679 
+12). We cannot look for an exact parallel to all this in the case of atc Onors, 
+which at most is only aAAoíecis ris: yet something analogous to avri- 
+терістасче seems to occur in the xuncets that, as it were, ‘circulate’ between 
+the external ‘ points of sense’ (eye, ear, ЖҮ and the коргох, between which 
+poles the xuncetç and the inhibiting forces (their negatives) move. 
+
+3 If we had been gazing at the sun itself we should not ‘see nothing’, 
+but continue to see the sun, as stated below 459 P 13. 
+
+CHAPTER II 
+
+the same colour. Again if, after having looked at the sun 
+or some other brilliant object, we close the eyes, then, if 
+we watch carefully, it appears in a right line with the direction 
+of vision (whatever this may be),at first in its own colour ; then 
+it changes to crimson, next to purple, until it becomes black 
+and disappears. Апа also when persons turn away from 
+looking at objects in motion, e.g. rivers, and especially those 
+which flow very rapidly, they find that the visual stimula- 
+tions! still present themselves, for the things really at rest are 
+then seen moving: persons become very deaf after hearing 
+loud noises, and after smelling very strong odours their power 
+of smelling is impaired ; and similarly in other cases. These 
+phenomena manifestly take place in the way above described.? 
+
+That the sensory organs are acutely sensitive to even a 
+slight qualitative difference [in their objects] is shown by 
+what happens in the case of mirrors; a subject to which, 
+even taking it independently, one might devote close? con- 
+sideration and inquiry. At the same time it becomes plain 
+from them that as the eye [in seeing] is affected [by the 
+object seen], so also it produces & certain effect upon it. 
+‘Speculorum enim admodum nitidorum, si forte mulieres 
+menstruae inspexerint, superficies sanguinea quasi nebula 
+offunditur; et novo quidem speculo haud facile est eius- 
+modi maculam detergere, veteri autem facilius. Quod fit 
+
+! kat... meraBaddXovow. Cf. 460° 28-32 ai кисе ai атд тәу... 
+
+ywópevat . . . фашоғта, From this we learn that ai here agrees with 
+копсевв, and that фагуортай (which occurs іп the clauses just before and 
+after) is to be supplied in the sense of ёт: $aívovrai. ретаВаХУХоуочу here 
+cannot be as Mich. takes it 2 'undergo dAAoiwars’, persistency of impression 
+after transfer of gaze being the point of the sentence, not yeraBoA; 
+on the part of the кой (as with the colour images just before changing 
+to their complementaries, negatives, &c.). We have had it in this sense 
+of ‘transfer’ just above ? 1 3, where peraBadwpey serves as aor. subj. of 
+peradépeww 9 8. The full construction then would be: xai ай amò ray xtwov- 
+pévoy 06 (убре: коес Ext файортас) peraBaddAovow (ту {ну ато 
+тау бете нді olov krÀ. ОҒ course “бе copulat, xai intendit’. It isa 
+matter of indifference for sense or grammar whether after оѓоу we supply 
+ai, or peraBdddovor. There is no need to suspect the ai as a piece of 
+dittography after кай in 5 18. In 46ob 28 the conclusion of the whole 
+argument is set forth. 
+
+* i.e. by the persistence of the qualitative change implied in all per- 
+ception. 
+
+It is simplest to take тері ой каб abrá with акеугавто àv, and understand 
+
+459 b 
+
+-— 
+
+5 
+
+% 
+"Ja 
+
+of course rjv dudvoray (or something equivalent) in the usual way with- 
+
+ётістрсах. 
+
+46oa DE SOMNIIS 
+
+propterea quia visus, ut diximus, non modo patitur quippiam, 
+aere agente, sed etiam facit et agit, id quod debent omnia 
+quae sunt splendida. Visus enim ipse illorum est quae 
+splendida sunt et colorem habent. Oculi igitur, ut con- 
+sentaneum est, eadem qua quaelibet alia pars corporis ratione 
+s se habent; suapte enim natura sunt venosi,' unde fit ut, dum 
+menstrua perturbatione quadam sanguinis et inflammatione 
+profluunt, oculi mulierum, quamvis nos quidem mares, dum 
+intuemur, res fugiat (eadem ? enim seminis quae menstruorum 
+natura), mutationem subeant; illis autem motus vicinus aer 
+eum quoque, qui supra speculum continuus diffunditur, aera 
+io nescio qualem reddit, nempe talem qualiscumque iam antea 
+est ipse redditus ; hic porro superficiem speculi pariter afficit. 
+Ut enim vestimenta, [sic specula] quo sunt puriora, eo citius 
+sordescunt. Quaecunque enim pura sunt, si maculam acce- 
+perint, aperte ostendunt, et purissimum quidque exhibet vel 
+minimas turbationes. Aes vero speculare imprimis, propter 
+levitatem quidem tactum qualemcunque sentit (aéris autem 
+15 tactum oportet pro fricatione quadam et quasi expressione 
+vel ablutione haberi); propterea autem quod purum est, 
+manifeste іп eo apparet tactus quantuluscumque. Quod vero 
+tarde e novis speculis maculae discedunt, id fit quia speculum 
+eiusmodi léve et purum est; namque per talia in altum et 
+20 omnifariam insinuatur infectus; in altum quidem propterea 
+quod pura sunt, omnifariam autem propter levitatem. Contra 
+in veteribus speculis macula idcirco non residet, quod neque 
+perinde in ea penetrat, et summa tantummodo attingit. 
+
+From this therefore it is plain that stimulatory motion is 
+set up even by slight differences, and that sense-perception 
+is quick to respond to it; and further that the organ which 
+
+25 perceives colour is not only affected by its object, but also 
+
+1 фАеВобев бртес as if éPOadpoi not бината had preceded. 
+
+3 The object of the parenthetic words is to explain not the егесті, but 
+the fact that, although éveori, it escapes oux notice. This is due to the 
+fact that the adAoiwors required for perception depends оп the presence 
+of opposites (cp. de An., where the doctrine птасҳе ró аубиооу [отд той 
+dvopotov| memovOos 8 дробу orv is laid down as fundamental). Owing 
+to the identity of ¿ocs here the requisite dvouotórgs does not exist: 
+hence 7 еу rois бинаоч тәу y. piv dógAos. This seems plain enough ; but 
+the words in the translation have been so collocated as to exhibit it in 
+the clearest light. 
+
+CHAPTER Il 46o a 
+
+reacts upon it. Further evidence to the same point is 
+afforded by what takes place in wines, and in the manu- 
+facture of unguents. For both oil when prepared, and 
+wine become rapidly infected by the odours of the things near 
+them ; they not only acquire the odours of the things thrown 3o 
+into or mixed with them, but also those of the things which 
+are placed, or which grow, near the vessels containing them. 7 
+
+In order to answer our original question, let us now, 
+therefore, assume one proposition, which is clear from what 460 b 
+precedes, viz. that even when the external object of perception 
+has departed, the impressions it has made persist, and are 
+themselves objects of perception; and [let us assume], 
+besides, that we are easily deceived respecting the operations 
+of sense-perception when we are excited by emotions,! and 
+different persons according to their different emotions; for 
+example, the coward when excited by fear, the amorous 5 
+person by amorous desire ; so that, with but little resemblance 
+to go upon, the former thinks he sees his foes approaching, 
+the latter, that he sees the object of his desire ; and the more 
+deeply one is under the influence of the emotion, the less 
+similarity is required to give rise to these illusory impressions. 
+Thus too, both in fits of anger, and also in all states of appe- 
+tite, all men become easily deceived, and more so the more their 
+emotions are excited. This is the reason too why persons 
+in the delirium of fever sometimes think they see animals 
+on their chamber walls, an illusion arising from the faint 
+resemblance to animals of the markings thereon when put 
+together in patterns; and this sometimes corresponds with 
+the emotional states of the sufferers, in such a way that, if the 
+latter be not very ill, they know well enough that it is an 
+illusion; but if the illness is more severe they actually move 
+according to the appearances. The cause of these occur- 
+
+о 
+
+„ч 
+424. 
+
+l еу пабесір Ovres ... 6 деде, xtA. The óeiMós = the person whose 
+disposition or character inclines him to take fright; (һе фоӧВоѕ = the 
+fright he gets into at any particular time. So with ó éperwós and his 
+ёроѕ. maón here not = * passions’, as this word is generally understood in 
+psychological English. See Hóffding (E.T.), p. 282, where ‘ passion’ and 
+‘emotion’ are defined. For табов y е, see W.E. 11059 21-26. 
+
+? прдѕ aura: they regulate their movements with a view to them or 
+with relation to them : 1. e. move away from them or towards them, as if 
+they were real. 
+
+46o b 
+
+20 
+
+to 
+ел 
+
+DE SOMNIIS 
+
+rences is that the faculty in virtue of which the controlling 
+sense judges is not identical with that in virtue of which 
+presentations come before the mind. A proof of this is, 
+that the sun presents itself as only a foot in diameter, 
+though often something! else gainsays the presentation. 
+Again, when the fingers are crossed, the one object [placed 
+between them] is felt [by the touch] as two; but yet we 
+deny that it is two; for sight is more authoritative than 
+touch. Yet, if touch stood alone, we should actually have 
+pronounced the one object to be two. The ground of such 
+false judgments is that any appearances whatever present 
+themselves, not only when its object stimulates a sense, 
+but also when the sense by itself alone? is stimulated, 
+provided only it be stimulated in the same manner? as it 
+is by the object. For example, to persons sailing past 
+the land seems to move,’ when it is really the eye that is 
+being moved by something else [the moving ship]. 
+
+CHAPTER ПІ 
+
+From this it is manifest that the stimulatory movements based 
+upon sensory impressions, whether the latter are derived from 
+external objects or from causes within the body, present them- 
+selves ? not only when persons are awake, but also then, when 
+
+1 As some senses are more authoritative than others, so rò xpivoy is 
+more authoritative than то davraerwóv, and even than any particular 
+sense, The judgment, which recognizes the superior authority of sight 
+and makes us say (banéy) that the objects are #of two, but one, is what 
+Aristotle here wishes to emphasize. 
+
+? Without an object. 
+
+? The importance of this in explaining the illusion of dreams appears 
+fully in 461^ 28-9. 
+
+* xwetoOat, kwovpévgs are here both used of local movement, while 
+kwobvTos, Kwovpéyns, just above were used of sense-stimulation. 
+
+5 Biehl’s text has been translated. еуртуордтом: we have a gen. absol. 
+(not a dative after файорта)) because when awake people do not 
+notice them, although they are there. Тһе eiow supplied by Mich. 
+in first clause is not necessary. 29 тду aiofnudroy: the impressions 
+of sense as distinct from the exercises of sense—-aicOnoes. тому борабер 
+
+. тӧу ек той о. impressions derived from objects in space around 
+us X impressions of our bodily states, e.g. twinges of pain, &c. ato6n- 
+párov agrees with ray kai rôv. 'Evvrapxovo àv in Biehl's text must be wrong, 
+for we cannot believe in his anacoluthia. The case is not like $Ae8ó8«s 
+óvres, 460? 5 ; for there, at least, there is a new sentence, and the subject 
+is grammatically different. Put we cannot part with aic Óguárov here: 
+aicÜnaeov would contradict 459? 27 ameAÓova àv and 460° 2 (ameÀ0ódyrov); 
+
+CHAPTER III 46o b 
+
+this affection which is called sleep has come upon them, with 
+
+even greater! impressiveness. For by day, while the senses 
+
+and the intellect are working together,’ they (1. e. such move- 
+ments) are extruded from consciousness or obscured, just as 461a 
+a smaller is beside a larger fire, or as small beside great pains 
+
+or pleasures, though, as soon as the latter have ceased, even 
+those which are trifling emerge into notice. But by night 
+
+[i.e. in sleep] owing to the inaction of the particular senses, 
+
+and their powerlessness to realize themselves, which arises 
+from the reflux of the hot from the exterior parts to the 5 
+interior, they [i.e. the above ‘movements’] are borne in? to 
+the head quarters of sense-perception, and there display them- 
+selves as the disturbance (of waking life) subsides. We must 
+suppose that, like the little eddies which are being ever formed 
+in rivers, so the sensory movements are each a continuous 
+process, often remaining like what they were when first 
+started, but often, too, broken into other forms by collisions 
+with obstacles. This [last mentioned point], moreover, gives 
+the reason why no dreams occur in sleep immediately after 
+meals, or to sleepers who are extremely young, e.g., to infants, 
+The internal movement in such cases is excessive, owing to 
+the heat generated from the food. Hence, just as in a liquid, 
+if one vehemently disturbs it, sometimes no reflected image 
+appears, while at other times one appears, indeed, but utterly 
+
+the doctrine being that dreams are based апд тёр aicÜguárev or ard тёр 
+kwrceov rv aigÜnuárov, the aicOnoes of which have departed. Cf. 461* 19 
+and 462% зо. We should, therefore (in spite of MSS.), read évvrápxovow, 
+with Bywater, 7. P. xxviii. 243, 461^ 30. Besides it is emphatically not the 
+aiOnoes but their «woes or аісдпрата that abide within: cf. 459% ov 
+póvov ёуотарҳє еу tots аісбттүріое évepyovaóv тәу аісдђоєоу, dÀÀà kai 
+ал«Абоувду. Keeping Biehl's text, however, daivovrat 4600 32 goes with 
+the preceding clause also, even without zeugma : for the килсе сап be 
+said aiverOa ëypnyopórey = to ‘present themselves’ when people are 
+awake, though they do not daivorvra éypryopóoiw, i.e. appear 70 or get 
+noticed by them. 
+
+! kai раћ№\оу. The trans. ‘even more’ has the advantage of requiring 
+gbaivovrat to be supplied but once, viz. in the ой pévoy clause. We 
+get a perfectly good construction by making xat the copula, but then must 
+supply фашовтаы twice. Besides каї uaA Voy — vel magis is a stock expression. 
+
+Zvvepyova àv should Бе évepyovaóv of which it is an attempted correction 
+in ЕМУ; (1) it perverts Aristotle’s meaning, as the co-operation of aio. 
+and дкағова is not necessary for the extrusion of the «woes; (2) Aristotle 
+nowhere else uses evvepyeiv absolutely, nor can we supply here rais 
+«wnaeciw ; (3) cf. 461% 5, alibi, where évepyeiw is used de re eadem. 
+
+3 karadépoviat, borne ім (to the xuprov alo 6.) from rà aieOntnpia, in which 
+еуитаруоуаш, 
+
+о 
+
+i 
+
+5 
+
+5 
+
+461a DE SOMNIIS 
+
+distorted, so as to seem quite unlike its original ; while, when 
+once the motion has ceased, the reflected images are clear 
+and plain; in the same manner during sleep the phantasms, 
+or residuary movements, which are based upon the sensory 
+impressions, become sometimes quite obliterated by the 
+20 above described motion when too violent; while at other 
+times the sights are indeed seen, but confused and weird, and 
+the dreams [which then appear] are unhealthy, like those 
+of persons who are atrabilious, or feverish, or intoxicated with 
+wine. For all such affections, being spirituous, cause much 
+commotion and disturbance. In sanguineous animals, in pro- 
+25 portion as the blood becomes calm, and as its purer are 
+separated from its less pure elements, the fact that the 
+movement, based on impressions derived from each of 
+the organs of sense, is preserved in its integrity, renders the 
+dreams healthy, causes a [clear] image to present itself, 
+and makes the dreamer think, owing to the effects borne in 
+from the organ of sight, that he actually sees, and owing to 
+those which come from the organ of hearing, that he really 
+30 hears; and so on with those also which proceed from the 
+other sensory organs. For it is owing to the fact that 
+the movement which reaches the primary organ of sense 
+comes from them, that one even when awake believes him- 
+461 b self to see, or hear, or otherwise perceive; just as it is from 
+a belief that the organ of sight is being stimulated,! though 
+in reality not so stimulated, that we sometimes erroneously 
+declare ourselves to see, or that, from the fact that touch 
+announces two movements, we think that the one object is 
+two. For, as a rule, the governing sense affirms the report 
+of each particular sense, unless another particular sense, more 
+
+5 authoritative, makes a contradictory report. In every case 
+an appearance presents itself, but what appears does not in 
+every case seem real, unless when the deciding faculty is 
+inhibited, or does not move with its proper motion. More- 
+over, as we said that different men are subject to illusions, 
+each according to the different emotion present in him, so it is 
+that the sleeper, owing to sleep, and to the movements then 
+going on in his sensory organs, as well as to the other facts 
+
+! By objective visual impressions. 
+
+CHAPTER III 
+
+of the sensory process, [is liable to illusion], so that the 
+dream presentation, though but little like it, appears as some 
+actual given thing. For when one is asleep, in proportion as 
+most of the blood sinks inwards to its fountain [the heart], 
+the internal [sensory] movements, some potential, others 
+actual! accompany it inwards. They are so related [in 
+general] that, if anything move the blood, some one 
+sensory movement will emerge from it, while if this perishes 
+another will take its place; while to one another also they 
+are related in the same way as the artificial frogs in water 
+which severally rise [in fixed succession] to the surface in the 
+order in which the salt [which keeps them down] becomes 
+dissolved. The residuary movements are like these: they are 
+within the soul potentially, but actualize themselves only 
+when the impediment to their doing so has been relaxed ; 
+and according as? they are thus set free, they begin to move 
+in the blood which remains in the sensory organs, and which 
+is now but scanty,® while they possess verisimilitude after the 
+manner of cloud-shapes, which in their rapid metamorphoses 
+one compares now to human beings and a moment afterwards 
+to centaurs. Each of them is however, as has been said, the 
+remnant of a sensory impression taken when sense was 
+actualizing itself; and when this, the true impression,’ has 
+departed, its remnant is still immanent, and it is correct to say 
+of it, that though not actually Koriskos, it is like Koriskos. 
+For? when the person was actually perceiving, his controlling 
+
+! The *actual' are those in consciousness at the time when one is falling 
+RE the potential, those which had before that subsided into latency. 
+Cf. 461% 1. | 
+
+? Аобиеуай: i.e. successively and severally: pres. part. has its force 
+(all through these tracts such points are most carefully observed). 
+
+3 The most favourable condition, disturbance being at its minimum. 
+
+* той аісдђџратоѕ roù adnOovs has here and in what follows to be 
+carefully distinguished from rò aie8nua = the impression merely, when 
+the aic6nrdv is gone. 
+
+5 Mich. explains 86 as = уар, rightly ; for the биовбтпе of the dmddetppa 
+is derived from that of ‘the алёс atocOnua, But he is wrong when he 
+makes ӧтє gaÜávero = бте Еу rà Ünv ой катєіҳєто UTO Tov aiparos. The 
+past tense might have warned him against doing so. Both this and 
+the dy ш) mavreAós refer to what happens in waking and normal 
+consciousness. The detection of a dream as such in sleep is men- 
+tioned below (462* 3) as an exceptional occurrence, and not part of the 
+dream proper; to introduce it here would only confuse, not illustrate 
+
+461b 
+
+IO 
+
+461b 
+
+30 
+
+DE SOMNIIS 
+
+and judging sensory faculty did not call it! Koriskos, but, 
+prompted by this [impression], called the genuine person 
+yonder Koriskos. Accordingly, this sensory impulse, which, 
+when actually perceiving, it [the controlling faculty] so 
+describes (unless completely inhibited by the blood), it 
+now [in dreams], when quasi-perceiving, ^ receives from 
+the movements persisting in the sense-organs, and mistakes 
+it — an impulse that is merely like the true? [objective] 
+impression — for the true impression itself, while the effect 
+of sleep is so great that it causes this mistake to pass 
+unnoticed. Accordingly, just as if a finger be inserted 
+beneath the eyeball without being observed, one object will 
+
+as Aristotle means to do. Mich. is right, however, in making ob ón 
+
+. . aipatos 8у\ отікду Tov Ore è Побагето. Biehl, in stating that Mich. 
+read шу after Фотер, ? 27, makes a mistake. Wendland's (Mich., р. 73. 
+12) note is “Фотер cum Arist. EMSUY (óonep и) L)? See next 
+note but one. 
+
+! The impression synchronous with actual perception. 
+
+2 orep aigÜavopevov. In the translation the text of Biehl has not been 
+followed. Тһе retention (with Biehl, after L) of un after Фостер b 27, or its 
+omission (with Mich. and EMYSUJ), makes a great difference. It ought to 
+be omitted: Фотер aia Üavóuevov is in sense opposed to каї algÜavópevov b 26, 
+and to óre ya Odvero 24, as the dreaming to the waking consciousness. When 
+one was actually percipient, the кәреоу did not confound even rò ateÓnpa ró 
+dÀyOéc with Коріоков ó aAgÓwós, nor does it when actually percipient ever 
+do so unless under some pathological condition ; yet (see 460" 25) in the 
+quasi-percipient state of sleep, when not perceiving rò atoOnua ro dÀnÓés 
+at all, but only its oómóAeuipa, it is moved with this same movement (rovro 
+kweirat, СЕ. 4635 18), and made to treat this (the отдАецшиа) not only as 
+if it were тб aAnOeés ataOgpa, but as if it were a real thing. After aio Onrn- 
+
+‘piots b 29 there should be only a comma. The waking ateOnya is only otov 
+
+Kopioxos, not actually K. The remanent aic@nua too is, but only іп a 
+secondary degree, oiov K. Yet so great is the power of sleep that the 
+critical faculty, which in waking moments (unless inhibited completely) 
+does not mistake even the genuine асура for its object, when asleep 
+confounds distinctions, and mistaking the remanent ato@nya for the object, 
+is unaware of this mistake. 
+
+3 b29, avro with дроу. a)n0és here and above is to be kept distinct 
+from dAÀgÓwos, as ‘truthful’ from ‘genuine’, according to the usual 
+meanings of these words. 6 а\убфѕ К. = the genuine Koriskos: rò 
+dÀyÜés atgÜnua = the impression which tells truth, i.e. the immediate 
+impression of K. yonder, as distinct from the ӛтбХециа, which speaks of 
+him as if there when he is not there. Hence it is that aXn0éç and avro 
+should not be referred to the external thing. Two degrees of error 
+(whence the strong expression тосаоту 5 Svvapes) are usual in dreams: 
+(а) the aio@nua ró vmóXourov is confounded with то аісбура тб aAgÓés; 
+(2) no distinction is drawn between rò atoOnua ró aÀn0éç and то mpaypa 
+то dAnOwwév. This fine analysis is (or may have been) founded on Plato, 
+Republic, 476 с Tó dvetparrew dpa ой rode естіу, Ейу те еу Әпуо Tis ёар т. 
+€ypnyopas тб брои тө py броюу GAA’ abrÓ ўуђта: elvat œ ёокєу; 
+
+& 
+
+CHAPTER III 462a 
+
+not only present two visual images, but will create an opinion 
+of its being two objects ; while if it [the finger] be observed, the 
+presentation will be the same, but the same opinion will not 
+. be formed of it; exactly so it is in states of sleep: if the 
+sleeper perceives that he is asleep, and is conscious of 
+the sleeping state during which the perception comes before 
+his mind, it presents itself still, but something within him 
+speaks to this effect: ‘the image of Koriskos presents itself, 
+but the real Koriskos is not present '; for often, when one is 
+asleep, there is something in consciousness which declares 
+that what then presents itself is but a dream. If, however, 
+he is not aware of being asleep, there is nothing which will 
+contradict the testimony of the bare presentation. 
+
+That what we here urge is true, i.e. that there are Such 
+presentative movements in the sensory organs, any one may 
+convince himself, if he attends to and tries to remember the !o 
+affections we experience when sinking into slumber or when 
+being awakened. He will sometimes, in the moment of 
+awakening, surprise the images which present themselves to 
+him in sleep, and find that they are really but movements 
+lurking in the organs of sense. And indeed some very young 
+persons, if it is dark, though looking with wide open eyes,’ 
+see multitudes of phantom figures moving before them, so that 
+they often cover up their heads in terror. 
+
+From all this, then, the conclusion to be drawn is, that the 15 
+dream is a sort of presentation, and, more particularly, onc 
+which occurs in sleep; since the phantoms just mentioned 
+are not dreams, nor is any other a dream which presents 
+itself when the sense-perceptions are in a state of freedom. 
+Nor is every presentation which occurs in sleep necessarily 
+a dream. For in the first place, some persons [when asleep] 
+actually, in a certain way, perceive sounds, light, savour, and 2° 
+contact; feebly, however, and, as it were, remotely. For 
+there have been cases in which persons while asleep, but with 
+the eyes partly open, saw faintly in their sleep (as they 
+supposed) the light of a lamp, and afterwards, on being 
+awakened, straightway recognized it as the actual light of 
+a real lamp; while, in other cases, persons who faintly heard 
+
+et 
+
+! фа Хетовртес x vmofAénovres, 4623 22. 
+
+AR PN H 
+
+462a DE SOMNIIS 
+
+25 the crowing of cocks or the barking of dogs identified these 
+clearly with the real sounds as soon as they awoke. Some 
+persons, too, return answers to questions put to them in sleep. 
+For it is quite possible that, of waking or sleeping, while the 
+one is present in the ordinary sense, the other also should be 
+present in a certain way. But none of these occurrences! 
+should be called a dream. Nor should the true thoughts,’ 
+as distinct from the mere presentations, which occur in sleep [be 
+called dreams]. The dream proper is a presentation based 
+
+зо on the movement of sense impressions, when such presentation 
+
+occurs during sleep, taking sleep in the strict sense of the 
+term. . 
+
+There are cases of persons who in their whole lives have 
+
+462 b never had a dream, while others dream when considerably 
+
+advanced in years, having never dreamed before. The cause 
+
+of their not having dreams appears somewhat like that which 
+
+operates in the case of infants, and [that which operates] 
+
+immediately after meals. It is intelligible enough that no 
+
+5 dream-presentation should occur to persons whose natural 
+constitution is such that in them copious evaporation is 
+borne upwards, which, when borne back downwards, causes a 
+large quantity of motion. But it is not surprising that, as age 
+advances, a dream should at length appear to them. Indeed, 
+
+roit is inevitable that, as a change is wrought* in them in 
+proportion to age or emotional experience, this reversal 
+[from non-dreaming to dreaming] should occur also. 
+
+1 Those due to this ambiguous condition. 
+
+? Gdnbeis ёрро: e.g. when one says to himself ‘this is only a dream’. 
+Cf. supra 462* 6. 
+
+5 Reading ў... Kkaradepoueyn movet with IS U and Themistius. Biehl's 
+text is wrong, for it implies that the zward movement of the ағабушасв 1 
+causes sleep. Cf. supra 456^ 26-8. 
+
+* If we keep ywopévns (which suits каб" Тмкіпу) we must give it its 
+continuative or progressive sense. This progressive change keeps pace 
+with their change of age, and with the succession of (or vicissitudes of) ráðn 
+which they experience. xarà табос does not mean “іп consequence of 
+something that has happened to them’, or in consequence of some one 
+emotion. 
+
+DE DIVINATIONE PER SOMNUM 
+
+CHAPTER I 
+
+As to the divination which takes place in sleep, and is said 
+to be based on dreams, we cannot lightly either dismiss it with 
+contempt or give it implicit confidence. The fact that all per- 
+sons, or many, suppose dreams to possess a special significance, 
+tends to inspire us with belief in it [such divination], as founded 
+on the testimony of experience ; and indeed that divination in 
+dreams should, as regards some subjects, be genuine, is not 
+incredible, for it has a show of reason ; from which one might 
+form a like opinion also respecting all other dreams. Yet the 
+fact of our seeing no probable cause to account for such 
+divination tends to inspire us with distrust. For, in addition to 
+its further unreasonableness, it is absurd to combine! the idea 
+that the sender of such dreams should be God with the fact 
+that those to whom he sends them are not the best and wisest, 
+but merely commonplace persons. If, however, we abstract 
+from the causality of God, none of the other causes assigned 
+appears probable. For that certain persons should have fore- 
+sight in dreams concerning things destined to take place at the 
+Pillars of Hercules, or on the banks of the Borysthenes, seems 
+to be something to discover the explanation of which surpasses 
+the wit of man. Well then, the dreams in question must be 
+regarded either as causes, or as tokens, of the events, or else as 
+coincidences; either as all, or some, of these, or as one only. 
+I use the word 'cause' in the sense in which the moon is 
+
+! b20-22.  Biehl's comma after терторта is wrong, unless another 
+comma be put after aAoyig. Тһе clause трде ту аА аХоуіа, which is 
+parenthetic, refers to the *abandonment of reason' already noticed in 
+рлдемау айтіау «бХоуоу just before. Besides the general adoyia of referring 
+dreams to ó eds, there is the special dromia of his sending them to poor 
+creatures, not to wise men (cf. 463^ 15). The constr. is : ró re ... elvat 
+Kai тд...пёртєу; it is the conjunction of the two things that is peculiarly 
+dronov. Thus те and «ai are in their usual correlation here. 
+
+H 2 
+
+462b 
+
+462 b DE DIVINATIONE PER SOMNUM 
+
+[the cause] of an eclipse of the sun, or in which fatigue is 
+3o [a cause] of fever; ‘token’ [in the sense in which] the entrance 
+of a! star [into the shadow] is a token of the eclipse, or [in 
+which] roughness of the tongue [is a token] of fever; while 
+by ‘coincidence’ I mean, for example, the occurrence of ап 
+eclipse of the sun while some one is taking a walk; for the 
+463a walking is neither a token nor a cause of the eclipse, nor 
+the eclipse [a cause or token] of the walking. For this 
+reason no coincidence takes place according to a universal 
+or general rule. Are we then to say that some dreams 
+are causes, others tokens, e.g. of events taking plàce in the 
+bodily organism? At all events, even scientific physicians tell 
+5 us that one should pay diligent attention to dreams, and to 
+hold this view is reasonable also for those who are not 
+practitioners, but speculative philosophers. For the move- 
+ments which occur in the daytime [within the body] are, 
+unless very great and violent, lost sight of in contrast with the 
+ro waking movements, which are more impressive. In sleep the 
+opposite takes place, for then even trifling movements seem 
+considerable. This is plain in what often happens during sleep; 
+for example, dreamers fancy that they are affected by thunder 
+and lightning, when in fact there are only faint ringings in their 
+ears ; or that they are enjoying honey or other sweet savours, 
+when only a tiny drop of phlegm is flowing down [the 
+15 oesophagus]; or that they are walking through fire, апа 
+feeling intense heat, when there is only a slight warmth 
+affecting certain parts of the body. When they are awakened, 
+these things appear to them in this their true character. 
+But since the beginnings of all events are small, so, it is 
+clear, are those also of the diseases or other affections about 
+20 to occur in our bodies. In conclusion, it is manifest that these 
+beginnings must be more evident in sleeping than in waking 
+moments. | | 
+Nay, indeed, it is not improbable that some of the presenta- 
+tions which come before the mind in sleep may even be 
+
+! roy астера = a star or amy star’: the star that does show out, whatever 
+star it be. The article is generic. Тһе eie- not= into our view’ but = 
+‘into the shadow,’ when however, of course, it also comes into our view. 
+Bonitz, Jnd., queries eiceAÓeiv here: why? The first star we see 
+betokens the coming eclipse. 
+
+CHAPTER I 463a 
+
+causes of the actions cognate to each of them. For as when 
+we are about to act [in waking hours], or are engaged in any 
+course of action, or have already performed certain actions, 
+we often find ourselves concerned with these actions, or per- 25 
+forming them, in a vivid dream ; the cause whereof is that 
+the dream-movement has had a way paved for it from the 
+original movements set up in the daytime; exactly so, but 
+conversely, it must happen that the movements set up 
+first in sleep should also prove to be starting-points of actions 
+to be performed in the daytime, since the recurrence by day 
+of the thought of these actions also has had its way paved for 
+
+it in the images before the mind at night. Thus then it is 39 
+quite conceivable that some dreams may be tokens and causes 
+[of future events]. 
+
+Most [so-called prophetic] dreams are, however, to be 
+classed as mere coincidences, especially all such as are ex- 463 b 
+travagant, and those in the fulfilment of which the dreamers 
+have no initiative, such as in the case of a sea-fight, or of things 
+taking place far away. Ав regards these it is natural that the 
+fact should stand as it does whenever a person, on mentioning 
+something, finds the very thing mentioned come to pass. Why, 
+indeed, should this not happen also in sleep? The proba- 
+bility is, rather, that many such things should happen. As, 
+then, one's mentioning a particular person is neither token 
+nor cause of this person's presenting himself, so, in the parallel 
+instance, the dream is, to him who has seen it, neither token 
+nor cause of its [so-called] fulfilment, but a mere coincidence. 
+Hence the fact that many dreams have no ‘fulfilment’, for 
+coincidences do not occur according to any universal or 10 
+general law. | 
+
+Ot 
+
+CHAPTER II 
+
+On the whole, forasmuch as certain of the lower animals also 
+dream, it may be concluded that dreams are not sent by God, 
+nor are they designed for this purpose [to reveal the future]. 
+They have a divine aspect,! however, for Nature [their cause] 
+
+1 дашбиа pevror, | yap фос: Satpovia, AAN’ оф Geia. Bonitz (/zd. 4648 28) 
+followed by L. and S. (sub voc. Satponos) explains $vots here as ñ тәу 
+ov (dev фоси. Zeller, Arist. i. 421 (E. T.) takes the right view. 
+
+463 b 
+
+I5 
+
+2 
+
+о 
+
+30 
+
+DE DIVINATIONE РЕК SOMNUM 
+
+is divinely planned, though not itself divine. А special proof 
+[of their not being sent by God] is this: the power of fore- 
+seeing the future and of having vivid dreams is found in 
+persons of inferior type, which implies that God does not 
+send their dreams; but merely that all those whose physical 
+temperament is, as it were, garrulous and excitable, see 
+sights of all descriptions ; for, inasmuch as they experience 
+many movements of every kind, they just chance to have 
+visions resembling objective facts, their luck in these matters 
+being merely like that of persons who play at even and odd.! 
+For the principle which is expressed in the gambler's maxim : 
+‘If you make many throws your luck must change, holds 
+good in their case also. 
+
+That many dreams have no fulfilment is not strange, for 
+it is so too with many bodily symptoms and weather-signs, 
+e. g., those of rain or wind. For if another movement occurs 
+more influential than that from which, while [the event to which 
+it pointed was] still future, the given token was derived, the 
+event [to which such token pointed] does not take place. So, 
+of the things which ought to be accomplished by human agency, 
+many, though well-planned, are by the operation of other prin- 
+ciples more powerful [than man's agency] brought to nought. 
+For, speaking generally, that which was about to happen is not 
+in every case what now zs happening ; nor is that which skall 
+hereafter de identical with that which zs now going to be. 
+Still, however, we must hold that the beginnings from 
+which, as we said,’ no consummation follows, are real begin- ` 
+nings, and these constitute natural tokens of certain events, 
+even though the events do not come to pass. 
+
+As for [prophetic] dreams which involve not such ета 
+[sc. of future events] as ме have here described, but such as 
+are extravagant in times, or places, or magnitudes ; or those 
+
+If фоовв were to be thus limited we should have had avró». Nature in 
+general is дациоиа as the province and theatre of God's final causation, 
+and dreams (which are $voe«xd) partake of the character of Nature their 
+cause. The general difference between беде and ĝaipwv, беюос and бауибиоу, 
+(that the ñatuey is the offspring of the 8eós, the даибиоу the handiwork of 
+the Getov) is here preserved. 
+
+1 Reading dprid{ovres, Bekker's conj. | 
+
+2 ойк éreAéa n : such is the force of the aor. For meaning of тіраѕ cf. 
+notes 440? 28. 
+
+CHAPTER II 
+
+involving beginnings which are not extravagant in any of 
+these respects! while yet the persons who see the dream 
+hold not in their own hands the beginnings [of the event 
+
+464a 
+
+to which it points]: unless the foresight which such dreams 
+
+give is the result of pure coincidence, the following 
+would be a better explanation of it than that pro- 
+posed by Democritus, who alleges ‘images’ and ‘emana- 
+tions' as its cause. As, when something has caused 
+motion in water or air, this [the portion moved] moves 
+another [portion of water or air], and, though the cause has 
+ceased to operate, such motion propagates itself to a certain 
+point, though there the prime movent is not present ; just so 
+it may well be that a movement and a consequent sense-per- 
+ception should reach sleeping souls from the objects from which 
+Democritus represents ‘images’ and ‘ emanations’ as coming ; 
+that such movements, in whatever way they arrive, should be 
+more perceptible at night [than by day], because when pro- 
+ceeding thus in the daytime they are more liable to dissolu- 
+tion (since at night the air is less disturbed, there being then 
+less wind); and that they shall be perceived within the body 
+owing to sleep, since persons are more sensitive even to slight 
+sensory movements when asleep than when awake. It is 
+these movements then that cause ‘ presentations’, as a result 
+of which sleepers foresee the future even relatively to such 
+events as those referred? to above. These considerations 
+also explain why this experience befalls commonplace persons 
+and not the most intelligent. For it would have regularly oc- 
+curred both in the daytime and to the wise had it been God 
+who sent it; but, as we have explained the matter, it is quite 
+natural that commonplace persons should be those who have 
+foresight [in dreams]. For the mind of such persons is not 
+given to thinking, but, as it were, derelict, or totally vacant, 
+and, when once set moving, is borne passively on in the direc- 
+tion taken by that which moves it. With regard to the fact 
+that some persons who are liable to derangement have this 
+
+1 ^5, ñ rovrov меу рпбеу: 5С. trepopias ras apxas Ехбутоу тфу éyvmviov. 
+Муде» is acc. of respect after ӛтероріпв understood from the previous 
+clause. Perhaps руде! would have been plainer; but the construction 
+is easy enough. Biehl by his proposed correction abrois ... rois (бодан 
+
+would seem to construe as if руду depended on éxóvrov directly. 
+? i. e. those referred to 464% 1-4. 
+
+5 
+
+464a DE DIVINATIONE PER SOMNUM 
+
+foresight, its explanation is that their normal mental move- 
+ments do not impede [the alien movements], but are beaten 
+off by the latter. Therefore it is that they have an especially 
+keen perception of the alien movements. 
+
+That certain persons in particular should have vivid 
+dreams, e.g. that familiar friends should thus have foresight 
+in a special degree respecting one another, is due to the fact 
+that such friends are most solicitous on one another's behalf. 
+
+3o For as acquaintances in particular recognize and perceive one 
+another a long way off, so also they do as regards the sensory 
+movements respecting one another; for sensory movements 
+which refer to persons familiarly known are themselves more 
+familiar. Atrabilious persons, owing to their impetuosity,' аге, 
+when they, as it were, shoot from a distance, expert at hitting ; 
+
+464b while, owing to their mutability, the series of movements 
+
+deploys quickly before their minds. For even as the insane 
+
+recite, or con over in thought, the poems of Philaegides,’ e. g. 
+
+the Aphrodite, whose parts succeed in order of similitude, just 
+
+so do they [the ‘ atrabilious '] go оп and on stringing sensory 
+
+movements together. Moreover, owing to their aforesaid 
+
+5 impetuosity, one movement within them is not liable to be 
+knocked out of its course by some other movement. 
+
+The most skilful interpreter of dreams is he who has the 
+faculty of observing resemblances. Any one may interpret 
+dreams which are vivid and plain. But, speaking of ' resem- 
+blances ', I mean that dream presentations are analogous to 
+the forms reflected in water, as indeed we have already stated. 
+
+i0 In the latter case, if the motion in the water be great, the 
+reflexion has no resemblance to its original, nor do the forms 
+resemble the real objects. Skilful, indeed, would he be in 
+interpreting such reflexions who could rapidly discern, and at 
+a glance comprehend, the scattered and distorted fragments 
+
+! Which do not suffer them to wait until the object of their speculation 
+is near them. 
+
+* Probably should be @cAawidos, а name found in Lucian, Pseudologista, 
+$ 24, and Athenaeus 335 D-E. But what were the poems referred to? 
+Did they go on like * The House that Jack built'? Ath. and Luc. 
+do not help to explain the point here, and Mich. and Pseudo-Them. add 
+nothing to what our passage yields. Michael only contrasts the desultory 
+manner of Euripides with the consistency of Philaegides in keeping to 
+a tneme, 
+
+CHAPTER II 464 b 
+
+of such forms, so as to perceive that one of them represents 
+a man, or a horse, or anything whatever. Accordingly, in the 
+other case also, in a similar way, some such thing as this 
+[blurred image] is all that a dream amounts! to; for the 
+internal movement effaces the clearness of the dream. 
+
+The questions, therefore, which we proposed as to the nature 
+of sleep and the dream, and the cause to which each of them 
+is due, and also as to divination as a result of dreams, in every 
+form of it, have now been discussed. 
+
+5 
+
+bis. The ¢roubled dream ‘has this effect’, ĝúvaraı rovro, Тһе raket 
+prevents us from taking тойто with rò éyúmvuoy = ‘the dream we speak of 
+has a certain effect.’ Toexplain reit is necessary, after Biehl’s conjecture, 
+to read rovovro. There is no analogy for rovró те: rode re is a totally different 
+kind of expression. But rotovró re would be not only correct, but quite to 
+the point here. Not re, but res, should qualify ópotos. 
+
+OXFORD 
+PRINTED AT THE CLARENDON PRESS 
+BY HORACE HART, M.A. 
+PRINTER TO THE UNIVERSITY 
+
+135933
