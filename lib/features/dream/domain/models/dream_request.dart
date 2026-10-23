@@ -4,6 +4,7 @@ class DreamRequest {
   final DateTime timestamp;
   final String preferredTradition;
   final String? userId;
+  final String? language;
 
   DreamRequest({
     required this.dreamText,
@@ -11,6 +12,7 @@ class DreamRequest {
     DateTime? timestamp,
     this.preferredTradition = 'islam_dogu',
     this.userId,
+    this.language,
   }) : timestamp = timestamp ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
@@ -22,6 +24,9 @@ class DreamRequest {
     };
     if (userId != null && userId!.isNotEmpty) {
       map['user_id'] = userId;
+    }
+    if (language != null && language!.isNotEmpty) {
+      map['language'] = language;
     }
     return map;
   }

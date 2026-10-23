@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -84,7 +85,8 @@ class _DreamLoadingScreenState extends ConsumerState<DreamLoadingScreen> {
     unawaited(ref.read(userSubscriptionProvider.notifier).consumeDreamAttempt());
 
     try {
-      final result = await ref.read(dreamProvider.notifier).analyzeDream();
+      final currentLang = ref.read(localeProvider);
+      final result = await ref.read(dreamProvider.notifier).analyzeDream(language: currentLang);
       if (result != null && mounted) {
         await Future.delayed(const Duration(milliseconds: 900));
         _navigateToResult(result);

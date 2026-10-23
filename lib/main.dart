@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
+import 'core/localization/locale_provider.dart';
 import 'core/theme/theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/widgets/theme_selection_screen.dart';
@@ -25,8 +26,9 @@ void main() async {
     ),
   );
 
-  // 0. Kayıtlı Temayı Yükle (Edebi Günlük, Kadim Mistik veya Safir Minimal)
+  // 0. Kayıtlı Temayı ve 10 Dilli Dil Ayarını Yükle
   await ThemeNotifier.loadInitialTheme();
+  final initialLang = await LocaleNotifier.loadInitialLocale();
 
   // 1. Firebase Başlatma
   try {
@@ -62,8 +64,11 @@ void main() async {
   }
 
   runApp(
-    const ProviderScope(
-      child: OneiroApp(),
+    ProviderScope(
+      overrides: [
+        localeProvider.overrideWith((ref) => LocaleNotifier(initialLang)),
+      ],
+      child: const OneiroApp(),
     ),
   );
 }

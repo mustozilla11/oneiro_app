@@ -90,7 +90,10 @@ TRADITIONS_I18N: Dict[str, Dict[str, Dict[str, str]]] = {
         "de": {"title": "Östliche und Islamische Tradition", "scholar": "Ibn Sirin & Al-Nabulsi"},
         "es": {"title": "Tradición Oriental e Islámica", "scholar": "Ibn Sirin y Al-Nabulsi"},
         "ar": {"title": "التقليد الشرقي والإسلامي", "scholar": "ابن سيرين والنابلسي"},
-        "fr": {"title": "Tradition Orientale et Islamique", "scholar": "Ibn Sirin et Al-Nabulsi"}
+        "fr": {"title": "Tradition Orientale et Islamique", "scholar": "Ibn Sirin et Al-Nabulsi"},
+        "pt": {"title": "Tradição Oriental e Islâmica", "scholar": "Ibn Sirin e Al-Nabulsi"},
+        "hi": {"title": "पूर्वी और इस्लामी परंपरा", "scholar": "इब्न सिरीन और अन-नाबुलसी"},
+        "zh": {"title": "东方与伊斯兰解梦传统", "scholar": "伊本·西林与纳布勒斯"}
     },
     "antik_akdeniz": {
         "tr": {"title": "Antik Akdeniz Bilgeliği", "scholar": "Artemidorus (Oneirocritica)"},
@@ -99,7 +102,10 @@ TRADITIONS_I18N: Dict[str, Dict[str, Dict[str, str]]] = {
         "de": {"title": "Antike Weisheit des Mittelmeers", "scholar": "Artemidorus (Oneirocritica)"},
         "es": {"title": "Sabiduría del Mediterráneo Antiguo", "scholar": "Artemidoro (Oneirocrítica)"},
         "ar": {"title": "حكمة البحر الأبيض المتوسط القديمة", "scholar": "أرتيميدوروس (أونيروكريتيكا)"},
-        "fr": {"title": "Sagesse Méditerranéenne Antique", "scholar": "Artémidore (Oneirocritica)"}
+        "fr": {"title": "Sagesse Méditerranéenne Antique", "scholar": "Artémidore (Oneirocritica)"},
+        "pt": {"title": "Sabedoria do Mediterrâneo Antigo", "scholar": "Artemidoro (Oneirocrítica)"},
+        "hi": {"title": "प्राचीन भूमध्यसागरीय ज्ञान", "scholar": "आर्टेमिडोरस (ओनेइरोक्रिटिका)"},
+        "zh": {"title": "古地中海解梦智慧", "scholar": "阿特米多鲁斯 (梦的解析)"}
     },
     "psikoloji": {
         "tr": {"title": "Derinlik Psikolojisi", "scholar": "Carl G. Jung & Sigmund Freud"},
@@ -108,13 +114,16 @@ TRADITIONS_I18N: Dict[str, Dict[str, Dict[str, str]]] = {
         "de": {"title": "Tiefenpsychologie", "scholar": "Carl G. Jung & Sigmund Freud"},
         "es": {"title": "Psicología Profunda", "scholar": "Carl G. Jung y Sigmund Freud"},
         "ar": {"title": "علم النفس العميق", "scholar": "كارل غ. يونغ وسيغموند فرويد"},
-        "fr": {"title": "Psychologie des Profondeurs", "scholar": "Carl G. Jung et Sigmund Freud"}
+        "fr": {"title": "Psychologie des Profondeurs", "scholar": "Carl G. Jung et Sigmund Freud"},
+        "pt": {"title": "Psicologia Profunda", "scholar": "Carl G. Jung e Sigmund Freud"},
+        "hi": {"title": "गहन मनोविज्ञान", "scholar": "कार्ल जी. जुंग और सिगमंड फ्रायड"},
+        "zh": {"title": "深度心理学", "scholar": "卡尔·荣格与西格蒙德·弗洛伊德"}
     }
 }
 
 
 def get_tradition_metadata(tradition_id: str, lang: str = "tr") -> Dict[str, str]:
-    """İstenen dilde gelenek başlığı ve bilgin adını döner (tr, en, ru, de, es, ar, fr)."""
+    """İstenen dilde gelenek başlığı ve bilgin adını döner (tr, en, ru, de, es, ar, fr, pt, hi, zh)."""
     base = TRADITIONS.get(tradition_id, TRADITIONS["islam_dogu"])
     i18n_lang = TRADITIONS_I18N.get(tradition_id, {}).get(lang)
     if not i18n_lang:
@@ -132,16 +141,24 @@ def get_tradition_metadata(tradition_id: str, lang: str = "tr") -> Dict[str, str
 
 
 def detect_language(text: str) -> str:
-    """Metnin dilini sıfır harici bağımlılıkla ve 0 ms gecikmeyle tespit eder (ru, ar, tr, de, es, fr, en)."""
+    """Metnin dilini sıfır harici bağımlılıkla ve 0 ms gecikmeyle tespit eder (ru, ar, hi, zh, tr, de, es, fr, pt, en)."""
     if re.search(r"[\u0400-\u04FF]", text):
         return "ru"
     if re.search(r"[\u0600-\u06FF]", text):
         return "ar"
+    if re.search(r"[\u0900-\u097F]", text):
+        return "hi"
+    if re.search(r"[\u4E00-\u9FFF]", text):
+        return "zh"
     if re.search(r"[çğıöşüÇĞİÖŞÜ]", text):
         return "tr"
 
     lower = text.lower()
     words = set(re.findall(r"\b[^\W\d_]{2,}\b", lower, flags=re.UNICODE))
+
+    # Portekizce belirteçleri
+    if len(words.intersection({"não", "para", "com", "uma", "este", "sonho", "dos", "das", "mais", "voce", "você", "estava"})) >= 2:
+        return "pt"
 
     # Almanca belirteçleri
     if len(words.intersection({"ich", "und", "nicht", "der", "die", "das", "ein", "eine", "mit", "war", "im"})) >= 2:
@@ -717,6 +734,7 @@ class DreamInterpretRequest(BaseModel):
     dream_text: str = Field(..., min_length=3, description="Kullanıcının rüya metni")
     preferred_tradition: Optional[str] = Field("islam_dogu", description="İlk analizde ücretsiz açılacak gelenek")
     user_id: Optional[str] = Field(None, description="Kullanıcı Firebase UID (opsiyonel)")
+    language: Optional[str] = Field(None, description="Hedef çıktı dili (tr, en, es, ar, de, fr, pt, ru, hi, zh)")
 
 
 class DreamInterpretResponse(BaseModel):
@@ -1320,7 +1338,9 @@ async def interpret_dream(request: DreamInterpretRequest):
 
     logger.info(f"Rüya analizi talebi alındı. Kullanıcı ID: {request.user_id or 'Misafir/Anonim'}")
 
-    lang = detect_language(dream_text)
+    lang = request.language.lower() if request.language else detect_language(dream_text)
+    if lang not in ("tr", "en", "es", "ar", "de", "fr", "pt", "ru", "hi", "zh"):
+        lang = detect_language(dream_text)
     preferred_trad = request.preferred_tradition or "islam_dogu"
     if preferred_trad not in TRADITIONS:
         preferred_trad = "islam_dogu"

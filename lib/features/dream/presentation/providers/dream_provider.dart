@@ -88,7 +88,7 @@ class DreamNotifier extends StateNotifier<DreamState> {
     state = DreamState(preferredTradition: state.preferredTradition);
   }
 
-  Future<DreamInterpretation?> analyzeDream() async {
+  Future<DreamInterpretation?> analyzeDream({String? language}) async {
     if (state.dreamText.trim().isEmpty) {
       state = state.copyWith(errorMessage: 'Lütfen rüyanızı tarif edin.');
       return null;
@@ -103,6 +103,7 @@ class DreamNotifier extends StateNotifier<DreamState> {
         emotion: state.selectedEmotion,
         preferredTradition: state.preferredTradition,
         userId: currentUid,
+        language: language,
       );
 
       final result = await _repository.interpretDream(request);

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -78,10 +80,11 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
 
     final text = _textController.text.trim();
     if (text.isEmpty) {
+      final currentLang = ref.read(localeProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Lütfen önce rüyanızı günlüğe aktarın...',
+            AppStrings.get('pleaseEnterDream', currentLang),
             style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
           ),
           backgroundColor: AppColors.charcoalElevated,
@@ -133,6 +136,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     final activeTheme = ref.watch(themeProvider);
     final subState = ref.watch(userSubscriptionProvider);
     final selectedTradition = ref.watch(dreamProvider).preferredTradition;
+    final lang = ref.watch(localeProvider);
 
     return Scaffold(
       backgroundColor: AppColors.charcoalBlack,
@@ -144,13 +148,13 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 1. Üst Kompakt Bar (DreamApp + Tarih + Tema + Hak)
-              _buildEditorialMetaBar(subState, activeTheme),
+              _buildEditorialMetaBar(subState, activeTheme, lang),
 
               const SizedBox(height: 14),
 
               // 2. Sıkı Başlık & Kısa Rehber Cümle
               Text(
-                'Bu gece hangi eşikten geçtiniz?',
+                AppStrings.get('thresholdTitle', lang),
                 style: AppTheme.headingStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -161,7 +165,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               ),
               const SizedBox(height: 5),
               Text(
-                'Gördüğünüz imgeleri, mekanları ve uyandığınızda kalan hissi kısaca not edin.',
+                AppStrings.get('thresholdSubtitle', lang),
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12.5,
                   height: 1.4,
@@ -172,17 +176,17 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               const SizedBox(height: 12),
 
               // 3. Rüya Yazma Kutusu (Sadece border rengi seçili kaynağa göre açıktan koyuya sürekli değişir)
-              _buildJournalEditorCanvas(selectedTradition),
+              _buildJournalEditorCanvas(selectedTradition, lang),
 
               const SizedBox(height: 14),
 
               // 4. Öncelikli Kaynak Seçimi (Doğu Altın, Akdeniz Mavi, Psikoloji Mor)
-              _buildTraditionSelector(selectedTradition),
+              _buildTraditionSelector(selectedTradition, lang),
 
               const SizedBox(height: 14),
 
               // 5. Aktif Temaya Uyumlu "RÜYAYI ÇÖZÜMLE" Butonu
-              _buildSubmitButton(),
+              _buildSubmitButton(lang),
             ],
           ),
         ),
@@ -193,6 +197,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
   Widget _buildEditorialMetaBar(
     dynamic subState,
     OneiroThemeMode activeTheme,
+    String lang,
   ) {
     return Container(
       padding: const EdgeInsets.only(bottom: 8),
@@ -298,8 +303,8 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                     children: [
                       Text(
                         subState.isPremium
-                            ? 'PLUS'
-                            : 'HAK: ${subState.dreamCredits}',
+                            ? AppStrings.get('plus', lang)
+                            : '${AppStrings.get('credits', lang)}: ${subState.dreamCredits}',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -324,7 +329,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     );
   }
 
-  Widget _buildJournalEditorCanvas(String selectedTradition) {
+  Widget _buildJournalEditorCanvas(String selectedTradition, String lang) {
     final lightBorder = AppColors.traditionLightBorderColor(selectedTradition);
     final darkBorder = AppColors.traditionDarkBorderColor(selectedTradition);
     final baseTradColor = AppColors.traditionColor(selectedTradition);
@@ -371,8 +376,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               color: AppColors.textPrimary,
             ),
             decoration: InputDecoration(
-              hintText:
-                  'Dün gece ne gördünüz? Hatırladığınız mekanları, yüzleri, sembolleri ve uyandığınızdaki hissi buraya yazın...',
+              hintText: AppStrings.get('inputHint', lang),
               hintStyle: GoogleFonts.plusJakartaSans(
                 color: AppColors.dimMist,
                 fontSize: 13.5,
@@ -410,7 +414,9 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        words > 0 ? '$words kelime yazıldı' : 'Rüya günlüğü hazır',
+                        words > 0
+                            ? '$words ${AppStrings.get('wordsWritten', lang)}'
+                            : AppStrings.get('journalReady', lang),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           color: AppColors.dimMist,
@@ -439,7 +445,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                                 Icon(Icons.history_rounded, size: 12, color: baseTradColor),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Son Notu Getir',
+                                  AppStrings.get('restoreDraft', lang),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -463,7 +469,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             child: Text(
-                              'Temizle',
+                              AppStrings.get('clear', lang),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -483,26 +489,26 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     );
   }
 
-  Widget _buildTraditionSelector(String selectedTradition) {
+  Widget _buildTraditionSelector(String selectedTradition, String lang) {
     final traditions = [
       {
         'id': 'islam_dogu',
-        'title': 'Doğu & İslam',
-        'scholar': 'İbn-i Sîrîn',
+        'title': AppStrings.get('islamDogu', lang),
+        'scholar': AppStrings.get('islamDoguScholar', lang),
         'icon': Icons.menu_book_outlined,
         'color': AppColors.islamGold,
       },
       {
         'id': 'antik_akdeniz',
-        'title': 'Antik Akdeniz',
-        'scholar': 'Artemidorus',
+        'title': AppStrings.get('antikAkdeniz', lang),
+        'scholar': AppStrings.get('antikAkdenizScholar', lang),
         'icon': Icons.account_balance_outlined,
         'color': AppColors.mediterraneanBlue,
       },
       {
         'id': 'psikoloji',
-        'title': 'Psikoloji',
-        'scholar': 'Carl Jung',
+        'title': AppStrings.get('psikoloji', lang),
+        'scholar': AppStrings.get('psikolojiScholar', lang),
         'icon': Icons.psychology_outlined,
         'color': AppColors.psychologyPurple,
       },
@@ -515,7 +521,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ÖNCELİKLİ KAYNAK SEÇİMİ',
+              AppStrings.get('sourceSelection', lang),
               style: AppTheme.headingStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -524,7 +530,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
               ),
             ),
             Text(
-              'İlk Açılacak Yorum',
+              AppStrings.get('firstUnlocked', lang),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
                 color: AppColors.dimMist,
@@ -606,7 +612,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(String lang) {
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
@@ -636,7 +642,7 @@ class _DreamInputScreenState extends ConsumerState<DreamInputScreen>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'RÜYAYI ÇÖZÜMLE',
+                  AppStrings.get('solveDream', lang),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -504,7 +506,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const SizedBox(height: 18),
 
-              // 2. "Nasıl Çalışır?" 6 Aşamalı Şema & Blok Diyagram Kutusu
+              // 2. 10 Dilli Evrensel Dil Seçimi (Language Settings)
+              _buildLanguageSelectorCard(context),
+
+              const SizedBox(height: 18),
+
+              // 3. "Nasıl Çalışır?" 6 Aşamalı Şema & Blok Diyagram Kutusu
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -1102,6 +1109,198 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLanguageSelectorCard(BuildContext context) {
+    final currentLang = ref.watch(localeProvider);
+    final activeLangObj = AppStrings.supportedLanguages.firstWhere(
+      (l) => l['code'] == currentLang,
+      orElse: () => AppStrings.supportedLanguages.first,
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      decoration: BoxDecoration(
+        color: AppColors.charcoalSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.borderSubtle,
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _showLanguagePicker(context);
+        },
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.borderSubtle),
+              ),
+              child: Icon(
+                Icons.language_rounded,
+                color: AppColors.moonlight,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.get('languageSetting', currentLang),
+                    style: AppTheme.headingStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    AppStrings.get('languageSubtitle', currentLang),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11.5,
+                      color: AppColors.mistGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.borderMoonlight),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${activeLangObj['flag']} ${activeLangObj['name']}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.unfold_more_rounded,
+                    size: 14,
+                    color: AppColors.moonlight,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final currentLang = ref.read(localeProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.charcoalSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppStrings.get('languageSetting', currentLang),
+                  style: AppTheme.headingStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: AppColors.moonlight,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Uygulama arayüzü ve yapay zeka analiz dili anında güncellenir',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: AppColors.mistGrey,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.55,
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: AppStrings.supportedLanguages.length,
+                    separatorBuilder: (_, __) => Divider(
+                      color: AppColors.borderSubtle,
+                      height: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      final item = AppStrings.supportedLanguages[index];
+                      final code = item['code']!;
+                      final isSelected = code == currentLang;
+
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        leading: Text(
+                          item['flag']!,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        title: Text(
+                          item['name']!,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? AppColors.moonlight : AppColors.textPrimary,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check_circle_rounded, color: AppColors.moonlight, size: 20)
+                            : null,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          ref.read(localeProvider.notifier).setLanguage(code);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
