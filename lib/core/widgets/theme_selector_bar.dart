@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme.dart';
 import '../theme/theme_provider.dart';
+import 'theme_selection_screen.dart';
 
 /// Giriş ekranında ve uygulama içinde 3 tema arasında anında geçiş sağlayan seçici bileşen
 class ThemeSelectorBar extends ConsumerWidget {
@@ -179,65 +180,8 @@ class ThemeSelectorBar extends ConsumerWidget {
     );
   }
 
-  /// Ana sayfadan tek dokunuşla açılabilen hızlı tema seçici alt penceresi
+  /// Ana sayfadan veya girişten tek dokunuşla Tam Ekran Tema Seçim sayfasını açar
   static void showQuickModal(BuildContext context) {
-    HapticFeedback.lightImpact();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.charcoalElevated,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-        side: BorderSide(color: AppColors.borderSubtle, width: 1),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.dimMist.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(Icons.palette_outlined, color: AppColors.moonlight, size: 20),
-                    const SizedBox(width: 10),
-                    Text(
-                      'GÖRÜNÜM & TEMA SEÇİMİ',
-                      style: AppTheme.headingStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                        color: AppColors.moonlight,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Dilediğiniz atmosferi seçin; tercihiniz otomatik kaydedilir.',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12.5,
-                    color: AppColors.mistGrey,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const ThemeSelectorBar(compact: false),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    ThemeSelectionScreen.open(context);
   }
 }

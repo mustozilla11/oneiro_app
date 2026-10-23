@@ -328,25 +328,61 @@ class _OnboardingAuthScreenState extends ConsumerState<OnboardingAuthScreen> {
 
                             const SizedBox(height: 14),
 
-                            // 4. Girişte Canlı Tema Seçici (3 Tema Arasında Anında Geçiş)
+                            // 4. Girişte Canlı Tema Seçici (Tam Sayfa Önizleme + Hızlı Geçiş)
                             Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.palette_outlined, size: 13, color: AppColors.moonlight),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'ATMOSFER & TEMA SEÇİMİ (SONRADAN DEĞİŞTİRİLEBİLİR)',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1.0,
-                                        color: AppColors.moonlight,
+                                GestureDetector(
+                                  onTap: () => ThemeSelectorBar.showQuickModal(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.moonlight.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: AppColors.moonlight.withValues(alpha: 0.45),
+                                        width: 1.2,
                                       ),
                                     ),
-                                  ],
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.palette_outlined, size: 16, color: AppColors.moonlight),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'TEMA SEÇİMİ: ${activeTheme.title.toUpperCase()}',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.8,
+                                                color: AppColors.moonlight,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Tam Ekran Gör',
+                                              style: GoogleFonts.plusJakartaSans(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              Icons.open_in_full_rounded,
+                                              size: 13,
+                                              color: AppColors.moonlight,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 const ThemeSelectorBar(compact: true),

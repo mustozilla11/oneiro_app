@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ad_service.dart';
 import 'core/theme/theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/widgets/theme_selection_screen.dart';
 import 'features/auth/presentation/screens/onboarding_auth_screen.dart';
 import 'features/home/presentation/screens/main_pager_screen.dart';
 import 'services/auth_service.dart';
@@ -83,13 +84,28 @@ class OneiroApp extends ConsumerWidget {
   }
 }
 
-class AuthGate extends ConsumerWidget {
+class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends ConsumerState<AuthGate> {
+  @override
+  Widget build(BuildContext context) {
     // Tema değişikliğini tüm alt ekranlara anında yansıt
     ref.watch(themeProvider);
+
+    // Başlangıçta tam sayfa tema seçim ekranını göster ("koca bir sayfa tema sorsun")
+    if (!ThemeNotifier.hasConfirmedInitialTheme) {
+      return ThemeSelectionScreen(
+        isInitialStartup: true,
+        onCompleted: () {
+          if (mounted) setState(() {});
+        },
+      );
+    }
 
     return StreamBuilder<OneiroUser?>(
       stream: AuthService.instance.authStateChanges,

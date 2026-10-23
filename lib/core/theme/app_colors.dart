@@ -54,19 +54,37 @@ class AppColors {
     return islamAmber;
   }
 
-  /// Seçilen ekole göre sayfa arka planına yayılan hafif ambiyans gradyanı
+  /// Seçilen ekole göre chatbox / rüya kutusunun AÇIK ton border rengi
+  static Color traditionLightBorderColor(String? traditionId) {
+    final id = (traditionId ?? '').toLowerCase();
+    if (id.contains('akdeniz') || id.contains('artemidorus')) {
+      return const Color(0xFF93E5FF); // Açık parlak Akdeniz mavisi
+    }
+    if (id.contains('psikoloji') || id.contains('jung') || id.contains('bilinç')) {
+      return const Color(0xFFE0AAFF); // Açık parlak lavanta moru
+    }
+    return const Color(0xFFFFE28A); // Açık parlak kehribar altını
+  }
+
+  /// Seçilen ekole göre chatbox / rüya kutusunun KOYU ton border rengi
+  static Color traditionDarkBorderColor(String? traditionId) {
+    final id = (traditionId ?? '').toLowerCase();
+    if (id.contains('akdeniz') || id.contains('artemidorus')) {
+      return const Color(0xFF0B4F7C); // Koyu derin Akdeniz mavisi
+    }
+    if (id.contains('psikoloji') || id.contains('jung') || id.contains('bilinç')) {
+      return const Color(0xFF4C1D7A); // Koyu derin bilinçaltı moru
+    }
+    return const Color(0xFF784B0E); // Koyu derin kehribar altını
+  }
+
+  /// Sayfa arka planı kaynağa göre değişmez; seçili temanın kendi zemin rengini korur
   static LinearGradient traditionAmbientGradient(String? traditionId) {
-    final primary = traditionColor(traditionId);
     final bg = charcoalBlack;
     return LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      stops: const [0.0, 0.38, 1.0],
-      colors: [
-        Color.alphaBlend(primary.withValues(alpha: 0.16), bg),
-        Color.alphaBlend(primary.withValues(alpha: 0.05), bg),
-        bg,
-      ],
+      colors: [bg, bg],
     );
   }
 

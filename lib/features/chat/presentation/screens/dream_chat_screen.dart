@@ -20,15 +20,21 @@ class DreamChatScreen extends ConsumerStatefulWidget {
   ConsumerState<DreamChatScreen> createState() => _DreamChatScreenState();
 }
 
-class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
+class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _messageController;
   late final ScrollController _scrollController;
+  late final AnimationController _borderPulseController;
 
   @override
   void initState() {
     super.initState();
     _messageController = TextEditingController();
     _scrollController = ScrollController();
+    _borderPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat(reverse: true);
 
     // Sistem promptunu ve rüya bağlamını hazırla
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -39,6 +45,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
 
   @override
   void dispose() {
+    _borderPulseController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -303,6 +310,10 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
   }
 
   Widget _buildInputBar() {
+    final tradId = widget.interpretation.primaryTradition.traditionId;
+    final lightBorder = AppColors.traditionLightBorderColor(tradId);
+    final darkBorder = AppColors.traditionDarkBorderColor(tradId);
+
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).viewPadding.bottom + 12),
       decoration: BoxDecoration(
@@ -314,13 +325,28 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen> {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.charcoalSurface,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: AppColors.borderSubtle, width: 1),
-              ),
+            child: AnimatedBuilder(
+              animation: _borderPulseController,
+              builder: (context, child) {
+                final t = Curves.easeInOutSine.transform(_borderPulseController.value);
+                final animatedBorderColor = Color.lerp(darkBorder, lightBorder, t)!;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.charcoalSurface,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: animatedBorderColor, width: 1.8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: animatedBorderColor.withValues(alpha: 0.08 + (t * 0.14)),
+                        blurRadius: 6 + (t * 8),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: child,
+                );
+              },
               child: TextField(
                 controller: _messageController,
                 style: GoogleFonts.plusJakartaSans(

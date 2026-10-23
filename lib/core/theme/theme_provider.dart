@@ -79,12 +79,16 @@ enum OneiroThemeMode {
 
 class ThemeNotifier extends StateNotifier<OneiroThemeMode> {
   static const String _prefThemeKey = 'oneiro_selected_theme_mode_v1';
+  static const String _prefThemeConfirmedKey = 'oneiro_has_confirmed_fullscreen_theme_v1';
+
+  static bool hasConfirmedInitialTheme = false;
 
   ThemeNotifier(super.initialMode);
 
   static Future<OneiroThemeMode> loadInitialTheme() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      hasConfirmedInitialTheme = prefs.getBool(_prefThemeConfirmedKey) ?? false;
       final saved = prefs.getString(_prefThemeKey);
       final mode = OneiroThemeMode.fromId(saved);
       AppColors.setThemeMode(mode);
@@ -100,6 +104,15 @@ class ThemeNotifier extends StateNotifier<OneiroThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefThemeKey, mode.id);
+    } catch (_) {}
+  }
+
+  Future<void> confirmInitialThemeSelection(OneiroThemeMode mode) async {
+    hasConfirmedInitialTheme = true;
+    await setTheme(mode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefThemeConfirmedKey, true);
     } catch (_) {}
   }
 }
