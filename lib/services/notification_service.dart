@@ -34,8 +34,8 @@ class NotificationService {
       body: 'Günaydınnn... Az önce gördüğün rüyayı hala hatırlıyorken gel bana anlat, aramızda kalacak 🌙',
     ),
     DreamNotificationItem(
-      title: 'Kahveden önce bir sır... ☕',
-      body: 'Rüyalar uyandıktan 10 dakika sonra %90 silinir! Uçup gitmeden hemen günlüğüne mühürle.',
+      title: 'Kahveden önce... ☕',
+      body: 'Rüyalar uyandıktan 10 dakika sonra %90 unutulur! Unutmadan hemen günlüğüne kaydet.',
     ),
     DreamNotificationItem(
       title: 'Kaderinden bir işaret mi? 📜',

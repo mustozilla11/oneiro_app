@@ -198,7 +198,7 @@ class SubscriptionService {
         }
         return const PurchaseResult(
           success: true,
-          message: '10 Kadim Rüya Jetonu hesabınıza mühürlendi!',
+          message: '10 Rüya Jetonu hesabınıza tanımlandı!',
         );
       } else {
         return const PurchaseResult(

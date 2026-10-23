@@ -92,7 +92,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
       SnackBar(
         content: Text(
           _isSaved
-              ? 'Rüya günlüğünüze mühürlendi.'
+              ? 'Rüya günlüğünüze kaydedildi.'
               : 'Rüya günlüğünüzden kaldırıldı.',
           style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
         ),
@@ -205,9 +205,9 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               ),
               const SizedBox(height: 10),
 
-              // 2. Edebi Başlık
+              // 2. Ana Başlık
               Text(
-                'Bilinçdışının Kadim Yankısı',
+                'Rüya ve Kaynak Analizi',
                 style: AppTheme.headingStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
@@ -358,9 +358,9 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               Divider(color: AppColors.borderSubtle, height: 1),
               const SizedBox(height: 32),
 
-              // 7. Alt Bölüm: İçgörü (Günün Pusulası)
+              // 7. Alt Bölüm: Somut Tavsiye ve Özet
               _buildSectionHeader(
-                title: 'GÜNÜN İÇGÖRÜSÜ',
+                title: 'SOMUT TAVSİYE VE ÖZET',
                 icon: Icons.lightbulb_outline,
                 color: AppColors.islamGold,
               ),
@@ -377,10 +377,10 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                 ),
                 child: Text(
                   '"${liveInterpretation.freeAnalysis.gununPusulasi}"',
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    height: 1.55,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    height: 1.6,
                     color: AppColors.islamGold,
                   ),
                 ),
@@ -390,10 +390,10 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               Divider(color: AppColors.borderSubtle, height: 1),
               const SizedBox(height: 32),
 
-              // 8. Alt Bölüm: Diğer Kadim Ekoller (Locked Traditions - Her biri kendi renginde!)
+              // 8. Alt Bölüm: Diğer Kaynak Ekoller (Locked Traditions - Her biri kendi renginde!)
               if (liveInterpretation.lockedTraditions.isNotEmpty) ...[
                 _buildSectionHeader(
-                  title: 'DİĞER GELENEKLER VE YANSIMALAR',
+                  title: 'DİĞER KAYNAK KİTAP YORUMLARI',
                   icon: Icons.lock_clock_outlined,
                   color: AppColors.moonlight,
                 ),
@@ -409,7 +409,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 
               const SizedBox(height: 28),
 
-              // 9. Tabirci İle Teemmül (Edebi Soru Butonu)
+              // 9. Rüya Yorumcusuna Soru Sor Butonu
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.charcoalSurface,
@@ -436,7 +436,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            'TABİRCİ İLE TEEMMÜL ET (SORU SOR)',
+                            'RÜYA YORUMCUSUNA SORU SOR',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

@@ -129,7 +129,7 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
                         ),
                       ),
                       Text(
-                        'Cihazınızda ve bulutta mühürlenen tüm rüya kayıtları',
+                        'Cihazınızda ve bulutta kaydedilen tüm rüya yorumları',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           color: AppColors.mistGrey,

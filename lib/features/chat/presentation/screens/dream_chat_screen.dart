@@ -102,11 +102,11 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'TEEMMÜL & SÖYLEŞİ',
-              style: GoogleFonts.cormorantGaramond(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
+              'RÜYA SORU & CEVAP',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
                 color: AppColors.moonlight,
               ),
             ),
@@ -175,20 +175,13 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isUser ? 'SİZ' : 'KADİM REHBER',
-                    style: isUser
-                        ? GoogleFonts.plusJakartaSans(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.5,
-                            color: AppColors.mistGrey,
-                          )
-                        : GoogleFonts.cormorantGaramond(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.4,
-                            color: AppColors.moonlight,
-                          ),
+                    isUser ? 'SİZ' : 'RÜYA YORUMCUSU',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: isUser ? AppColors.mistGrey : AppColors.moonlight,
+                    ),
                   ),
                 ],
               ),
@@ -253,7 +246,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
           ),
           const SizedBox(width: 10),
           Text(
-            'Kadim kaynaklar taranıyor...',
+            'Kaynak kitaplar taranıyor...',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontStyle: FontStyle.italic,
@@ -267,9 +260,9 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
 
   Widget _buildSuggestionsBar() {
     final suggestions = [
-      'Bu sembollerin kadim kökeni nedir?',
-      'Rüyadaki hisler neye işaret ediyor?',
-      'Bilinçaltım neyi entegre etmemi istiyor?',
+      'Kitaplarda bu semboller ne anlama geliyor?',
+      'Rüyadaki olayların bağlantısı nedir?',
+      'Bu rüya günlük hayatım için ne söylüyor?',
     ];
 
     return Container(

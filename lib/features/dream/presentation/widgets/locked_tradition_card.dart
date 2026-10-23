@@ -191,7 +191,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          '${widget.tradition.title} analizi günlüğünüze mühürlendi.',
+                          '${widget.tradition.title} analizi günlüğünüze kaydedildi.',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
@@ -430,10 +430,10 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                     Flexible(
                                       child: Text(
                                         subState.isPremium
-                                            ? 'Kadim Analizi Oku (Plus ile Açık)'
+                                            ? 'Kaynak Analizini Oku (Plus ile Açık)'
                                             : subState.dreamCredits > 0
                                                 ? 'Tam Analizi Oku (1 Reklam veya Jeton)'
-                                                : 'Kadim Analizi Oku (Kısa Reklam)',
+                                                : 'Kaynak Analizini Oku (Kısa Reklam)',
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13,

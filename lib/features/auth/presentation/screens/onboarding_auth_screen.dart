@@ -95,7 +95,7 @@ class _OnboardingAuthScreenState extends ConsumerState<OnboardingAuthScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Hoş geldiniz ${savedUser.displayName}. Oturumunuz bu cihaza kalıcı olarak mühürlendi.',
+              'Hoş geldiniz ${savedUser.displayName}. Oturumunuz bu cihaza kalıcı olarak kaydedildi.',
               style: GoogleFonts.plusJakartaSans(color: AppColors.textPureWhite),
             ),
             backgroundColor: AppColors.surfaceCardElevated,
