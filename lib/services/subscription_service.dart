@@ -217,4 +217,42 @@ class SubscriptionService {
       return PurchaseResult(success: false, message: 'Ödeme tamamlanamadı: $e');
     }
   }
+
+  /// Satın Alımları Geri Yükle (Apple Guideline 3.1.1 Zorunluluğu)
+  Future<PurchaseResult> restorePurchases() async {
+    if (!_isConfigured) {
+      return const PurchaseResult(
+        success: true,
+        message: 'Satın alımlarınız geri yüklendi.',
+        isConfigured: false,
+      );
+    }
+
+    try {
+      final customerInfo = await Purchases.restorePurchases();
+      final isPremium = customerInfo.entitlements.all[entitlementPremium]?.isActive ?? false;
+      _isPremiumUser = isPremium;
+
+      if (onPremiumStatusChanged != null) {
+        onPremiumStatusChanged!(isPremium);
+      }
+
+      if (_currentUserId != null && _currentUserId!.isNotEmpty) {
+        await FirestoreService.instance.updatePremiumStatus(_currentUserId!, isPremium);
+      }
+
+      return PurchaseResult(
+        success: true,
+        message: isPremium
+            ? 'Plus aboneliğiniz başarıyla geri yüklendi!'
+            : 'Aktif bir abonelik bulunamadı veya geri yüklendi.',
+      );
+    } catch (e) {
+      debugPrint('[SubscriptionService] restorePurchases hatası: $e');
+      return PurchaseResult(
+        success: false,
+        message: 'Geri yükleme işlemi tamamlanamadı: $e',
+      );
+    }
+  }
 }

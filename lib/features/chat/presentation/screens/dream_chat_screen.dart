@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/localization/locale_provider.dart';
+import '../../../../core/legal/legal_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../dream/domain/models/dream_interpretation.dart';
 import '../providers/chat_provider.dart';
@@ -123,6 +124,14 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
               ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: AppStrings.get('reportContentBtn', lang),
+            icon: Icon(Icons.flag_outlined, size: 19, color: AppColors.mistGrey),
+            onPressed: () => LegalService.showReportDialog(context, contentTag: 'chat_response', lang: lang),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [

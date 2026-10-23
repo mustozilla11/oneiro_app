@@ -118,14 +118,11 @@ class NotificationService {
         },
       );
 
-      // Android 13+ bildirim izni ve Android 12+ tam saat (exact alarm) izni iste
+      // Android 13+ bildirim izni iste
       final androidImplementation = _notificationsPlugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
         await androidImplementation.requestNotificationsPermission();
-        try {
-          await androidImplementation.requestExactAlarmsPermission();
-        } catch (_) {}
       }
 
       _isInitialized = true;
@@ -300,32 +297,18 @@ class NotificationService {
         iOS: DarwinNotificationDetails(presentAlert: true, presentSound: true),
       );
 
-      // Önce tam saat (exactAllowWhileIdle) ile zamanlamayı dene, izin kısıtlıysa inexactAllowWhileIdle kullan
-      try {
-        await _notificationsPlugin.zonedSchedule(
-          1001,
-          item.title,
-          item.body,
-          scheduledDate,
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      } catch (_) {
-        await _notificationsPlugin.zonedSchedule(
-          1001,
-          item.title,
-          item.body,
-          scheduledDate,
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      }
+      // Google Play Store uyumlu ve pil dostu inexactAllowWhileIdle modu ile zamanla
+      await _notificationsPlugin.zonedSchedule(
+        1001,
+        item.title,
+        item.body,
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
 
       debugPrint('[NotificationService] Sabah 08:30 alarmı (${scheduledDate.toString()}) için aktif edildi.');
     } catch (e) {

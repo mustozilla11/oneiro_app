@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/ads/ad_service.dart';
+import '../../../../core/legal/legal_service.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -25,6 +28,7 @@ class PaywallModal extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(themeProvider);
+    final lang = ref.watch(localeProvider);
     final subState = ref.watch(userSubscriptionProvider);
 
     return Container(
@@ -415,6 +419,7 @@ class PaywallModal extends ConsumerWidget {
               ),
 
               const SizedBox(height: 16),
+
               Center(
                 child: Text(
                   'Mevcut Bakiye: ${subState.isPremium ? "Sınırsız (Plus)" : "${subState.dreamCredits} Tabir"}',
@@ -424,6 +429,104 @@ class PaywallModal extends ConsumerWidget {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 12),
+
+              // Apple Guideline 3.1.1: "Satın Alımları Geri Yükle" Butonu
+              Center(
+                child: TextButton.icon(
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    final result = await SubscriptionService.instance.restorePurchases();
+                    if (result.success && SubscriptionService.instance.isPremiumUser) {
+                      await ref.read(userSubscriptionProvider.notifier).setPremium(true);
+                    }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result.message,
+                            style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13),
+                          ),
+                          backgroundColor: AppColors.charcoalElevated,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  icon: Icon(Icons.restore_rounded, size: 14, color: AppColors.moonlight),
+                  label: Text(
+                    AppStrings.get('restorePurchasesBtn', lang),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.moonlight,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Apple Guideline 3.1.2: Otomatik Yenilenen Abonelik Şartı Açıklaması
+              Text(
+                AppStrings.get('subscriptionTermsDesc', lang),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10.5,
+                  color: AppColors.mistGrey.withValues(alpha: 0.7),
+                  height: 1.4,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Apple Guideline 3.1.2: EULA (Kullanım Koşulları) ve Gizlilik Politikası Bağlantıları
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () => LegalService.openTermsOfUse(context, lang: lang),
+                    child: Text(
+                      AppStrings.get('termsOfUse', lang),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.moonlight,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '  •  ',
+                    style: TextStyle(color: AppColors.mistGrey.withValues(alpha: 0.5)),
+                  ),
+                  GestureDetector(
+                    onTap: () => LegalService.openPrivacyPolicy(context, lang: lang),
+                    child: Text(
+                      AppStrings.get('privacyPolicy', lang),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.moonlight,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Tıbbi & Yasal Feragatname Özeti
+              Text(
+                AppStrings.get('medicalDisclaimerDesc', lang),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 9.5,
+                  color: AppColors.mistGrey.withValues(alpha: 0.5),
+                  height: 1.35,
+                ),
+              ),
+
               const SizedBox(height: 8),
             ],
           ),

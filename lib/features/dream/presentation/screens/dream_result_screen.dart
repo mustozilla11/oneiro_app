@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/localization/locale_provider.dart';
+import '../../../../core/legal/legal_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -166,6 +167,11 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
           IconButton(
             icon: Icon(Icons.share_outlined, size: 20, color: AppColors.mistGrey),
             onPressed: () => _shareInterpretation(liveInterpretation),
+          ),
+          IconButton(
+            tooltip: AppStrings.get('reportContentBtn', lang),
+            icon: Icon(Icons.flag_outlined, size: 19, color: AppColors.mistGrey),
+            onPressed: () => LegalService.showReportDialog(context, contentTag: 'dream_result', lang: lang),
           ),
           const SizedBox(width: 8),
         ],
@@ -458,6 +464,24 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                   ),
                 ),
               ).animate().fadeIn(duration: 400.ms),
+
+              const SizedBox(height: 20),
+
+              // Yasal Bilgilendirme ve Tıbbi Feragatname
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    AppStrings.get('medicalDisclaimerDesc', lang),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      color: AppColors.mistGrey.withValues(alpha: 0.5),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 40),
             ],

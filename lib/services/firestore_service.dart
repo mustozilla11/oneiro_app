@@ -317,6 +317,36 @@ class FirestoreService {
     }
   }
 
+  /// Kullanıcının tüm yerel ve bulut rüya kayıtlarını ve verilerini kalıcı olarak siler (Hesap Silme Zorunluluğu)
+  Future<void> deleteAllUserData({String? uid}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefLocalDreamsKey);
+      localDreamsRevision.value++;
+    } catch (e) {
+      debugPrint('[FirestoreService] deleteAllUserData yerel temizlik hatası: $e');
+    }
+
+    if (isFirebaseAvailable && uid != null && uid.isNotEmpty && !uid.startsWith('guest_') && !uid.startsWith('dev_')) {
+      try {
+        final query = await firestore
+            .collection('users')
+            .doc(uid)
+            .collection('dreams')
+            .get()
+            .timeout(const Duration(seconds: 5));
+
+        for (final doc in query.docs) {
+          await doc.reference.delete().catchError((_) {});
+        }
+
+        await firestore.collection('users').doc(uid).delete().catchError((_) {});
+      } catch (e) {
+        debugPrint('[FirestoreService] deleteAllUserData Firestore temizlik uyarısı: $e');
+      }
+    }
+  }
+
   /// Kullanıcının geçmiş rüyalarını canlı yayınlayan Stream
   Stream<List<Map<String, dynamic>>> getDreamHistoryStream(String uid) {
     if (!isFirebaseAvailable || uid.isEmpty || uid.startsWith('guest_') || uid.startsWith('dev_')) {

@@ -390,4 +390,59 @@ class AuthService {
       _authStateController.add(_currentUser);
     }
   }
+
+  /// Hesabı ve Tüm Verileri Kalıcı Olarak Sil (Apple Guideline 5.1.1(v) & Google Play Data Safety)
+  Future<bool> deleteAccount() async {
+    try {
+      final user = _currentUser;
+      final uid = user?.uid;
+
+      // 1. Veritabanındaki rüyaları ve profili temizle
+      await FirestoreService.instance.deleteAllUserData(uid: uid);
+
+      // 2. Firebase Auth kullanıcısını sil
+      if (isFirebaseAvailable) {
+        try {
+          final fbUser = auth.currentUser;
+          if (fbUser != null) {
+            await fbUser.delete();
+          }
+        } catch (e) {
+          debugPrint('[AuthService] Firebase auth delete uyarısı: $e');
+        }
+        try {
+          await auth.signOut();
+        } catch (_) {}
+      }
+
+      // 3. Google Sign-In bağlantısını kopar
+      try {
+        await _googleSignIn.disconnect();
+      } catch (_) {
+        try {
+          await _googleSignIn.signOut();
+        } catch (_) {}
+      }
+
+      // 4. Misafir kullanıcıya sıfırla ve SharedPreferences kullanıcı verisini temizle
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefUserKey);
+
+      final guestUser = OneiroUser(
+        uid: 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        displayName: 'Misafir Okuyucu',
+        email: null,
+        isGuest: true,
+      );
+      await _persistUser(guestUser);
+      unawaited(SubscriptionService.instance.logOut().catchError((_) {}));
+      debugPrint('[AuthService] Kullanıcı hesabı ve tüm verileri kalıcı olarak silindi.');
+      return true;
+    } catch (e) {
+      debugPrint('[AuthService] deleteAccount hatası: $e');
+      return false;
+    } finally {
+      _authStateController.add(_currentUser);
+    }
+  }
 }

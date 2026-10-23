@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/localization/locale_provider.dart';
+import '../../../../core/legal/legal_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -208,6 +209,97 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  /// Apple Guideline 5.1.1(v) ve Google Play Veri Güvenliği: Hesabı ve Tüm Verileri Kalıcı Olarak Silme
+  Future<void> _handleDeleteAccount(String lang) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.charcoalBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppColors.borderSubtle),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent.shade200, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                AppStrings.get('deleteAccountDialogTitle', lang),
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.moonlight,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          AppStrings.get('deleteAccountDialogDesc', lang),
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: AppColors.mistGrey,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              AppStrings.get('cancelBtn', lang),
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.mistGrey,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade900.withValues(alpha: 0.6),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.4)),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              AppStrings.get('deleteAccountConfirm', lang),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    HapticFeedback.heavyImpact();
+    setState(() => _isLoading = true);
+    try {
+      await AuthService.instance.deleteAccount();
+      ref.read(dreamProvider.notifier).reset();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppStrings.get('deleteAccountSuccess', lang),
+              style: GoogleFonts.plusJakartaSans(color: Colors.white),
+            ),
+            backgroundColor: AppColors.charcoalElevated,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   /// Kullanıcının kayıtlı gerçek rüyalarından matematiksel ve tıklanabilir bilinçaltı istatistikleri üretir
@@ -772,6 +864,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                         ],
+
+                        const SizedBox(height: 10),
+
+                        // Apple & Google Zorunlu Kuralı: Hesabı ve Verileri Silme Seçeneği
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: _isLoading ? null : () => _handleDeleteAccount(lang),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.delete_outline_rounded, size: 15, color: Colors.redAccent.shade100),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppStrings.get('deleteAccountBtn', lang),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.redAccent.shade100,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -1174,6 +1300,126 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             AppStrings.get('privacyDesc', lang),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
+                              color: AppColors.mistGrey,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 8,
+                            children: [
+                              InkWell(
+                                onTap: () => LegalService.openPrivacyPolicy(context, lang: lang),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppColors.borderSubtle),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.open_in_new_rounded, size: 12, color: AppColors.moonlight),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        AppStrings.get('privacyPolicy', lang),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.moonlight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => LegalService.openTermsOfUse(context, lang: lang),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppColors.borderSubtle),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.description_outlined, size: 12, color: AppColors.moonlight),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        AppStrings.get('termsOfUse', lang),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.moonlight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 8. Tıbbi & Yasal Bilgilendirme / Feragatname (Store Health & Legal Disclaimer)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.charcoalSurface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.borderSubtle,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.borderSubtle),
+                      ),
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        color: AppColors.warmSand,
+                        size: 17,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.get('medicalDisclaimerTitle', lang),
+                            style: AppTheme.headingStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                              color: AppColors.warmSand,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            AppStrings.get('medicalDisclaimerDesc', lang),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
                               color: AppColors.mistGrey,
                               height: 1.5,
                             ),
