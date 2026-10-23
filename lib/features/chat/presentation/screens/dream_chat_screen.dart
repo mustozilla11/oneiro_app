@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../dream/domain/models/dream_interpretation.dart';
 import '../providers/chat_provider.dart';
@@ -76,6 +78,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+    final lang = ref.watch(localeProvider);
 
     // Yeni mesaj geldiğinde listeyi kaydır
     ref.listen(chatProvider, (previous, next) {
@@ -102,7 +105,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'RÜYA SORU & CEVAP',
+              AppStrings.get('chatTitle', lang),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -155,6 +158,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
   Widget _buildDialogueEntry(dynamic message) {
     final isUser = message.isUser as bool;
     final timeStr = DateFormat('HH:mm').format(message.timestamp as DateTime);
+    final lang = ref.watch(localeProvider);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 28),
@@ -175,7 +179,9 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isUser ? 'SİZ' : 'RÜYA YORUMCUSU',
+                    isUser
+                        ? AppStrings.get('youLabel', lang)
+                        : AppStrings.get('interpreterLabel', lang),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -232,6 +238,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
   }
 
   Widget _buildTypingIndicator() {
+    final lang = ref.watch(localeProvider);
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
@@ -246,7 +253,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
           ),
           const SizedBox(width: 10),
           Text(
-            'Kaynak kitaplar taranıyor...',
+            AppStrings.get('scanningBooks', lang),
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontStyle: FontStyle.italic,
@@ -259,10 +266,11 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
   }
 
   Widget _buildSuggestionsBar() {
+    final lang = ref.watch(localeProvider);
     final suggestions = [
-      'Kitaplarda bu semboller ne anlama geliyor?',
-      'Rüyadaki olayların bağlantısı nedir?',
-      'Bu rüya günlük hayatım için ne söylüyor?',
+      AppStrings.get('chatSug1', lang),
+      AppStrings.get('chatSug2', lang),
+      AppStrings.get('chatSug3', lang),
     ];
 
     return Container(
@@ -347,7 +355,7 @@ class _DreamChatScreenState extends ConsumerState<DreamChatScreen>
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Rüya hakkında bir soru sorun...',
+                  hintText: AppStrings.get('chatInputHint', ref.watch(localeProvider)),
                   hintStyle: GoogleFonts.plusJakartaSans(
                     color: AppColors.dimMist,
                     fontSize: 13.5,

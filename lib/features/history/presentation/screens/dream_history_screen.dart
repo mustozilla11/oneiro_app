@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -86,13 +88,14 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     ref.watch(themeProvider);
+    final lang = ref.watch(localeProvider);
     final currentUser = AuthService.instance.currentUser;
 
     final filters = [
-      {'id': 'all', 'label': 'Tümü', 'color': AppColors.moonlight},
-      {'id': 'islam_dogu', 'label': 'Doğu & İslam', 'color': AppColors.islamGold},
-      {'id': 'antik_akdeniz', 'label': 'Antik Akdeniz', 'color': AppColors.mediterraneanBlue},
-      {'id': 'psikoloji', 'label': 'Psikoloji', 'color': AppColors.psychologyPurple},
+      {'id': 'all', 'label': AppStrings.get('filterAll', lang), 'color': AppColors.moonlight},
+      {'id': 'islam_dogu', 'label': AppStrings.get('islamDogu', lang), 'color': AppColors.islamGold},
+      {'id': 'antik_akdeniz', 'label': AppStrings.get('antikAkdeniz', lang), 'color': AppColors.mediterraneanBlue},
+      {'id': 'psikoloji', 'label': AppStrings.get('psikoloji', lang), 'color': AppColors.psychologyPurple},
     ];
 
     return Scaffold(
@@ -116,26 +119,28 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
                     child: Icon(Icons.history_edu_outlined, color: AppColors.moonlight, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'RÜYA ARŞİVİ',
-                        style: AppTheme.headingStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                          color: AppColors.moonlight,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppStrings.get('archiveTitle', lang),
+                          style: AppTheme.headingStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                            color: AppColors.moonlight,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Cihazınızda ve bulutta kaydedilen tüm rüya yorumları',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.mistGrey,
+                        Text(
+                          AppStrings.get('archiveSubtitle', lang),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.mistGrey,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -316,6 +321,7 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final lang = ref.watch(localeProvider);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -332,8 +338,9 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
           const SizedBox(height: 20),
           Text(
             _selectedFilter == 'all'
-                ? 'Henüz Mühürlenmiş Bir Rüya Yok'
-                : 'Bu Ekolde Kayıtlı Rüya Bulunamadı',
+                ? AppStrings.get('emptyArchiveTitle', lang)
+                : AppStrings.get('emptyCategoryTitle', lang),
+            textAlign: TextAlign.center,
             style: AppTheme.headingStyle(
               fontSize: 19,
               fontWeight: FontWeight.w700,
@@ -344,7 +351,7 @@ class _DreamHistoryScreenState extends ConsumerState<DreamHistoryScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Gördüğünüz rüyaları ana ekranda kaleme alın, çözümlemeler otomatik olarak günlüğünüze kaydedilsin.',
+              AppStrings.get('emptyArchiveDesc', lang),
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,

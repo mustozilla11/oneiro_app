@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../dream/presentation/screens/dream_input_screen.dart';
 import '../../../history/presentation/screens/dream_history_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 
-class MainPagerScreen extends StatefulWidget {
+class MainPagerScreen extends ConsumerStatefulWidget {
   const MainPagerScreen({super.key});
 
   @override
-  State<MainPagerScreen> createState() => _MainPagerScreenState();
+  ConsumerState<MainPagerScreen> createState() => _MainPagerScreenState();
 }
 
-class _MainPagerScreenState extends State<MainPagerScreen> {
+class _MainPagerScreenState extends ConsumerState<MainPagerScreen> {
   late final PageController _pageController;
   int _currentPage = 1; // Başlangıç: 1 (Orta - Ana Rüya Giriş Ekranı)
 
@@ -78,6 +81,9 @@ class _MainPagerScreenState extends State<MainPagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeProvider);
+    ref.watch(localeProvider);
+
     // Klavye açık mı kontrolü (viewInsets.bottom > 50)
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 50;
     final shouldShowIndicator = !isKeyboardOpen && _isIndicatorVisible;

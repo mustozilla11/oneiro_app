@@ -423,6 +423,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     ref.watch(themeProvider);
+    final lang = ref.watch(localeProvider);
 
     return Scaffold(
       backgroundColor: AppColors.oledBlack,
@@ -446,26 +447,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Icon(Icons.person_outline_rounded, color: AppColors.moonlight, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'RÜYA PROFİLİ',
-                        style: AppTheme.headingStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                          color: AppColors.moonlight,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppStrings.get('profileTitle', lang),
+                          style: AppTheme.headingStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.5,
+                            color: AppColors.moonlight,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Kişisel hesap, tema tercihi ve bilinçaltı arşivi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppColors.mistGrey,
+                        Text(
+                          AppStrings.get('profileSubtitle', lang),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.mistGrey,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -480,20 +483,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Icon(Icons.palette_outlined, color: AppColors.moonlight, size: 17),
                       const SizedBox(width: 8),
-                      Text(
-                        'GÖRÜNÜM & TEMA SEÇİMİ',
-                        style: AppTheme.headingStyle(
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                          color: AppColors.moonlight,
+                      Expanded(
+                        child: Text(
+                          AppStrings.get('appearanceTheme', lang),
+                          style: AppTheme.headingStyle(
+                            fontSize: 16.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: AppColors.moonlight,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Edebi Günlük, Kadim Mistik ve Safir Minimal temaları arasında dilediğiniz an geçiş yapın',
+                    AppStrings.get('appearanceSubtitle', lang),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: AppColors.mistGrey,
@@ -549,13 +554,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           children: [
                             Row(
                               children: [
-                                Text(
-                                  'NASIL ÇALIŞIR?',
-                                  style: AppTheme.headingStyle(
-                                    fontSize: 16.5,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.2,
-                                    color: AppColors.moonlight,
+                                Flexible(
+                                  child: Text(
+                                    AppStrings.get('howItWorksTitle', lang),
+                                    style: AppTheme.headingStyle(
+                                      fontSize: 16.5,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.2,
+                                      color: AppColors.moonlight,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -567,7 +574,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     border: Border.all(color: AppColors.borderSubtle),
                                   ),
                                   child: Text(
-                                    'ŞEMA',
+                                    AppStrings.get('howItWorksBadge', lang),
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w600,
@@ -580,7 +587,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Rüya metninden sembol ayrıştırmaya ve kadim kaynak taramasına kadar 6 aşamalı blok diyagram.',
+                              AppStrings.get('howItWorksDesc', lang),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
                                 height: 1.4,
@@ -610,10 +617,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 builder: (context, authSnap) {
                   final user = authSnap.data ?? AuthService.instance.currentUser;
                   final isSignedIn = user != null && !user.isGuest;
-                  final userName = isSignedIn ? (user.displayName ?? 'Rüya Gezgini') : 'Kayıtlı Misafir Okuyucu';
+                  final userName = isSignedIn
+                      ? (user.displayName ?? 'DreamApp')
+                      : AppStrings.get('guestUserTitle', lang);
                   final userEmail = isSignedIn
-                      ? (user.email ?? 'Kalıcı Oturum Aktif')
-                      : 'Rüyalarınız bu cihazda güvenle saklanıyor';
+                      ? (user.email ?? AppStrings.get('guestUserSub', lang))
+                      : AppStrings.get('guestUserSub', lang);
                   final avatarInitial = (isSignedIn && userName.isNotEmpty ? userName[0].toUpperCase() : '☾');
 
                   return Container(
@@ -652,6 +661,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const SizedBox(height: 4),
                         Text(
                           userEmail,
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: AppColors.mistGrey,
@@ -685,7 +695,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Google ile Hesabı Bağla',
+                                      AppStrings.get('googleConnectBtn', lang),
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
@@ -718,7 +728,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     Icon(Icons.apple, size: 18, color: AppColors.moonlight),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Apple ile Bağlan',
+                                      AppStrings.get('appleConnectBtn', lang),
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
@@ -750,7 +760,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     Icon(Icons.logout_rounded, size: 15, color: AppColors.mistGrey),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Oturumu Kapat',
+                                      AppStrings.get('signOutBtn', lang),
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 12,
                                         color: AppColors.mistGrey,
@@ -805,7 +815,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                sub.isPremium ? 'RÜYA GÜNLÜĞÜ PLUS' : 'RÜYA KONTÖRÜ',
+                                sub.isPremium
+                                    ? AppStrings.get('plusCardTitle', lang)
+                                    : AppStrings.get('creditsCardTitle', lang),
                                 style: AppTheme.headingStyle(
                                   fontSize: 16.5,
                                   fontWeight: FontWeight.w700,
@@ -816,8 +828,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               const SizedBox(height: 3),
                               Text(
                                 sub.isPremium
-                                    ? 'Sınırsız Analiz & Sıfır Reklam'
-                                    : '${sub.dreamCredits} Tabir Hakkı (Günde 1 Ücretsiz)',
+                                    ? AppStrings.get('plusCardSub', lang)
+                                    : '${sub.dreamCredits} ${AppStrings.get('creditsCardSub', lang)}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   color: AppColors.mistGrey,
@@ -840,7 +852,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                           child: Text(
-                            sub.isPremium ? 'Yönet' : 'Yükselt',
+                            sub.isPremium
+                                ? AppStrings.get('manageBtn', lang)
+                                : AppStrings.get('upgradeBtn', lang),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -865,7 +879,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'BİLİNÇALTI İSTATİSTİKLERİ',
+                          AppStrings.get('subconsciousStats', lang),
                           style: AppTheme.headingStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w700,
@@ -875,7 +889,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Detaylı analiz tablosunu görmek için kartlara dokunun',
+                          AppStrings.get('statsSubtitle', lang),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             color: AppColors.mistGrey,
@@ -902,13 +916,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       final stats = snapshot.data ??
                           <String, dynamic>{
                             'count': '0',
-                            'countSub': 'İlk rüyanızı çözümleyin',
-                            'topSymbol': 'Henüz Yok',
-                            'topSymbolSub': 'Sembol kaydı bekleniyor',
-                            'archetype': 'Keşfediliyor',
-                            'archetypeSub': 'Jung arketip analizi',
-                            'frequency': '0 / 7 Gün',
-                            'frequencySub': 'Son 7 günlük kayıt düzeni',
+                            'countSub': AppStrings.get('analyzeFirstDream', lang),
+                            'topSymbol': AppStrings.get('noneYet', lang),
+                            'topSymbolSub': AppStrings.get('waitingSymbols', lang),
+                            'archetype': AppStrings.get('discovering', lang),
+                            'archetypeSub': AppStrings.get('jungAnalysis', lang),
+                            'frequency': '0 / 7 ${AppStrings.get('days', lang)}',
+                            'frequencySub': AppStrings.get('last7DaysHabit', lang),
                             'symbolList': <MapEntry<String, int>>[],
                             'traditionCounts': <String, int>{},
                             'archetypeScores': <String, int>{},
@@ -917,6 +931,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             'totalSymbols': 0,
                           };
 
+                      final totalDreams = int.tryParse(stats['count'] as String? ?? '0') ?? 0;
+                      final totalSyms = stats['totalSymbols'] as int? ?? 0;
+                      final streakDays = stats['streak'] as int? ?? 0;
+
                       return Column(
                         children: [
                           Row(
@@ -924,8 +942,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               Expanded(
                                 child: _buildStatTile(
                                   value: stats['count'] as String,
-                                  label: 'Çözülen Rüya',
-                                  subLabel: stats['countSub'] as String? ?? '',
+                                  label: AppStrings.get('countLabel', lang),
+                                  subLabel: totalDreams == 0
+                                      ? AppStrings.get('analyzeFirstDream', lang)
+                                      : '$totalSyms ${AppStrings.get('symbolsAnalyzed', lang)}',
                                   icon: Icons.auto_stories_outlined,
                                   accentColor: AppColors.islamGold,
                                   onTap: () => _showStatsDetailSheet(context, stats),
@@ -934,9 +954,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildStatTile(
-                                  value: stats['topSymbol'] as String,
-                                  label: 'Baskın Sembol',
-                                  subLabel: stats['topSymbolSub'] as String? ?? '',
+                                  value: totalDreams == 0
+                                      ? AppStrings.get('noneYet', lang)
+                                      : (stats['topSymbol'] as String),
+                                  label: AppStrings.get('symbolLabel', lang),
+                                  subLabel: totalDreams == 0
+                                      ? AppStrings.get('waitingSymbols', lang)
+                                      : (stats['topSymbolSub'] as String? ?? ''),
                                   icon: Icons.water_drop_outlined,
                                   accentColor: AppColors.mediterraneanBlue,
                                   onTap: () => _showStatsDetailSheet(context, stats),
@@ -949,9 +973,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             children: [
                               Expanded(
                                 child: _buildStatTile(
-                                  value: stats['archetype'] as String,
-                                  label: 'Baskın Arketip',
-                                  subLabel: stats['archetypeSub'] as String? ?? '',
+                                  value: totalDreams == 0
+                                      ? AppStrings.get('discovering', lang)
+                                      : (stats['archetype'] as String),
+                                  label: AppStrings.get('archetypeLabel', lang),
+                                  subLabel: totalDreams == 0
+                                      ? AppStrings.get('jungAnalysis', lang)
+                                      : (stats['archetypeSub'] as String? ?? ''),
                                   icon: Icons.psychology_outlined,
                                   accentColor: AppColors.psychologyPurple,
                                   onTap: () => _showStatsDetailSheet(context, stats),
@@ -960,9 +988,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildStatTile(
-                                  value: stats['frequency'] as String,
-                                  label: 'Haftalık Düzen',
-                                  subLabel: stats['frequencySub'] as String? ?? '',
+                                  value: (stats['frequency'] as String).replaceAll('Gün', AppStrings.get('days', lang)),
+                                  label: AppStrings.get('weeklyLabel', lang),
+                                  subLabel: totalDreams == 0
+                                      ? AppStrings.get('last7DaysHabit', lang)
+                                      : '${AppStrings.get('activeStreak', lang)}: $streakDays ${AppStrings.get('days', lang)}',
                                   icon: Icons.calendar_today_outlined,
                                   accentColor: AppColors.moonlight,
                                   onTap: () => _showStatsDetailSheet(context, stats),
@@ -979,7 +1009,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const SizedBox(height: 24),
 
-              // 6. Sabah Rüya Hatırlatıcısı Ayarı (08:30)
+              // 6. Sabah Rüya Hatırlatıcısı Ayarı (08:30) + Anlık Test Butonu
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 decoration: BoxDecoration(
@@ -990,56 +1020,107 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     width: 1,
                   ),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.borderSubtle),
-                      ),
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: AppColors.moonlight,
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Sabah Rüya Hatırlatıcısı (08:30)',
-                            style: AppTheme.headingStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.moonlight,
-                            ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.04),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.borderSubtle),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Her sabah uyanınca rüyanızı unutmadan kaydetmeniz için bildirim gönderir',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11.5,
-                              color: AppColors.mistGrey,
-                              height: 1.4,
-                            ),
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            color: AppColors.moonlight,
+                            size: 18,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppStrings.get('morningReminder', lang),
+                                style: AppTheme.headingStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.moonlight,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                AppStrings.get('morningReminderDesc', lang),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11.5,
+                                  color: AppColors.mistGrey,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Switch(
+                          value: _morningReminderEnabled,
+                          activeThumbColor: AppColors.moonlight,
+                          activeTrackColor: AppColors.moonlight.withValues(alpha: 0.25),
+                          onChanged: (val) async {
+                            HapticFeedback.selectionClick();
+                            setState(() => _morningReminderEnabled = val);
+                            await NotificationService.instance.setMorningReminderEnabled(val);
+                            if (val && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    AppStrings.get('reminderScheduledMsg', lang),
+                                    style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
+                                  ),
+                                  backgroundColor: AppColors.charcoalElevated,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Switch(
-                      value: _morningReminderEnabled,
-                      activeThumbColor: AppColors.moonlight,
-                      activeTrackColor: AppColors.moonlight.withValues(alpha: 0.25),
-                      onChanged: (val) async {
-                        HapticFeedback.selectionClick();
-                        setState(() => _morningReminderEnabled = val);
-                        await NotificationService.instance.setMorningReminderEnabled(val);
-                      },
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          await NotificationService.instance.showInstantTestNotification(lang: lang);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.borderSubtle),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.notifications_active_outlined, size: 13, color: AppColors.moonlight),
+                              const SizedBox(width: 6),
+                              Text(
+                                AppStrings.get('testNotificationBtn', lang),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.moonlight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -1080,7 +1161,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Gizlilik ve Kalıcı Yerel Kayıt',
+                            AppStrings.get('privacyTitle', lang),
                             style: AppTheme.headingStyle(
                               fontSize: 16.5,
                               fontWeight: FontWeight.w700,
@@ -1090,7 +1171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            'Rüyalarınız, oturumunuz ve tema tercihiniz doğrudan cihazınızın kalıcı hafızasında saklanır. Uygulamayı kapatsanız dahi verileriniz silinmez.',
+                            AppStrings.get('privacyDesc', lang),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               color: AppColors.mistGrey,
@@ -1247,7 +1328,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Uygulama arayüzü ve yapay zeka analiz dili anında güncellenir',
+                  AppStrings.get('languageModalSub', currentLang),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     color: AppColors.mistGrey,
@@ -1290,6 +1371,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         onTap: () {
                           HapticFeedback.selectionClick();
                           ref.read(localeProvider.notifier).setLanguage(code);
+                          NotificationService.instance.scheduleNextMorningNotification();
                           Navigator.pop(ctx);
                         },
                       );

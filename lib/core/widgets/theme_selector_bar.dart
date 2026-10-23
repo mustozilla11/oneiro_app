@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
+import '../localization/locale_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme.dart';
 import '../theme/theme_provider.dart';
@@ -16,9 +18,32 @@ class ThemeSelectorBar extends ConsumerWidget {
     this.compact = false,
   });
 
+  String _localizedTitle(OneiroThemeMode mode, String lang) {
+    switch (mode) {
+      case OneiroThemeMode.editorialJournal:
+        return AppStrings.get('themeEditorialTitle', lang);
+      case OneiroThemeMode.ancientMystic:
+        return AppStrings.get('themeMysticTitle', lang);
+      case OneiroThemeMode.minimalistChic:
+        return AppStrings.get('themeMinimalTitle', lang);
+    }
+  }
+
+  String _localizedSub(OneiroThemeMode mode, String lang) {
+    switch (mode) {
+      case OneiroThemeMode.editorialJournal:
+        return AppStrings.get('themeEditorialSub', lang);
+      case OneiroThemeMode.ancientMystic:
+        return AppStrings.get('themeMysticSub', lang);
+      case OneiroThemeMode.minimalistChic:
+        return AppStrings.get('themeMinimalSub', lang);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeTheme = ref.watch(themeProvider);
+    final lang = ref.watch(localeProvider);
 
     if (compact) {
       return Container(
@@ -76,7 +101,7 @@ class ThemeSelectorBar extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          mode.title,
+                          _localizedTitle(mode, lang),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
@@ -148,7 +173,7 @@ class ThemeSelectorBar extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          mode.title,
+                          _localizedTitle(mode, lang),
                           style: AppTheme.headingStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w700,
@@ -157,7 +182,7 @@ class ThemeSelectorBar extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          mode.subtitle,
+                          _localizedSub(mode, lang),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             color: AppColors.mistGrey,

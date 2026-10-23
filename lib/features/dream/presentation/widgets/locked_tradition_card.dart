@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/ads/ad_service.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../subscription/presentation/providers/user_subscription_provider.dart';
@@ -226,6 +228,7 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
   Widget build(BuildContext context) {
     final trad = widget.tradition;
     final subState = ref.watch(userSubscriptionProvider);
+    final lang = ref.watch(localeProvider);
     final isUnlocked = trad.isUnlocked;
     final tradColor = AppColors.traditionColor(trad.traditionId.isNotEmpty ? trad.traditionId : trad.title);
     final tradSecondaryColor = AppColors.traditionSecondaryColor(trad.traditionId.isNotEmpty ? trad.traditionId : trad.title);
@@ -314,7 +317,9 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        isUnlocked ? 'AÇILDI' : 'KİLİTLİ',
+                        isUnlocked
+                            ? AppStrings.get('unlockedBadge', lang)
+                            : AppStrings.get('lockedBadge', lang),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -429,11 +434,9 @@ class _LockedTraditionCardState extends ConsumerState<LockedTraditionCard> {
                                     const SizedBox(width: 8),
                                     Flexible(
                                       child: Text(
-                                        subState.isPremium
-                                            ? 'Kaynak Analizini Oku (Plus ile Açık)'
-                                            : subState.dreamCredits > 0
-                                                ? 'Tam Analizi Oku (1 Reklam veya Jeton)'
-                                                : 'Kaynak Analizini Oku (Kısa Reklam)',
+                                        subState.isPremium || subState.dreamCredits > 0
+                                            ? AppStrings.get('readSourceBtn', lang)
+                                            : AppStrings.get('readSourceAdBtn', lang),
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13,

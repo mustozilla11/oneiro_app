@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -88,12 +90,13 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
     }
 
     if (!mounted) return;
+    final lang = ref.read(localeProvider);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           _isSaved
-              ? 'Rüya günlüğünüze kaydedildi.'
-              : 'Rüya günlüğünüzden kaldırıldı.',
+              ? AppStrings.get('savedToJournal', lang)
+              : AppStrings.get('removedFromJournal', lang),
           style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.charcoalElevated,
@@ -118,6 +121,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
   @override
   Widget build(BuildContext context) {
     ref.watch(themeProvider);
+    final lang = ref.watch(localeProvider);
     final providerInterp = ref.watch(dreamProvider).interpretation;
     final liveInterpretation = (providerInterp != null &&
             providerInterp.dreamText == widget.interpretation.dreamText)
@@ -135,7 +139,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
-          'RÜYA GÜNLÜĞÜ',
+          AppStrings.get('journalHeader', lang),
           style: AppTheme.headingStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -192,13 +196,15 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'ÇÖZÜMLEME KAYDI • ${liveInterpretation.primaryTradition.title.toUpperCase()}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                      color: primaryTradColor,
+                  Flexible(
+                    child: Text(
+                      '${AppStrings.get('analysisRecord', lang)} • ${liveInterpretation.primaryTradition.title.toUpperCase()}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                        color: primaryTradColor,
+                      ),
                     ),
                   ),
                 ],
@@ -207,7 +213,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 
               // 2. Ana Başlık
               Text(
-                'Rüya ve Kaynak Analizi',
+                AppStrings.get('resultMainTitle', lang),
                 style: AppTheme.headingStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
@@ -246,7 +252,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 
               // 4. Alt Bölüm: Baskın Semboller
               _buildSectionHeader(
-                title: 'BASKIN SEMBOLLER',
+                title: AppStrings.get('dominantSymbols', lang),
                 icon: Icons.grain_outlined,
                 color: AppColors.moonlight,
               ),
@@ -283,7 +289,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 
               // 5. Alt Bölüm: Psikolojik Anlam (Bilinçaltı Moru Vurgulu)
               _buildSectionHeader(
-                title: 'PSİKOLOJİK ANLAM VE BİLİNÇALTI',
+                title: AppStrings.get('psychSummaryHeader', lang),
                 icon: Icons.psychology_outlined,
                 color: AppColors.psychologyPurple,
               ),
@@ -315,7 +321,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               Divider(color: AppColors.borderSubtle, height: 1),
               const SizedBox(height: 32),
 
-              // 6. Alt Bölüm: Kadim Tabir (Seçili Birincil Ekol Renginde)
+              // 6. Alt Bölüm: Birincil Kaynak Analizi (Seçili Birincil Ekol Renginde)
               _buildSectionHeader(
                 title: liveInterpretation.primaryTradition.title.toUpperCase(),
                 icon: Icons.auto_stories_outlined,
@@ -323,7 +329,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               ),
               const SizedBox(height: 4),
               Text(
-                'Temsil: ${liveInterpretation.primaryTradition.scholar}',
+                '${AppStrings.get('repPrefix', lang)}: ${liveInterpretation.primaryTradition.scholar}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -345,7 +351,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                   ),
                 ),
                 child: Text(
-                  liveInterpretation.primaryTradition.interpretation ?? 'Kadim tabir hazırlanıyor.',
+                  liveInterpretation.primaryTradition.interpretation ?? '...',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15.5,
                     height: 1.85,
@@ -360,7 +366,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
 
               // 7. Alt Bölüm: Somut Tavsiye ve Özet
               _buildSectionHeader(
-                title: 'SOMUT TAVSİYE VE ÖZET',
+                title: AppStrings.get('practicalAdviceHeader', lang),
                 icon: Icons.lightbulb_outline,
                 color: AppColors.islamGold,
               ),
@@ -393,7 +399,7 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
               // 8. Alt Bölüm: Diğer Kaynak Ekoller (Locked Traditions - Her biri kendi renginde!)
               if (liveInterpretation.lockedTraditions.isNotEmpty) ...[
                 _buildSectionHeader(
-                  title: 'DİĞER KAYNAK KİTAP YORUMLARI',
+                  title: AppStrings.get('otherSourcesHeader', lang),
                   icon: Icons.lock_clock_outlined,
                   color: AppColors.moonlight,
                 ),
@@ -435,13 +441,15 @@ DreamApp ile rüyalarınızın ardındaki anlamı keşfedin.
                             size: 18,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            'RÜYA YORUMCUSUNA SORU SOR',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.0,
-                              color: primaryTradColor,
+                          Flexible(
+                            child: Text(
+                              AppStrings.get('askInterpreterBtn', lang),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.0,
+                                color: primaryTradColor,
+                              ),
                             ),
                           ),
                         ],

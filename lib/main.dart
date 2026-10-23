@@ -79,12 +79,13 @@ class OneiroApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentThemeMode = ref.watch(themeProvider);
+    ref.watch(localeProvider);
 
     return MaterialApp(
       title: 'DreamApp',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.getTheme(currentThemeMode),
-      home: AuthGate(key: ValueKey(currentThemeMode)),
+      home: const AuthGate(),
     );
   }
 }
